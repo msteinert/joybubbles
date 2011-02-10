@@ -1,0 +1,88 @@
+1. Joybubbles
+
+Joy is an intense and especially ecstatic or exultant happiness. Joybubbles is
+the name of a real-life hacker who inspired the character Whistler in the 1992
+caper film Sneakers.
+
+The Joybubbles API provides a system-level abstraction for a windowing system
+or a low-level graphics API and provides the basis for a GUI toolkit
+implementation. Joybubbles provides the following interfaces:
+
+	. graphics hardware
+	. window management
+	. input devices
+	. GUI widgets
+
+Joybubbles is designed to be easily ported to new embedded systems. As such,
+it cuts out most of the fat in other platform abstractions. Joybubbles doesn't
+add yet another input event abstraction. Chances are highly likely that your
+system already has input events and an input event queue. When you port
+Joybubbles to your system you just need to make sure that actions are sent to
+the correct window.
+
+2. Graphics Hardware
+
+The graphics hardware abstraction provides an abstract interface to hardware
+specific APIs.
+
+2.1 Application
+
+The application object represents a display adapter (i.e. GPU, blitter,
+graphics card, etc). The application is a context through which other objects
+are accessed.
+
+2.2 Screen
+
+A screen represents a screen connected to the display adapter. A screen may
+extend across multiple physical monitors (i.e. a multi-head setup).
+
+Additionally a display may have multiple discrete screens attached (i.e. a
+set-top box in dual-user mode).
+
+Screens have the physical dimensions of width and height.
+
+3. Window Management
+
+Window management refers the placement and appearance of windows on the
+screen.
+
+3.1 Window
+
+A window is a drawable area on the screen. All Joybubbles windows are
+top-level windows. The visible portion of a child window is fully contained
+within the screen.
+
+Windows provide a way to obtain a higher-level level drawing abstraction. For
+example, the window API will not provide any 2D drawing routines. To perform
+2D drawing the user would use the window API to obtain a Cairo handle and then
+use the Cairo API for drawing.
+
+Windows have the physical dimensions of width and height. Windows also have
+the physical dimension of position, i.e. X and Y-axis coordinates within
+the screen.
+
+4. Input Devices
+
+Input devices represent physical devices attached to the computer through
+which the user provides input. Each implementation may overload the device
+abstraction to provide interfaces to new device types. At a minimum each
+implementation should provide at least one of each of the following devices:
+
+	. mouse
+	. keyboard
+
+The input abstraction handles input focus; Events will be directed the
+currently focused window.
+
+4.1 Mouse
+
+The mouse device controls the location of the cursor and provides down and
+up click events for buttons. The mouse provides the following event types:
+
+	. motion
+	. button up & down
+	. enter or exit a window
+
+4.2 Keyboard
+
+The keyboard device provides down and up key events.

@@ -1,0 +1,116 @@
+/* Copyright 2011 EchoStar Corporation
+ * 
+ * EchoStar Corporation
+ * 100 Inverness Terrace East
+ * Englewood, CO 80112
+ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "joy/bubble.h"
+#include "joy/buffer.h"
+#include "joy/screen.h"
+
+struct JoyBuffer_ {
+	cairo_surface_t *surface;
+	cairo_region_t *damage;
+	gint width;
+	gint height;
+};
+
+JoyBuffer *
+joy_buffer_new(void)
+{
+	JoyBuffer *self = g_slice_new0(struct JoyBuffer_);
+	if (G_UNLIKELY(!self)) {
+		goto error;
+	}
+	self->damage = cairo_region_create();
+	if (G_UNLIKELY(!self->damage)) {
+		goto error;
+	}
+exit:
+	return self;
+error:
+	joy_buffer_destroy(self);
+	goto exit;
+}
+
+void
+joy_buffer_destroy(JoyBuffer *self)
+{
+	if (!self) {
+		return;
+	}
+	if (self->damage) {
+		cairo_region_destroy(self->damage);
+	}
+	if (self->surface) {
+		cairo_surface_destroy(self->surface);
+	}
+	g_slice_free(struct JoyBuffer_, self);
+}
+
+void
+joy_buffer_damage(JoyBuffer *self, const cairo_region_t *damage)
+{
+	g_return_if_fail(self);
+	cairo_region_union(self->damage, damage);
+}
+
+void
+joy_buffer_draw(JoyBuffer *self, JoyBubble *widget, guint id, cairo_t *cr)
+{
+	g_return_if_fail(self);
+	g_return_if_fail(JOY_IS_BUBBLE(widget));
+	g_return_if_fail(cr);
+	gint width = joy_bubble_get_width(widget);
+	gint height = joy_bubble_get_height(widget);
+	if ((width != self->width) || (height != self->height)) {
+		if (self->surface) {
+			cairo_surface_destroy(self->surface);
+			self->surface = NULL;
+		}
+		self->width = width;
+		self->height = height;
+	}
+	if (G_UNLIKELY(!self->width || !self->height)) {
+		return;
+	}
+	if (G_UNLIKELY(!self->surface)) {
+		JoyScreen *screen = joy_bubble_get_screen(widget);
+		if (G_UNLIKELY(!screen)) {
+			return;
+		}
+		self->surface = joy_screen_cairo_surface_create(screen,
+				self->width, self->height);
+		if (G_UNLIKELY(!self->surface)) {
+			return;
+		}
+		cairo_rectangle_int_t rect = {
+			0, 0, self->width, self->height
+		};
+		cairo_region_union_rectangle(self->damage, &rect);
+	}
+	if (G_UNLIKELY(!cairo_region_is_empty(self->damage))) {
+		cairo_t *cr = cairo_create(self->surface);
+		gint n = cairo_region_num_rectangles(self->damage);
+		for (gint i = 0; i < n; ++i) {
+			cairo_rectangle_int_t rect;
+			cairo_region_get_rectangle(self->damage, i, &rect);
+			cairo_rectangle(cr, rect.x, rect.y,
+					rect.width, rect.height);
+		}
+		cairo_clip(cr);
+		cairo_save(cr);
+		cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+		cairo_paint(cr);
+		cairo_restore(cr);
+		g_signal_emit(widget, id, 0, cr);
+		cairo_destroy(cr);
+		cairo_region_subtract(self->damage, self->damage);
+	}
+	cairo_set_source_surface(cr, self->surface, 0., 0.);
+	cairo_paint(cr);
+}
