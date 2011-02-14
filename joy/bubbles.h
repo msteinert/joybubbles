@@ -22,6 +22,8 @@
 #include <joy/application.h>
 #include <joy/container.h>
 #include <joy/easing.h>
+#include <joy/filter/gaussian.h>
+#include <joy/iterator.h>
 #include <joy/screen.h>
 #include <joy/sketch.h>
 #include <joy/window.h>

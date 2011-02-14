@@ -170,6 +170,7 @@ AC_CONFIG_FILES([
 	joy/animation/Makefile
 	joy/device/Makefile
 	joy/easing/Makefile
+	joy/filter/Makefile
 	joy/iterator/Makefile
 	joy/platform/Makefile
 	joy/platform/x11/Makefile

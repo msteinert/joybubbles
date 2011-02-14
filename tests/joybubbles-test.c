@@ -92,10 +92,9 @@ on_key_up(JoyBubble *window, JoyDevice *device, gulong timestamp,
 		{
 			JoyApplication *app =
 				joy_bubble_get_application(window);
-			if (G_UNLIKELY(!app)) {
-				break;
+			if (app) {
+				joy_application_quit(app, EXIT_SUCCESS);
 			}
-			joy_application_quit(app, EXIT_SUCCESS);
 		}
 		break;
 	default:
@@ -240,7 +239,7 @@ main(int argc, char *argv[])
 	GError *error = NULL;
 	GOptionContext *context = NULL;
 	struct ButtonDown down = { NULL, NULL, TRUE };
-	struct Crossing crossing = { NULL, { 5. }, 0, 0 };
+	struct Crossing crossing = { NULL, { 5. }, 200, 100 };
 	JoyApplication *app = joy_application_new();
 	if (!app) {
 		goto error;
