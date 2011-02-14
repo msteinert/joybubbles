@@ -15,7 +15,6 @@
 #define JOY_CONTAINER_H
 
 #include <joy/bubble.h>
-#include <joy/iterator.h>
 
 G_BEGIN_DECLS
 

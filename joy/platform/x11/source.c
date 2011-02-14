@@ -10,6 +10,7 @@
 #endif
 #include "joy/bubble.h"
 #include "joy/platform/x11/application.h"
+#include "joy/platform/x11/screen.h"
 #include "joy/platform/x11/source.h"
 #include "joy/platform/x11/window.h"
 #include <X11/Xutil.h>
@@ -250,6 +251,10 @@ input(JoySource *self)
 				joy_x11_application_get_mouse(priv->app),
 				event.xcrossing.time,
 				event.xcrossing.x, event.xcrossing.y);
+		JoyScreen *screen = joy_bubble_get_screen(window);
+		if (G_LIKELY(screen)) {
+			joy_screen_set_at_device(screen, mouse, NULL);
+		}
 		break;
 	case Expose:
 		{
@@ -306,6 +311,7 @@ input(JoySource *self)
 	case GravityNotify:
 	case ReparentNotify:
 	case NoExpose:
+	case ClientMessage:
 		// intentionally unhandled events
 		break;
 	default:

@@ -14,10 +14,14 @@
 #ifndef JOY_BUBBLES_H
 #define JOY_BUBBLES_H
 
-#include <joy/animation/grow.h>
-#include <joy/animation/scale.h>
+#include <joy/animation/fade.h>
+#include <joy/animation/move.h>
+#include <joy/animation/parallel.h>
+#include <joy/animation/resize.h>
+#include <joy/animation/series.h>
 #include <joy/application.h>
 #include <joy/container.h>
+#include <joy/easing.h>
 #include <joy/screen.h>
 #include <joy/sketch.h>
 #include <joy/window.h>

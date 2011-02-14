@@ -111,6 +111,15 @@ AC_ARG_WITH([platform],
 AC_DEFINE_UNQUOTED([JOY_PLATFORM], ["$joy_platform"],
 	[Define to the platform.])
 AC_SUBST([joy_platform])
+# Easing support
+joy_easing=yes
+AC_ARG_ENABLE([easing],
+	[AC_HELP_STRING([--disable-easing],
+		[disable easing support for animation tweening.])],
+	[joy_easing=$enableval])
+AS_IF([test "x$joy_easing" = "xyes"],
+		[AC_DEFINE([JOY_ENABLE_EASING], [1],
+			[Define to 1 to enable easing functions.])])
 # Native language support
 AC_ARG_ENABLE([nls],
 	[AC_HELP_STRING([--enable-nls],
@@ -160,6 +169,7 @@ AC_CONFIG_FILES([
 	joybubbles.pc
 	joy/animation/Makefile
 	joy/device/Makefile
+	joy/easing/Makefile
 	joy/iterator/Makefile
 	joy/platform/Makefile
 	joy/platform/x11/Makefile
@@ -173,6 +183,7 @@ $PACKAGE_NAME build options:
 	Host: $host
 	Version: $VERSION
 	Platform: $joy_platform
+	Easing Functions: $joy_easing
 	Native Language Support: $joy_nls
 	Debugging: $joy_debug
 	Tracing: $joy_trace

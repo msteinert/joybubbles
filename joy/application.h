@@ -7,7 +7,7 @@
 
 /**
  * \file
- * \brief The main interface
+ * \brief Application interface
  * \author Mike Steinert <michael.steinert@echostar.com>
  */
 
@@ -190,7 +190,7 @@ joy_application_quit(JoyApplication *self, gint status);
  *
  * \return The application status, i.e., EXIT_SUCCESS or EXIT_FAILURE.
  */
-int
+gint
 joy_application_run(JoyApplication *self, JoyScreen *screen);
 
 G_END_DECLS

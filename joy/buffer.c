@@ -17,6 +17,8 @@ struct JoyBuffer_ {
 	cairo_region_t *damage;
 	gint width;
 	gint height;
+	gboolean paint_with_alpha;
+	gdouble alpha;
 };
 
 JoyBuffer *
@@ -57,6 +59,26 @@ joy_buffer_damage(JoyBuffer *self, const cairo_region_t *damage)
 {
 	g_return_if_fail(self);
 	cairo_region_union(self->damage, damage);
+}
+
+void
+joy_buffer_set_alpha(JoyBuffer *self, gdouble alpha)
+{
+	g_return_if_fail(self);
+	g_return_if_fail(alpha >= 0. && 1. >= alpha);
+	if (1. == alpha) {
+		self->paint_with_alpha = FALSE;
+	} else {
+		self->paint_with_alpha = TRUE;
+		self->alpha = alpha;
+	}
+}
+
+gdouble
+joy_buffer_get_alpha(JoyBuffer *self)
+{
+	g_return_val_if_fail(self, 0.);
+	return self->paint_with_alpha ? self->alpha : 1.;
 }
 
 void
@@ -112,5 +134,9 @@ joy_buffer_draw(JoyBuffer *self, JoyBubble *widget, guint id, cairo_t *cr)
 		cairo_region_subtract(self->damage, self->damage);
 	}
 	cairo_set_source_surface(cr, self->surface, 0., 0.);
-	cairo_paint(cr);
+	if (!self->paint_with_alpha) {
+		cairo_paint(cr);
+	} else {
+		cairo_paint_with_alpha(cr, self->alpha);
+	}
 }

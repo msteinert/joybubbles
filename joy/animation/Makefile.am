@@ -4,8 +4,11 @@
 # library definition
 noinst_LTLIBRARIES = libjoybubbles-animation.la
 libjoybubbles_animation_la_SOURCES = \
-	grow.c \
-	scale.c
+	fade.c \
+	move.c \
+	parallel.c \
+	resize.c \
+	series.c
 # include directories & compiler switches
 libjoybubbles_animation_la_CFLAGS = \
 	-I$(top_srcdir) \
@@ -15,6 +18,9 @@ libjoybubbles_animation_la_CFLAGS = \
 # install development headers
 pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/animation
 pkginclude_HEADERS = \
-	grow.h \
-	scale.h \
+	fade.h \
+	move.h \
+	parallel.h \
+	resize.h \
+	series.h \
 	types.h

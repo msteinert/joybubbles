@@ -31,7 +31,7 @@ struct Private {
 	gboolean initialized;
 	gboolean quit;
 	gchar *name;
-	int status;
+	gint status;
 	gdouble frame;
 	gdouble min;
 };
@@ -195,8 +195,9 @@ get_option_group(JoyApplication *self)
 #endif // HAVE_BIND_TEXTDOMAIN_CODESET
 #endif // ENABLE_NLS
 	}
-	GOptionGroup *group = g_option_group_new("joy", Q_("Joy Options"),
-			Q_("Show Joy Options"), self, NULL);
+	GOptionGroup *group = g_option_group_new("joybubbles",
+			Q_("Joybubbles Options"),
+			Q_("Show Joybubbles Options"), self, NULL);
 	if (!group) {
 		return NULL;
 	}
@@ -273,7 +274,7 @@ joy_application_quit(JoyApplication *self, gint status)
 	priv->quit = TRUE;
 }
 
-int
+gint
 joy_application_run(JoyApplication *self, JoyScreen *screen)
 {
 	g_return_val_if_fail(JOY_IS_APPLICATION(self), EXIT_FAILURE);
@@ -288,10 +289,8 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 	gdouble ptime = priv->min;
 	while (!priv->quit) {
 		if (joy_screen_in_animation(screen)) {
-			gdouble timeout;
-			if (G_LIKELY(ptime < priv->frame)) {
-				timeout = priv->frame - ptime;
-			} else {
+			gdouble timeout = priv->frame - ptime;
+			if (G_UNLIKELY(0. > timeout)) {
 				timeout = 0.;
 			}
 			elapsed = joy_sink_poll(priv->sink, timeout);

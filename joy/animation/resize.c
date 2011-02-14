@@ -8,17 +8,17 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "joy/animation/grow.h"
+#include "joy/animation/resize.h"
 #include "joy/bubble.h"
 
-G_DEFINE_TYPE(JoyAnimationGrow, joy_animation_grow, JOY_TYPE_ANIMATION)
+G_DEFINE_TYPE(JoyAnimationResize, joy_animation_resize, JOY_TYPE_ANIMATION)
 
 #define ASSIGN_PRIVATE(instance) \
-	(G_TYPE_INSTANCE_GET_PRIVATE(instance, JOY_TYPE_ANIMATION_GROW, \
+	(G_TYPE_INSTANCE_GET_PRIVATE(instance, JOY_TYPE_ANIMATION_RESIZE, \
 		struct Private))
 
 #define GET_PRIVATE(instance) \
-	((struct Private *)((JoyAnimationGrow *)instance)->priv)
+	((struct Private *)((JoyAnimationResize *)instance)->priv)
 
 struct Private {
 	gint start_width;
@@ -29,7 +29,7 @@ struct Private {
 };
 
 static void
-joy_animation_grow_init(JoyAnimationGrow *self)
+joy_animation_resize_init(JoyAnimationResize *self)
 {
 	self->priv = ASSIGN_PRIVATE(self);
 }
@@ -91,7 +91,7 @@ frame(JoyAnimation *self, JoyBubble *widget, gdouble percent)
 }
 
 static void
-joy_animation_grow_class_init(JoyAnimationGrowClass *klass)
+joy_animation_resize_class_init(JoyAnimationResizeClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->set_property = set_property;
@@ -102,23 +102,39 @@ joy_animation_grow_class_init(JoyAnimationGrowClass *klass)
 	g_type_class_add_private(klass, sizeof(struct Private));
 	g_object_class_install_property(object_class, PROP_WIDTH,
 		g_param_spec_int("width", Q_("Width"),
-			Q_("The width to grow to"),
+			Q_("The width to resize to"),
 			0, G_MAXINT, 0,
 			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property(object_class, PROP_HEIGHT,
 		g_param_spec_int("height", Q_("Height"),
-			Q_("The height to grow to"),
+			Q_("The height to resize to"),
 			0, G_MAXINT, 0,
 			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 }
 
 JoyAnimation *
-joy_animation_grow_new(JoyBubble *widget, gint width, gint height)
+joy_animation_resize_new(JoyBubble *widget, gint width, gint height)
 {
 	g_return_val_if_fail(JOY_IS_BUBBLE(widget), NULL);
-	return g_object_new(JOY_TYPE_ANIMATION_GROW,
+	return g_object_new(JOY_TYPE_ANIMATION_RESIZE,
 			"widget", widget,
 			"width", width,
 			"height", height,
 			NULL);
+}
+
+void
+joy_animation_resize_set_width(JoyAnimation *self, gint width)
+{
+	g_return_if_fail(JOY_IS_ANIMATION_RESIZE(self));
+	g_return_if_fail(width >= 0);
+	GET_PRIVATE(self)->width = width;
+}
+
+void
+joy_animation_resize_set_height(JoyAnimation *self, gint height)
+{
+	g_return_if_fail(JOY_IS_ANIMATION_RESIZE(self));
+	g_return_if_fail(height >= 0);
+	GET_PRIVATE(self)->height = height;
 }

@@ -7,7 +7,7 @@
 
 /**
  * \file
- * \brief The main interface
+ * \brief Animation framework
  * \author Mike Steinert <michael.steinert@echostar.com>
  */
 
@@ -39,6 +39,9 @@ G_BEGIN_DECLS
 #define JOY_ANIMATION_GET_CLASS(instance) \
 	(G_TYPE_INSTANCE_GET_CLASS((instance), JOY_TYPE_ANIMATION, \
 		JoyAnimationClass))
+
+typedef gdouble
+(*JoyAnimationEasing)(gpointer self, gdouble time) G_GNUC_CONST;
 
 typedef struct JoyAnimationClass_ JoyAnimationClass;
 
@@ -75,49 +78,110 @@ GType
 joy_animation_get_type(void) G_GNUC_CONST;
 
 /**
+ * \brief Get the widget this animation is operating on.
+ *
+ * \param self [in] An animation object.
+ *
+ * \param The widget \e self is operating on.
+ */
+JoyBubble *
+joy_animation_get_widget(JoyAnimation *self);
+
+/**
  * \brief Set the animation duration.
+ *
+ * The default value is 250 milliseconds (0.25 seconds).
+ *
+ * \param self [in] An animation object.
+ * \param seconds [in] The new duration for \e self.
  */
 void
 joy_animation_set_duration(JoyAnimation *self, gdouble seconds);
 
 /**
+ * \brief Get the current animation duration.
+ *
+ * \param self [in] An animation object.
+ *
+ * \return The current duration for \e self.
+ */
+gdouble
+joy_animation_get_duration(JoyAnimation *self);
+
+/**
+ * \brief Add to the animation duration.
+ *
+ * \param self [in] An animation object.
+ * \param seconds [in] Seconds to add to the duration of \e self.
+ */
+void
+joy_animation_add_duration(JoyAnimation *self, gdouble seconds);
+
+/**
+ * \brief Set the easing function.
+ *
+ * If no easing function is set then tweening will be linear.
+ *
+ * \param self [in] An animation object.
+ * \param function [in] The new easing function for \e self.
+ * \param object [in] Data passed as the first parameter to \e function.
+ */
+void
+joy_animation_set_easing(JoyAnimation *self, JoyAnimationEasing function,
+		gpointer object);
+
+/**
  * \brief Set infinite looping.
+ *
+ * The animation will loop infinitely or until one of joy_animation_stop()
+ * or joy_animation_pause() is called.
+ *
+ * \param self [in] An animation object.
  */
 void
 joy_animation_set_looping(JoyAnimation *self);
 
 /**
  * \brief Set the number of times the animation should loop.
+ *
+ * The default loop count is one.
+ *
+ * \param self [in] An animation object.
+ * \param count [in] The number of times to loop.
  */
 void
 joy_animation_set_loop_count(JoyAnimation *self, gint count);
 
 /**
  * \brief Start an animation.
+ *
+ * \param self [in] An animation object.
  */
 void
 joy_animation_start(JoyAnimation *self);
 
 /**
  * \brief Stop an animation.
- */
-void
-joy_animation_stop(JoyAnimation *self);
-
-/**
- * \brief Stop an animation.
+ *
+ * \param self [in] An animation object.
  */
 void
 joy_animation_stop(JoyAnimation *self);
 
 /**
  * \brief Pause an animation.
+ *
+ * \param self [in] An animation object.
  */
 void
 joy_animation_pause(JoyAnimation *self);
 
 /**
  * \brief Advance the frame.
+ *
+ * This function is only useful in screen implementations.
+ *
+ * \param self [in] An animation object.
  */
 void
 joy_animation_frame(JoyAnimation *self);

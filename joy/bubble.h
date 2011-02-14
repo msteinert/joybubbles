@@ -144,6 +144,9 @@ joy_bubble_set_name(JoyBubble *self, const gchar *name);
 const gchar *
 joy_bubble_get_name(JoyBubble *self);
 
+GQuark
+joy_bubble_get_quark(JoyBubble *self);
+
 /**
  * \brief Set back-buffering for a widget.
  *
@@ -169,6 +172,12 @@ joy_bubble_set_buffered(JoyBubble *self, gboolean buffered);
  */
 gboolean
 joy_bubble_get_buffered(JoyBubble *self);
+
+void
+joy_bubble_set_alpha(JoyBubble *self, gdouble alpha);
+
+gdouble
+joy_bubble_get_alpha(JoyBubble *self);
 
 /**
  * \brief Set the parent of a widget.

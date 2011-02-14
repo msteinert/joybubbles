@@ -44,6 +44,7 @@ static guint signals[SIGNAL_LAST] = { 0 };
 
 struct Private {
 	gchar *name;
+	GQuark quark;
 	JoyBubble *parent;
 	cairo_region_t *area;
 	cairo_region_t *draw;
@@ -163,7 +164,8 @@ set_buffered(JoyBubble *self, gboolean buffered)
 	struct Private *priv = GET_PRIVATE(self);
 	if (buffered && !priv->buffer) {
 		priv->buffer = joy_buffer_new();
-	} else if (!buffered && priv->buffer) {
+	} else if (!buffered && priv->buffer
+			&& (1. == joy_buffer_get_alpha(priv->buffer))) {
 		joy_buffer_destroy(priv->buffer);
 		priv->buffer = NULL;
 	}
@@ -349,6 +351,46 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 			FALSE, G_PARAM_WRITABLE));
 }
 
+static void
+damage(JoyBubble *self, gint x, gint y, gint width, gint height,
+		gboolean buffer)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	cairo_region_t *region = NULL;
+	if (!priv->visible) {
+		goto exit;
+	}
+	cairo_rectangle_int_t rect = {
+		x, y, width, height
+	};
+	region = cairo_region_create_rectangle(&rect);
+	if (G_UNLIKELY(!region)) {
+		goto exit;
+	}
+	cairo_region_intersect(region, priv->area);
+	if (cairo_region_is_empty(region)) {
+		goto exit;
+	}
+	if (buffer && priv->buffer) {
+		joy_buffer_damage(priv->buffer, region);
+	}
+	JoyBubble *window = self;
+	while (priv->parent) {
+		cairo_region_translate(region, priv->x, priv->y);
+		window = priv->parent;
+		priv = GET_PRIVATE(priv->parent);
+	}
+	for (gint i = 0; i < cairo_region_num_rectangles(region); ++i) {
+		cairo_rectangle_int_t rect;
+		cairo_region_get_rectangle(region, i, &rect);
+		joy_bubble_expose(window, &rect);
+	}
+exit:
+	if (region) {
+		cairo_region_destroy(region);
+	}
+}
+
 void
 joy_bubble_set_name(JoyBubble *self, const gchar *name)
 {
@@ -356,6 +398,7 @@ joy_bubble_set_name(JoyBubble *self, const gchar *name)
 	struct Private *priv = GET_PRIVATE(self);
 	g_free(priv->name);
 	priv->name = g_strdup(name);
+	priv->quark = 0;
 }
 
 const gchar *
@@ -370,6 +413,17 @@ joy_bubble_get_name(JoyBubble *self)
 	}
 }
 
+GQuark
+joy_bubble_get_quark(JoyBubble *self)
+{
+	g_return_val_if_fail(JOY_IS_BUBBLE(self), 0);
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(!priv->quark)) {
+		priv->quark = g_quark_from_string(joy_bubble_get_name(self));
+	}
+	return priv->quark;
+}
+
 void
 joy_bubble_set_buffered(JoyBubble *self, gboolean buffered)
 {
@@ -382,6 +436,35 @@ joy_bubble_get_buffered(JoyBubble *self)
 {
 	g_return_val_if_fail(JOY_IS_BUBBLE(self), FALSE);
 	return JOY_BUBBLE_GET_CLASS(self)->get_buffered(self);
+}
+
+void
+joy_bubble_set_alpha(JoyBubble *self, gdouble alpha)
+{
+	g_return_if_fail(JOY_IS_BUBBLE(self));
+	struct Private *priv = GET_PRIVATE(self);
+	if (0. == alpha) {
+		joy_bubble_hide(self);
+		return;
+	} else {
+		if (priv->buffer) {
+			joy_buffer_set_alpha(priv->buffer, alpha);
+		}
+		if (!priv->visible) {
+			joy_bubble_show(self);
+		} else {
+			damage(self, 0, 0, joy_bubble_get_width(self),
+					joy_bubble_get_height(self), FALSE);
+		}
+	}
+}
+
+gdouble
+joy_bubble_get_alpha(JoyBubble *self)
+{
+	g_return_val_if_fail(JOY_IS_BUBBLE(self), 0.);
+	struct Private *priv = GET_PRIVATE(self);
+	return priv->buffer ? joy_buffer_get_alpha(priv->buffer) : 1.;
 }
 
 void
@@ -524,46 +607,6 @@ joy_bubble_at_device(JoyBubble *self, JoyDevice *device)
 }
 
 void
-damage(JoyBubble *self, gint x, gint y, gint width, gint height,
-		gboolean buffer)
-{
-	struct Private *priv = GET_PRIVATE(self);
-	cairo_region_t *region = NULL;
-	if (!priv->visible) {
-		goto exit;
-	}
-	cairo_rectangle_int_t rect = {
-		x, y, width, height
-	};
-	region = cairo_region_create_rectangle(&rect);
-	if (G_UNLIKELY(!region)) {
-		goto exit;
-	}
-	cairo_region_intersect(region, priv->area);
-	if (cairo_region_is_empty(region)) {
-		goto exit;
-	}
-	if (buffer && priv->buffer) {
-		joy_buffer_damage(priv->buffer, region);
-	}
-	JoyBubble *window = self;
-	while (priv->parent) {
-		cairo_region_translate(region, priv->x, priv->y);
-		window = priv->parent;
-		priv = GET_PRIVATE(priv->parent);
-	}
-	for (gint i = 0; i < cairo_region_num_rectangles(region); ++i) {
-		cairo_rectangle_int_t rect;
-		cairo_region_get_rectangle(region, i, &rect);
-		joy_bubble_expose(window, &rect);
-	}
-exit:
-	if (region) {
-		cairo_region_destroy(region);
-	}
-}
-
-void
 joy_bubble_move(JoyBubble *self, gint x, gint y)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
@@ -581,8 +624,8 @@ joy_bubble_move(JoyBubble *self, gint x, gint y)
 		gint width = joy_bubble_get_width(self);
 		gint height = joy_bubble_get_height(self);
 		if (priv->parent) {
-			damage(priv->parent, priv->x, priv->y, width, height,
-					FALSE);
+			damage(priv->parent, priv->x, priv->y,
+					width, height, FALSE);
 		}
 		g_signal_emit(self, signals[SIGNAL_MOVE], 0, x, y);
 		priv->x = x;
@@ -714,6 +757,12 @@ joy_bubble_show(JoyBubble *self)
 	if (!priv->visible) {
 		priv->visible = TRUE;
 		g_signal_emit(self, signals[SIGNAL_SHOW], 0);
+		if (priv->parent) {
+			damage(priv->parent, priv->x, priv->y,
+					joy_bubble_get_width(self),
+					joy_bubble_get_height(self),
+					FALSE);
+		}
 	}
 }
 
@@ -725,6 +774,12 @@ joy_bubble_hide(JoyBubble *self)
 	if (priv->visible) {
 		priv->visible = FALSE;
 		g_signal_emit(self, signals[SIGNAL_HIDE], 0);
+		if (priv->parent) {
+			damage(priv->parent, priv->x, priv->y,
+					joy_bubble_get_width(self),
+					joy_bubble_get_height(self),
+					FALSE);
+		}
 	}
 }
 

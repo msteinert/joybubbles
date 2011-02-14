@@ -18,9 +18,15 @@
 
 G_BEGIN_DECLS
 
-typedef struct JoyAnimationGrow_ JoyAnimationGrow;
+typedef struct JoyAnimationFade_ JoyAnimationFade;
 
-typedef struct JoyAnimationScale_ JoyAnimationScale;
+typedef struct JoyAnimationMove_ JoyAnimationMove;
+
+typedef struct JoyAnimationParallel_ JoyAnimationParallel;
+
+typedef struct JoyAnimationResize_ JoyAnimationResize;
+
+typedef struct JoyAnimationSeries_ JoyAnimationSeries;
 
 G_END_DECLS
 

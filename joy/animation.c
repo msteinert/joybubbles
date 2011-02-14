@@ -45,6 +45,8 @@ struct Private {
 	GTimer *timer;
 	gint loop;
 	gint count;
+	gpointer object;
+	JoyAnimationEasing function;
 };
 
 static void
@@ -157,11 +159,33 @@ joy_animation_class_init(JoyAnimationClass *klass)
 			G_MININT, G_MAXINT, 1, G_PARAM_WRITABLE));
 }
 
+JoyBubble *
+joy_animation_get_widget(JoyAnimation *self)
+{
+	g_return_val_if_fail(JOY_IS_ANIMATION(self), NULL);
+	return GET_PRIVATE(self)->widget;
+}
+
 void
 joy_animation_set_duration(JoyAnimation *self, gdouble seconds)
 {
 	g_return_if_fail(JOY_IS_ANIMATION(self));
+	g_return_if_fail(0. < seconds);
 	GET_PRIVATE(self)->duration = seconds;
+}
+
+gdouble
+joy_animation_get_duration(JoyAnimation *self)
+{
+	g_return_val_if_fail(JOY_IS_ANIMATION(self), 0.);
+	return GET_PRIVATE(self)->duration;
+}
+
+void
+joy_animation_add_duration(JoyAnimation *self, gdouble seconds)
+{
+	g_return_if_fail(JOY_IS_ANIMATION(self));
+	GET_PRIVATE(self)->duration += seconds;
 }
 
 void
@@ -169,6 +193,18 @@ joy_animation_set_looping(JoyAnimation *self)
 {
 	g_return_if_fail(JOY_IS_ANIMATION(self));
 	GET_PRIVATE(self)->loop = -1;
+}
+
+#include "joy/easing.h"
+
+void
+joy_animation_set_easing(JoyAnimation *self, JoyAnimationEasing function,
+		gpointer object)
+{
+	g_return_if_fail(JOY_IS_ANIMATION(self));
+	struct Private *priv = GET_PRIVATE(self);
+	priv->function = function;
+	priv->object = object;
 }
 
 void
@@ -186,10 +222,10 @@ joy_animation_start(JoyAnimation *self)
 	struct Private *priv = GET_PRIVATE(self);
 	if (JOY_ANIMATION_START != priv->state) {
 		if (JOY_ANIMATION_STOP == priv->state) {
-			if (priv->widget) {
+			if (G_LIKELY(priv->widget)) {
 				JoyScreen *screen;
 				screen = joy_bubble_get_screen(priv->widget);
-				if (screen) {
+				if (G_LIKELY(screen)) {
 					joy_screen_add_animation(screen, self);
 				}
 			}
@@ -209,10 +245,10 @@ joy_animation_stop(JoyAnimation *self)
 		return;
 	}
 	if (JOY_ANIMATION_STOP != priv->state) {
-		if (priv->widget) {
+		if (G_LIKELY(priv->widget)) {
 			JoyScreen *screen;
 			screen = joy_bubble_get_screen(priv->widget);
-			if (screen) {
+			if (G_LIKELY(screen)) {
 				joy_screen_remove_animation(screen, self);
 			}
 		}
@@ -242,6 +278,9 @@ joy_animation_frame(JoyAnimation *self)
 {
 	g_return_if_fail(JOY_IS_ANIMATION(self));
 	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(0. == priv->duration)) {
+		return;
+	}
 	if (G_UNLIKELY(JOY_ANIMATION_START != priv->state)) {
 		return;
 	}
@@ -252,7 +291,10 @@ joy_animation_frame(JoyAnimation *self)
 	if (G_UNLIKELY(1. < elapsed)) {
 		elapsed = 1.;
 	}
-	g_signal_emit(self, signals[SIGNAL_FRAME], 0, priv->widget, elapsed);
+	g_signal_emit(self, signals[SIGNAL_FRAME], 0, priv->widget,
+			priv->function
+			? priv->function(priv->object, elapsed)
+			: elapsed);
 	if (G_UNLIKELY(1. == elapsed)) {
 		if (++priv->count >= priv->loop) {
 			joy_animation_stop(self);

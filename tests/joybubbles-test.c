@@ -103,26 +103,107 @@ on_key_up(JoyBubble *window, JoyDevice *device, gulong timestamp,
 	}
 }
 
+struct ButtonDown {
+	JoyAnimation *move;
+	JoyAnimation *fade;
+	gboolean in;
+};
+
+static void
+on_button_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
+		gint x, gint y, JoyButton button, gpointer data)
+{
+	struct ButtonDown *down = (struct ButtonDown *)data;
+	if (JOY_BUTTON_RIGHT == button) {
+		JoyAnimation *move = down->move;
+		joy_animation_pause(move);
+		joy_animation_move_set_x(move, x);
+		joy_animation_move_set_y(move, y);
+		joy_animation_start(move);
+	} else if (JOY_BUTTON_MIDDLE == button) {
+		JoyAnimation *fade = down->fade;
+		joy_animation_pause(fade);
+		gdouble alpha;
+		if (down->in) {
+			joy_animation_set_easing(fade, joy_easing_out_cubic,
+					NULL);
+			down->in = FALSE;
+			alpha = 0.;
+		} else {
+			joy_animation_set_easing(fade, joy_easing_in_cubic,
+					NULL);
+			down->in = TRUE;
+			alpha = 1.;
+		}
+		joy_animation_fade_set_alpha(fade, alpha);
+		joy_animation_start(fade);
+	}
+}
+
 static void
 on_button_up(JoyBubble *window, JoyDevice *device, gulong timestamp,
 		gint x, gint y, JoyButton button, gpointer data)
 {
+	if (JOY_BUTTON_LEFT == button) {
+		JoyBubble *widget = (JoyBubble *)data;
+		if (joy_bubble_get_visible(widget)) {
+			joy_bubble_hide(widget);
+		} else {
+			joy_bubble_show(widget);
+		}
+	}
 }
+
+struct Crossing {
+	JoyAnimation *resize;
+	struct JoyEasingBack back;
+	gint width;
+	gint height;
+};
 
 static void
 on_enter(JoyBubble *window, JoyDevice *device, gulong timestamp,
 		gint x, gint y, gpointer data)
 {
-	JoyAnimation *grow = (JoyAnimation *)data;
-	joy_animation_start(grow);
+	struct Crossing *crossing = (struct Crossing *)data;
+	joy_animation_pause(crossing->resize);
+	JoyBubble *widget = joy_animation_get_widget(crossing->resize);
+	gint width = joy_bubble_get_width(widget);
+	gint height = joy_bubble_get_height(widget);
+	if (crossing->width == width && crossing->height == height) {
+		joy_animation_set_easing(crossing->resize, joy_easing_in_back,
+				&crossing->back);
+	} else {
+		crossing->width = width;
+		crossing->height = height;
+	}
+	joy_animation_resize_set_width(crossing->resize, 220);
+	joy_animation_resize_set_height(crossing->resize, 110);
+	joy_animation_start(crossing->resize);
 }
 
 static void
 on_leave(JoyBubble *window, JoyDevice *device, gulong timestamp,
 		gint x, gint y, gpointer data)
 {
-	JoyAnimation *shrink = (JoyAnimation *)data;
-	joy_animation_start(shrink);
+	struct Crossing *crossing = (struct Crossing *)data;
+	joy_animation_pause(crossing->resize);
+	JoyBubble *widget = joy_animation_get_widget(crossing->resize);
+	gint width = joy_bubble_get_width(widget);
+	gint height = joy_bubble_get_height(widget);
+	if (G_UNLIKELY(width == crossing->width
+				&& height == crossing->height)) {
+		return;
+	}
+	if (220 == width && 110 == height) {
+		joy_animation_set_easing(crossing->resize,
+				joy_easing_out_bounce, NULL);
+	} else {
+		joy_animation_set_easing(crossing->resize, NULL, NULL);
+	}
+	joy_animation_resize_set_width(crossing->resize, crossing->width);
+	joy_animation_resize_set_height(crossing->resize, crossing->height);
+	joy_animation_start(crossing->resize);
 }
 
 static void
@@ -158,8 +239,8 @@ main(int argc, char *argv[])
 {
 	GError *error = NULL;
 	GOptionContext *context = NULL;
-	JoyAnimation *grow = NULL;
-	JoyAnimation *shrink = NULL;
+	struct ButtonDown down = { NULL, NULL, TRUE };
+	struct Crossing crossing = { NULL, { 5. }, 0, 0 };
 	JoyApplication *app = joy_application_new();
 	if (!app) {
 		goto error;
@@ -191,30 +272,53 @@ main(int argc, char *argv[])
 	joy_bubble_resize(window, 400, 200);
 	g_signal_connect(window, "key-down", G_CALLBACK(on_key_down), NULL);
 	g_signal_connect(window, "key-up", G_CALLBACK(on_key_up), NULL);
-	g_signal_connect(window, "button-up", G_CALLBACK(on_button_up), NULL);
 	g_signal_connect(window, "scroll", G_CALLBACK(on_scroll), NULL);
 	JoyBubble *sketch = joy_sketch_new();
 	if (!sketch) {
 		goto error;
 	}
 	joy_container_add(window, sketch);
-	joy_bubble_set_buffered(sketch, TRUE);
 	joy_bubble_set_expand(sketch, FALSE);
 	joy_bubble_move(sketch, 100, 50);
 	joy_bubble_resize(sketch, 200, 100);
 	g_signal_connect(sketch, "draw", G_CALLBACK(on_draw), NULL);
-	grow = joy_animation_grow_new(sketch, 220, 110);
-	if (!grow) {
+	crossing.resize = joy_animation_resize_new(sketch, 220, 110);
+	if (!crossing.resize) {
 		goto error;
 	}
-	g_signal_connect(sketch, "enter", G_CALLBACK(on_enter), grow);
-	shrink = joy_animation_grow_new(sketch, 200, 100);
-	if (!shrink) {
+	joy_animation_set_duration(crossing.resize, .5);
+	g_signal_connect(sketch, "enter",
+			G_CALLBACK(on_enter), &crossing.resize);
+	g_signal_connect(sketch, "leave",
+			G_CALLBACK(on_leave), &crossing.resize);
+	g_signal_connect(window, "button-up",
+			G_CALLBACK(on_button_up), sketch);
+	down.move = joy_animation_move_new(sketch, 0, 0);
+	if (!down.move) {
 		goto error;
 	}
-	g_signal_connect(sketch, "leave", G_CALLBACK(on_leave), shrink);
+	joy_animation_set_duration(down.move, .5);
+	joy_animation_set_easing(down.move, joy_easing_out_elastic, NULL);
+	down.fade = joy_animation_fade_new(sketch, 0.);
+	if (!down.move) {
+		goto error;
+	}
+	joy_animation_set_duration(down.fade, 1.);
+	g_signal_connect(window, "button-down",
+			G_CALLBACK(on_button_down), &down);
 	joy_bubble_show(window);
-	return joy_application_run(app, screen);
+	gint status = joy_application_run(app, screen);
+exit:
+	if (crossing.resize) {
+		g_object_unref(crossing.resize);
+	}
+	if (down.move) {
+		g_object_unref(down.move);
+	}
+	if (down.fade) {
+		g_object_unref(down.fade);
+	}
+	return status;
 error:
 	if (error) {
 		g_error_free(error);
@@ -222,14 +326,9 @@ error:
 	if (context) {
 		g_option_context_free(context);
 	}
-	if (grow) {
-		g_object_unref(grow);
-	}
-	if (shrink) {
-		g_object_unref(shrink);
-	}
 	if (app) {
 		g_object_unref(app);
 	}
-	return EXIT_FAILURE;
+	status = EXIT_FAILURE;
+	goto exit;
 }

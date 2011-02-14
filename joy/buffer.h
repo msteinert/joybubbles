@@ -52,6 +52,23 @@ void
 joy_buffer_damage(JoyBuffer *self, const cairo_region_t *damage);
 
 /**
+ * \brief Set the alpha value for the entire buffer.
+ *
+ * If the alpha value is set to some value between 0.0 and 1.0 then the
+ * entire buffer will be painted with that alpha value.
+ *
+ * \param self [in] A back-buffer object.
+ * \param alpha [in] The new alpha value.
+ */
+G_GNUC_INTERNAL
+void
+joy_buffer_set_alpha(JoyBuffer *self, gdouble alpha);
+
+G_GNUC_INTERNAL
+gdouble
+joy_buffer_get_alpha(JoyBuffer *self);
+
+/**
  * \brief Draw using a buffer.
  *
  * The "draw" signal will only be emitted if the back-buffer is damaged or
