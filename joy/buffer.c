@@ -82,7 +82,8 @@ joy_buffer_get_alpha(JoyBuffer *self)
 }
 
 void
-joy_buffer_draw(JoyBuffer *self, JoyBubble *widget, guint id, cairo_t *cr)
+joy_buffer_draw(JoyBuffer *self, JoyBubble *widget, guint id, cairo_t *cr,
+		gboolean *status)
 {
 	g_return_if_fail(self);
 	g_return_if_fail(JOY_IS_BUBBLE(widget));
@@ -129,7 +130,7 @@ joy_buffer_draw(JoyBuffer *self, JoyBubble *widget, guint id, cairo_t *cr)
 		cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
 		cairo_paint(cr);
 		cairo_restore(cr);
-		g_signal_emit(widget, id, 0, cr);
+		g_signal_emit(widget, id, 0, cr, status);
 		cairo_destroy(cr);
 		cairo_region_subtract(self->damage, self->damage);
 	}

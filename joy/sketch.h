@@ -9,6 +9,9 @@
  * \file
  * \brief A custom drawing
  * \author Mike Steinert <michael.steinert@echostar.com>
+ *
+ * This widget implements a simple drawing area. Connect to the "draw" signal
+ * to draw a sketch.
  */
 
 #ifndef JOY_SKETCH_H

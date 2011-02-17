@@ -107,7 +107,7 @@ joy_animation_fade_new(JoyBubble *widget, gdouble alpha)
 	g_return_val_if_fail(JOY_IS_BUBBLE(widget), NULL);
 	return g_object_new(JOY_TYPE_ANIMATION_FADE,
 			"widget", widget,
-			"alpha", alpha,
+			"alpha", CLAMP(alpha, 0., 1.),
 			NULL);
 }
 

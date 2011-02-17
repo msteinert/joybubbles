@@ -56,9 +56,23 @@ G_GNUC_NO_INSTRUMENT
 GType
 joy_animation_series_get_type(void) G_GNUC_CONST;
 
+/**
+ * \brief Create a new series animation.
+ *
+ * Parallel animations execute a number of animations one after the other.
+ *
+ * \return A new series animation object.
+ */
+G_GNUC_WARN_UNUSED_RESULT
 JoyAnimation *
 joy_animation_series_new(void);
 
+/**
+ * \brief Add an animation to a series animation.
+ *
+ * \param self [in] A series animation object.
+ * \param animation [child] The animation to add to \e self.
+ */
 void
 joy_animation_series_add(JoyAnimation *self, JoyAnimation *child);
 

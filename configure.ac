@@ -115,7 +115,7 @@ AC_SUBST([joy_platform])
 joy_easing=yes
 AC_ARG_ENABLE([easing],
 	[AC_HELP_STRING([--disable-easing],
-		[disable easing support for animation tweening.])],
+		[disable easing support for animation tweening])],
 	[joy_easing=$enableval])
 AS_IF([test "x$joy_easing" = "xyes"],
 		[AC_DEFINE([JOY_ENABLE_EASING], [1],
@@ -141,7 +141,9 @@ AS_CASE([$joy_platform],
 			[Define to 1 if XComposite is available.])],
 		[:])
 	AC_DEFINE([JOY_PLATFORM_X11], [1],
-		[Define to 1 if the platform is x11.])])
+		[Define to 1 if the platform is x11.])],
+[*],
+	[:])
 # Set input files for keysyms
 JOY_KEYSYMDEF_H="http://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h"
 JOY_XF86KEYSYMS_H="http://cgit.freedesktop.org/xorg/proto/x11proto/plain/XF86keysym.h"
@@ -149,6 +151,9 @@ AC_ARG_VAR([JOY_KEYSYM_INPUT_H],
 	[path(s) and/or URL(s) to generate <joy/device/keysym.h>])
 AS_IF([test "x$JOY_KEYSYM_INPUT_H" = "x"],
 	[JOY_KEYSYM_INPUT_H="$JOY_KEYSYMDEF_H $JOY_XF86KEYSYMS_H"])
+# Configure theme directory
+themedir="\$(libdir)/joybubbles-$joy_series/theme"
+AC_SUBST(themedir)
 # GLib configuration
 AC_DEFINE_UNQUOTED([G_LOG_DOMAIN], ["$PACKAGE_NAME"],
 	[The GLib log domain for this project.])
@@ -174,6 +179,7 @@ AC_CONFIG_FILES([
 	joy/iterator/Makefile
 	joy/platform/Makefile
 	joy/platform/x11/Makefile
+	joy/style/Makefile
 	joy/Makefile
 	tests/Makefile
 	Makefile

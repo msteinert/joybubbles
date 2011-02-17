@@ -56,9 +56,24 @@ G_GNUC_NO_INSTRUMENT
 GType
 joy_animation_fade_get_type(void) G_GNUC_CONST;
 
+/**
+ * \brief Create a new fade animation.
+ *
+ * \param widget [in] The widget to fade.
+ * \param alpha [in] The alpha value to fade to.
+ *
+ * \return A new fade animation object.
+ */
+G_GNUC_WARN_UNUSED_RESULT
 JoyAnimation *
 joy_animation_fade_new(JoyBubble *widget, gdouble alpha);
 
+/**
+ * \brief Set a new alpha value.
+ *
+ * \param self [in] A fade animation object.
+ * \param alpha [in] The new alpha value for \e self.
+ */
 void
 joy_animation_fade_set_alpha(JoyAnimation *self, gdouble alpha);
 

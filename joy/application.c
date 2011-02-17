@@ -14,6 +14,7 @@
 #include "joy/sink.h"
 #include "joy/screen.h"
 #include "joy/source.h"
+#include "joy/theme.h"
 #include <locale.h>
 #include <stdlib.h>
 
@@ -28,6 +29,7 @@ G_DEFINE_ABSTRACT_TYPE(JoyApplication, joy_application, G_TYPE_OBJECT)
 
 struct Private {
 	JoySink *sink;
+	JoyTheme *theme;
 	gboolean initialized;
 	gboolean quit;
 	gchar *name;
@@ -54,6 +56,10 @@ dispose(GObject *base)
 	if (priv->sink) {
 		g_object_unref(priv->sink);
 		priv->sink = NULL;
+	}
+	if (priv->theme) {
+		g_object_unref(priv->theme);
+		priv->theme = NULL;
 	}
 	G_OBJECT_CLASS(joy_application_parent_class)->dispose(base);
 }
@@ -121,6 +127,32 @@ joy_application_get_name(JoyApplication *self)
 		}
 		return G_OBJECT_TYPE_NAME(self);
 	}
+}
+
+void
+joy_application_set_theme(JoyApplication *self, JoyTheme *theme)
+{
+	g_return_if_fail(JOY_IS_APPLICATION(self));
+	g_return_if_fail(JOY_IS_THEME(theme));
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->theme) {
+		g_object_unref(priv->theme);
+	}
+	priv->theme = g_object_ref(theme);
+	if (priv->theme) {
+		for (JoyIterator *iter = joy_application_begin(self); iter;
+				iter = joy_iterator_next(iter)) {
+			JoyScreen *screen = joy_iterator_item(iter);
+			joy_screen_set_theme(screen, theme);
+		}
+	}
+}
+
+JoyTheme *
+joy_application_get_theme(JoyApplication *self)
+{
+	g_return_val_if_fail(JOY_IS_APPLICATION(self), NULL);
+	return GET_PRIVATE(self)->theme;
 }
 
 void
@@ -290,10 +322,11 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 	while (!priv->quit) {
 		if (joy_screen_in_animation(screen)) {
 			gdouble timeout = priv->frame - ptime;
-			if (G_UNLIKELY(0. > timeout)) {
-				timeout = 0.;
+			if (G_LIKELY(0. < timeout)) {
+				elapsed = joy_sink_poll(priv->sink, timeout);
+			} else {
+				elapsed = 0.;
 			}
-			elapsed = joy_sink_poll(priv->sink, timeout);
 		} else {
 			joy_sink_wait(priv->sink);
 			elapsed = 0.;

@@ -56,12 +56,34 @@ G_GNUC_NO_INSTRUMENT
 GType
 joy_animation_resize_get_type(void) G_GNUC_CONST;
 
+/**
+ * \brief Create a new resize animation.
+ *
+ * \param widget [in] The widget to resize.
+ * \param width [in] The new width for \e widget.
+ * \param height [in] The new height for \e widget.
+ *
+ * \return A new resize animation object.
+ */
+G_GNUC_WARN_UNUSED_RESULT
 JoyAnimation *
 joy_animation_resize_new(JoyBubble *widget, gint width, gint height);
 
+/**
+ * \brief Set the resize width.
+ *
+ * \param self [in] A resize animation object.
+ * \param width [in] The new width for \e self.
+ */
 void
 joy_animation_resize_set_width(JoyAnimation *self, gint width);
 
+/**
+ * \brief Set the resize height.
+ *
+ * \param self [in] A resize animation object.
+ * \param height [in] The new height for \e self.
+ */
 void
 joy_animation_resize_set_height(JoyAnimation *self, gint height);
 

@@ -7,7 +7,7 @@
 
 /**
  * \file
- * \brief TODO
+ * \brief Gaussian blur filter
  * \author Mike Steinert <michael.steinert@echostar.com>
  */
 
@@ -56,13 +56,33 @@ G_GNUC_NO_INSTRUMENT
 GType
 joy_filter_gaussian_get_type(void) G_GNUC_CONST;
 
+/**
+ * \brief Create a new gaussian blur filter.
+ *
+ * \param radius [in] The blur radius.
+ *
+ * \return A new filter object or NULL if an error occurred.
+ */
 G_GNUC_WARN_UNUSED_RESULT
 JoyFilter *
 joy_filter_gaussian_new(gdouble radius);
 
+/**
+ * \brief Set a new blur radius.
+ *
+ * \param self [in] A gaussian blur filter object.
+ * \param radius [in] The new blur radius for \e self.
+ */
 void
 joy_filter_gaussian_set_radius(JoyFilter *self, gdouble radius);
 
+/**
+ * \brief Get the blur radius.
+ *
+ * \param self [in] A gaussian blur filter object.
+ *
+ * \return The blur radius for \e self.
+ */
 gdouble
 joy_filter_gaussian_get_radius(JoyFilter *self);
 

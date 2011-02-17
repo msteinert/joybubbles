@@ -50,6 +50,9 @@ struct JoyBubble_ {
 };
 
 /* virtual functions */
+typedef void
+(*JoyBubbleSetStyle)(JoyBubble *self, JoyTheme *theme);
+
 typedef JoyApplication *
 (*JoyBubbleGetApplication)(JoyBubble *self);
 
@@ -103,13 +106,14 @@ typedef void
 typedef void
 (*JoyBubbleFocus)(JoyBubble *self, JoyDevice *device);
 
-typedef void
+typedef gboolean
 (*JoyBubbleDraw)(JoyBubble *self, cairo_t *cr);
 
 struct JoyBubbleClass_ {
 	/*< private >*/
 	GInitiallyUnownedClass parent_class;
 	/*< public >*/
+	JoyBubbleSetStyle set_style;
 	JoyBubbleGetApplication get_application;
 	JoyBubbleGetScreen get_screen;
 	JoyBubbleGetWindow get_window;
@@ -138,14 +142,45 @@ G_GNUC_NO_INSTRUMENT
 GType
 joy_bubble_get_type(void) G_GNUC_CONST;
 
+/**
+ * \brief Set the name of a widget.
+ *
+ * This function is generally only useful for changing the style applied to
+ * a widget. Calling this function may invalidate the widget style and
+ * render the widget unable to draw itself.
+ *
+ * \param self [in] A widget object.
+ * \param name [in] The new name of \e self.
+ */
 void
 joy_bubble_set_name(JoyBubble *self, const gchar *name);
 
+/**
+ * \brief Get the name of a widget.
+ *
+ * If no name was previously set with joy_bubble_set_name() then the class
+ * type name is returned. Theme engines should use this value to determine
+ * what style to apply to a widget.
+ *
+ * \param self [in] A widget object.
+ *
+ * \return The name of \e self (cannot be NULL).
+ */
 const gchar *
 joy_bubble_get_name(JoyBubble *self);
 
-GQuark
-joy_bubble_get_quark(JoyBubble *self);
+/**
+ * \brief Set the widget style.
+ *
+ * The function is generally only useful for screen & container
+ * implementations. Calling this function from application code may have
+ * undesirable results.
+ *
+ * \param self [in] A widget object.
+ * \param theme [in] A theme containing the new style for \e self.
+ */
+void
+joy_bubble_set_style(JoyBubble *self, JoyTheme *theme);
 
 /**
  * \brief Set back-buffering for a widget.
@@ -173,9 +208,28 @@ joy_bubble_set_buffered(JoyBubble *self, gboolean buffered);
 gboolean
 joy_bubble_get_buffered(JoyBubble *self);
 
+/**
+ * \brief Set the widget alpha value.
+ *
+ * The alpha value is applied globally to the entire widget after it has been
+ * drawn, i.e., alpha values drawn by the widget will be composited with the
+ * global alpha. If a widget is not back-buffered then setting alpha values
+ * other than 0.0 (hides a visible widget) or 1.0 (shows a hidden widget) have
+ * no effect.
+ *
+ * \param self [in] A widget object.
+ * \param alpha [in] The new alpha value for \e self.
+ */
 void
 joy_bubble_set_alpha(JoyBubble *self, gdouble alpha);
 
+/**
+ * \brief Get the widget alpha value.
+ *
+ * \brief self [in] A widget object.
+ *
+ * \return The alpha value for \e self.
+ */
 gdouble
 joy_bubble_get_alpha(JoyBubble *self);
 
@@ -201,18 +255,56 @@ joy_bubble_set_parent(JoyBubble *self, JoyBubble *parent);
 JoyBubble *
 joy_bubble_get_parent(JoyBubble *self);
 
+/**
+ * \brief Simultaneously set the horizontal & vertical expand.
+ *
+ * \param self [in] A widget object.
+ * \param expand [in] The new expand value.
+ */
 void
 joy_bubble_set_expand(JoyBubble *self, gboolean expand);
 
+/**
+ * \brief Set a widget's horizontal expand.
+ *
+ * If \e expand is TRUE then \e self will expand horizontally to fill the
+ * container it is in.
+ *
+ * \param self [in] A widget object.
+ * \param expand [in] Indicates if \e self should expand or not.
+ */
 void
 joy_bubble_set_horizontal_expand(JoyBubble *self, gboolean expand);
 
+/**
+ * \brief Determine if a widget should expand horizontally.
+ *
+ * \param self [in] A widget object.
+ *
+ * \return TRUE if \e self should expand, FALSE otherwise.
+ */
 gboolean
 joy_bubble_get_horizontal_expand(JoyBubble *self);
 
+/**
+ * \brief Set a widget's vertical expand.
+ *
+ * If \e expand is TRUE then \e self will expand vertically to fill the
+ * container it is in.
+ *
+ * \param self [in] A widget object.
+ * \param expand [in] Indicates if \e self should expand or not.
+ */
 void
 joy_bubble_set_vertical_expand(JoyBubble *self, gboolean expand);
 
+/**
+ * \brief Determine if a widget should expand vertically.
+ *
+ * \param self [in] A widget object.
+ *
+ * \return TRUE if \e self should expand, FALSE otherwise.
+ */
 gboolean
 joy_bubble_get_vertical_expand(JoyBubble *self);
 
@@ -221,7 +313,7 @@ joy_bubble_get_vertical_expand(JoyBubble *self);
  *
  * \param self [in] A widget object.
  *
- * \return \e TRUE if \e self is visible, \e FALSE otherwise.
+ * \return TRUE if \e self is visible, FALSE otherwise.
  */
 gboolean
 joy_bubble_get_visible(JoyBubble *self);
@@ -299,7 +391,7 @@ joy_bubble_get_window(JoyBubble *self);
 /**
  * \brief Get the widget at the given coordinates.
  *
- * \param self [in] A widget.
+ * \param self [in] A widget object.
  * \param x [in] The X-coordinate relative to \e self.
  * \param y [in] The Y-coordinate relative to \e self.
  *
@@ -309,6 +401,14 @@ joy_bubble_get_window(JoyBubble *self);
 JoyBubble *
 joy_bubble_at(JoyBubble *self, gint x, gint y);
 
+/**
+ * \brief Get the widget under the specified device.
+ *
+ * \param self [in] A widget object.
+ * \param device [in] A device object.
+ *
+ * \return The widget under \e device (may be NULL).
+ */
 JoyBubble *
 joy_bubble_at_device(JoyBubble *self, JoyDevice *device);
 
@@ -362,6 +462,15 @@ void
 joy_bubble_leave(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y);
 
+/**
+ * \brief Draw a widget to the provided cairo context.
+ *
+ * This function is generally only useful to the toolkit implementation.
+ * Calling this function from application code may have undesirable results.
+ *
+ * \param self [in] A widget object.
+ * \param cr [in] The cairo context \e self should draw to.
+ */
 void
 joy_bubble_draw(JoyBubble *self, cairo_t *cr);
 

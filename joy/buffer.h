@@ -78,10 +78,12 @@ joy_buffer_get_alpha(JoyBuffer *self);
  * \param widget [in] The widget to draw.
  * \param id [in] The "draw" signal ID for \e widget.
  * \param cr [in] The cairo handle to draw to.
+ * \param status [out] Storage for the return value.
  */
 G_GNUC_INTERNAL
 void
-joy_buffer_draw(JoyBuffer *self, JoyBubble *widget, guint id, cairo_t *cr);
+joy_buffer_draw(JoyBuffer *self, JoyBubble *widget, guint id, cairo_t *cr,
+		gboolean *status);
 
 G_END_DECLS
 

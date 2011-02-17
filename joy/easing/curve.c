@@ -24,7 +24,7 @@
 static gdouble
 sin_progress(gdouble time)
 {
-	return sin((time * M_PI) - M_PI_2) / 2 + .5;
+	return sin((time * G_PI) - G_PI_2) / 2 + .5;
 }
 G_GNUC_CONST
 #endif
@@ -66,7 +66,7 @@ gdouble
 joy_easing_sine_curve(gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
-	return (sin(((time * M_PI * 2.)) - M_PI_2) + 1.) / 2.;
+	return (sin(((time * G_PI * 2.)) - G_PI_2) + 1.) / 2.;
 #else
 	return time;
 #endif
@@ -76,7 +76,7 @@ gdouble
 joy_easing_cosine_curve(gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
-	return (cos(((time * M_PI * 2.)) - M_PI_2) + 1.) / 2.;
+	return (cos(((time * G_PI * 2.)) - G_PI_2) + 1.) / 2.;
 #else
 	return time;
 #endif

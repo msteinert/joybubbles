@@ -8,6 +8,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "joy/accumulator.h"
 #include "joy/marshal.h"
 #include "joy/source.h"
 
@@ -60,15 +61,6 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 	}
 }
 
-static gboolean
-signal_prepare_accumulator(GSignalInvocationHint *hint, GValue *accu,
-		const GValue *value, gpointer data)
-{
-	gboolean ready = g_value_get_boolean(value);
-	g_value_set_boolean(accu, ready);
-	return ready ? FALSE : TRUE;
-}
-
 static void
 joy_source_class_init(JoySourceClass *klass)
 {
@@ -80,7 +72,7 @@ joy_source_class_init(JoySourceClass *klass)
 		g_signal_new(g_intern_static_string("prepare"),
 			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
 			G_STRUCT_OFFSET(JoySourceClass, prepare),
-			signal_prepare_accumulator, NULL,
+			joy_boolean_accumulator, NULL,
 			joy_marshal_BOOLEAN__VOID, G_TYPE_BOOLEAN, 0);
 	// JoySource::in
 	signals[SIGNAL_INPUT] =

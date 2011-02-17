@@ -7,7 +7,7 @@
 
 /**
  * \file
- * \brief TODO
+ * \brief Visual filtering
  * \author Mike Steinert <michael.steinert@echostar.com>
  */
 
@@ -62,6 +62,15 @@ G_GNUC_NO_INSTRUMENT
 GType
 joy_filter_get_type(void) G_GNUC_CONST;
 
+/**
+ * \brief Apply a filter to a widget.
+ *
+ * \note Filters must applied after the widget has drawn itself.
+ *
+ * \param self [in] A filter object.
+ * \param widget [in] The widget \e self is being applied to.
+ * \param cr [in] The cairo context to apply the filter to.
+ */
 void
 joy_filter_apply(JoyFilter *self, JoyBubble *widget, cairo_t *cr);
 

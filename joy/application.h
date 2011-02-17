@@ -97,6 +97,25 @@ const gchar *
 joy_application_get_name(JoyApplication *self);
 
 /**
+ * \brief Set the application theme.
+ *
+ * \param self [in] An application object.
+ * \param theme [in] A theme object.
+ */
+void
+joy_application_set_theme(JoyApplication *self, JoyTheme *theme);
+
+/**
+ * \brief Get the application theme.
+ *
+ * \param self [in] An application object.
+ *
+ * \return The theme set for \e self (may be NULL).
+ */
+JoyTheme *
+joy_application_get_theme(JoyApplication *self);
+
+/**
  * \brief Set the application refresh rate.
  *
  * The default refresh rate is 60.0 Hz.

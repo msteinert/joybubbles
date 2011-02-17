@@ -61,6 +61,14 @@ extern void joy_marshal_VOID__OBJECT_DOUBLE (GClosure     *closure,
                                              gpointer      invocation_hint,
                                              gpointer      marshal_data);
 
+/* BOOLEAN:POINTER (../../joy/marshal.list:11) */
+extern void joy_marshal_BOOLEAN__POINTER (GClosure     *closure,
+                                          GValue       *return_value,
+                                          guint         n_param_values,
+                                          const GValue *param_values,
+                                          gpointer      invocation_hint,
+                                          gpointer      marshal_data);
+
 G_END_DECLS
 
 #endif /* __joy_marshal_MARSHAL_H__ */

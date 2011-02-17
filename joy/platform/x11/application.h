@@ -103,10 +103,28 @@ G_GNUC_INTERNAL
 gpointer
 joy_x11_application_lookup_xid(JoyApplication *self, XID id);
 
+/**
+ * \brief Get the application mouse device.
+ *
+ * This implementation currently supports a single mouse.
+ *
+ * \param self [in] An X11 application object.
+ *
+ * \return The mouse device object for \e self.
+ */
 G_GNUC_INTERNAL
 JoyDevice *
 joy_x11_application_get_mouse(JoyApplication *self);
 
+/**
+ * \brief Get the application keyboard device.
+ *
+ * This implementation currently supports a single keyboard.
+ *
+ * \param self [in] An X11 application object.
+ *
+ * \return The keyboard device object for \e self.
+ */
 G_GNUC_INTERNAL
 JoyDevice *
 joy_x11_application_get_keyboard(JoyApplication *self);

@@ -42,6 +42,10 @@ typedef struct JoySource_ JoySource;
 
 typedef struct JoySketch_ JoySketch;
 
+typedef struct JoyStyle_ JoyStyle;
+
+typedef struct JoyTheme_ JoyTheme;
+
 typedef struct JoyWindow_ JoyWindow;
 
 G_END_DECLS

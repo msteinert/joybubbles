@@ -12,6 +12,7 @@
 #include "joy/application.h"
 #include "joy/iterator.h"
 #include "joy/screen.h"
+#include "joy/theme.h"
 #include "joy/window.h"
 
 G_DEFINE_ABSTRACT_TYPE(JoyScreen, joy_screen, G_TYPE_OBJECT)
@@ -133,6 +134,18 @@ joy_screen_get_application(JoyScreen *self)
 	return GET_PRIVATE(self)->app;
 }
 
+void
+joy_screen_set_theme(JoyScreen *self, JoyTheme *theme)
+{
+	g_return_if_fail(JOY_IS_SCREEN(self));
+	g_return_if_fail(JOY_IS_THEME(theme));
+	for (JoyIterator *iter = joy_screen_begin(self); iter;
+			iter = joy_iterator_next(iter)) {
+		JoyBubble *window = joy_iterator_item(iter);
+		joy_bubble_set_style(window, theme);
+	}
+}
+
 gint
 joy_screen_get_id(JoyScreen *self)
 {
@@ -240,7 +253,7 @@ joy_screen_add_animation(JoyScreen *self, JoyAnimation *animation)
 	g_return_if_fail(JOY_IS_SCREEN(self));
 	g_return_if_fail(JOY_IS_ANIMATION(animation));
 	g_ptr_array_add(GET_PRIVATE(self)->animations,
-			g_object_ref_sink(animation));
+			g_object_ref(animation));
 }
 
 void

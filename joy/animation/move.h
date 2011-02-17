@@ -56,12 +56,34 @@ G_GNUC_NO_INSTRUMENT
 GType
 joy_animation_move_get_type(void) G_GNUC_CONST;
 
+/**
+ * \brief Create a new move animation.
+ *
+ * \param widget [in] The widget to move.
+ * \param x [in] The new X-coordinate for \e widget.
+ * \param y [in] The new Y-coordinate for \e widget.
+ *
+ * \return A new move animation object.
+ */
+G_GNUC_WARN_UNUSED_RESULT
 JoyAnimation *
 joy_animation_move_new(JoyBubble *widget, gint x, gint y);
 
+/**
+ * \brief Set the X-coordinate.
+ *
+ * \param self [in] A fade animation object.
+ * \param x [in] The new X-coordinate for \e self.
+ */
 void
 joy_animation_move_set_x(JoyAnimation *self, gint x);
 
+/**
+ * \brief Set the Y-coordinate.
+ *
+ * \param self [in] A fade animation object.
+ * \param y [in] The new Y-coordinate for \e self.
+ */
 void
 joy_animation_move_set_y(JoyAnimation *self, gint y);
 

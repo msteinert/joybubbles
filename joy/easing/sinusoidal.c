@@ -27,7 +27,7 @@ joy_easing_in_sine(gpointer self, gdouble time)
 	if (1. == time) {
 		return 1.;
 	} else {
-		return -cos(time * M_PI_2) + 1.;
+		return -cos(time * G_PI_2) + 1.;
 	}
 #else
 	return time;
@@ -38,7 +38,7 @@ gdouble
 joy_easing_out_sine(gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
-	return sin(time * M_PI_2);
+	return sin(time * G_PI_2);
 #else
 	return time;
 #endif
@@ -48,7 +48,7 @@ gdouble
 joy_easing_in_out_sine(gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
-	return -.5 * (cos(M_PI * time) - 1.);
+	return -.5 * (cos(G_PI * time) - 1.);
 #else
 	return time;
 #endif

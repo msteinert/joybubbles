@@ -46,11 +46,11 @@ in_elastic(struct JoyEasingElastic *self, gdouble time,
 		amplitude = c;
 		s = period / 4.;
 	} else {
-		s = period / (2. * M_PI) * asin(c / amplitude);
+		s = period / (2. * G_PI) * asin(c / amplitude);
 	}
 	t -= 1.;
 	return -(amplitude * pow(2., 10. * t)
-			* sin((t * d - s) * (2. * M_PI) / period)) + b;
+			* sin((t * d - s) * (2. * G_PI) / period)) + b;
 }
 G_GNUC_CONST
 #endif
@@ -77,10 +77,10 @@ out_elastic(struct JoyEasingElastic *self, gdouble time,
 		amplitude = c;
 		s = period / 4.;
 	} else {
-		s = period / (2. * M_PI) * asin(c / amplitude);
+		s = period / (2. * G_PI) * asin(c / amplitude);
 	}
 	return (amplitude * pow(2., -10. * time)
-			* sin((time - s) * (2. * M_PI) / period) + c);
+			* sin((time - s) * (2. * G_PI) / period) + c);
 }
 G_GNUC_CONST
 #endif
@@ -127,14 +127,14 @@ joy_easing_in_out_elastic(gpointer self, gdouble time)
 		amplitude = 1.;
 		s = period / 4.;
 	} else {
-		s = period / (2. * M_PI) * asin(1. / amplitude);
+		s = period / (2. * G_PI) * asin(1. / amplitude);
 	}
 	if (time < 1) {
 		return -.5 * (amplitude * pow(2., 10. * (time - 1.))
-				* sin((time - 1. - s) * (2. * M_PI) / period));
+				* sin((time - 1. - s) * (2. * G_PI) / period));
 	} else {
 		return amplitude * pow(2., -10. * (time - 1.))
-			* sin((time - 1. - s) * (2. * M_PI) / period)
+			* sin((time - 1. - s) * (2. * G_PI) / period)
 			* .5 + 1.;
 	}
 #else

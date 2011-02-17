@@ -41,7 +41,7 @@ G_BEGIN_DECLS
 		JoyAnimationClass))
 
 typedef gdouble
-(*JoyAnimationEasing)(gpointer self, gdouble time) G_GNUC_CONST;
+(*JoyAnimationEasing)(gpointer self, gdouble time);
 
 typedef struct JoyAnimationClass_ JoyAnimationClass;
 
@@ -109,15 +109,6 @@ gdouble
 joy_animation_get_duration(JoyAnimation *self);
 
 /**
- * \brief Add to the animation duration.
- *
- * \param self [in] An animation object.
- * \param seconds [in] Seconds to add to the duration of \e self.
- */
-void
-joy_animation_add_duration(JoyAnimation *self, gdouble seconds);
-
-/**
  * \brief Set the easing function.
  *
  * If no easing function is set then tweening will be linear.
@@ -137,9 +128,10 @@ joy_animation_set_easing(JoyAnimation *self, JoyAnimationEasing function,
  * or joy_animation_pause() is called.
  *
  * \param self [in] An animation object.
+ * \param looping [in] The new new looping setting.
  */
 void
-joy_animation_set_looping(JoyAnimation *self);
+joy_animation_set_looping(JoyAnimation *self, gboolean looping);
 
 /**
  * \brief Set the number of times the animation should loop.

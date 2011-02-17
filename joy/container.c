@@ -8,6 +8,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "joy/application.h"
 #include "joy/container.h"
 #include "joy/iterator/queue.h"
 #include "joy/marshal.h"
@@ -56,6 +57,17 @@ dispose(GObject *base)
 		priv->children = NULL;
 	}
 	G_OBJECT_CLASS(joy_container_parent_class)->dispose(base);
+}
+
+static void
+set_style(JoyBubble *self, JoyTheme *theme)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	for (GList *node = g_queue_peek_head_link(priv->children); node;
+			node = node->next) {
+		JoyBubble *child = node->data;
+		joy_bubble_set_style(child, theme);
+	}
 }
 
 static JoyBubble *
@@ -128,7 +140,7 @@ expose(JoyBubble *self, const cairo_rectangle_int_t *rect)
 	}
 }
 
-static void
+static gboolean
 draw(JoyBubble *self, cairo_t *cr)
 {
 	// clear expose areas
@@ -142,6 +154,7 @@ draw(JoyBubble *self, cairo_t *cr)
 		JoyBubble *child = node->data;
 		joy_bubble_draw(child, cr);
 	}
+	return TRUE;
 }
 
 static JoyIterator *
@@ -175,6 +188,13 @@ add(JoyBubble *self, JoyBubble *child)
 		return;
 	}
 	joy_bubble_set_parent(child, self);
+	JoyApplication *app = joy_bubble_get_application(self);
+	if (app) {
+		JoyTheme *theme = joy_application_get_theme(app);
+		if (theme) {
+			joy_bubble_set_style(child, theme);
+		}
+	}
 	g_queue_push_tail(priv->children, g_object_ref_sink(child));
 }
 
@@ -200,6 +220,7 @@ joy_container_class_init(JoyContainerClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->dispose = dispose;
 	JoyBubbleClass *bubble_class = JOY_BUBBLE_CLASS(klass);
+	bubble_class->set_style = set_style;
 	bubble_class->at = at;
 	bubble_class->resize = resize;
 	bubble_class->show = show;

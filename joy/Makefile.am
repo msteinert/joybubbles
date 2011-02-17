@@ -1,7 +1,7 @@
 #                                        -*- Automake -*-
 # Process this file with automake to produce Makefile.in.
 
-SUBDIRS = animation device easing filter iterator platform
+SUBDIRS = animation device easing filter iterator platform style
 # generate marshalling routines
 $(srcdir)/marshal.h: marshal.list
 	$(AM_V_GEN)$(GLIB_GENMARSHAL) --prefix=joy_marshal --header $< > $@
@@ -10,6 +10,8 @@ $(srcdir)/marshal.c: marshal.list
 # library definition
 lib_LTLIBRARIES = libjoybubbles-@joy_series_major@.@joy_series_minor@.la
 libjoybubbles_@joy_series_major@_@joy_series_minor@_la_SOURCES = \
+	accumulator.c \
+	accumulator.h \
 	animation.c \
 	application.c \
 	bubble.c \
@@ -25,7 +27,9 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_SOURCES = \
 	screen.c \
 	sink.c \
 	sink.h \
+	style.c \
 	sketch.c \
+	theme.c \
 	source.c \
 	window.c
 BUILT_SOURCES = \
@@ -49,7 +53,8 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_LIBADD = \
 	easing/libjoybubbles-easing.la \
 	filter/libjoybubbles-filter.la \
 	iterator/libjoybubbles-iterator.la \
-	platform/$(joy_platform)/libjoybubbles-platform.la
+	platform/$(joy_platform)/libjoybubbles-platform.la \
+	style/libjoybubbles-style.la
 # install development headers
 pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy
 pkginclude_HEADERS = \
@@ -65,6 +70,8 @@ pkginclude_HEADERS = \
 	iterator.h \
 	screen.h \
 	source.h \
+	style.h \
+	theme.h \
 	sketch.h \
 	types.h \
 	window.h

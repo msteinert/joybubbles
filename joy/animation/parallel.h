@@ -56,9 +56,23 @@ G_GNUC_NO_INSTRUMENT
 GType
 joy_animation_parallel_get_type(void) G_GNUC_CONST;
 
+/**
+ * \brief Create a new parallel animation.
+ *
+ * Parallel animations execute a number of animations simultaneously.
+ *
+ * \return A new parallel animation object.
+ */
+G_GNUC_WARN_UNUSED_RESULT
 JoyAnimation *
 joy_animation_parallel_new(void);
 
+/**
+ * \brief Add an animation to a parallel animation.
+ *
+ * \param self [in] A parallel animation object.
+ * \param animation [child] The animation to add to \e self.
+ */
 void
 joy_animation_parallel_add(JoyAnimation *self, JoyAnimation *child);
 

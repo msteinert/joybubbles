@@ -17,7 +17,7 @@
 
 #define NAME "Joybubbles Example"
 
-static void
+static gboolean
 on_draw(JoyBubble *window, cairo_t *cr, gpointer data)
 {
 	gint width = joy_bubble_get_width(window) - 2;
@@ -45,6 +45,7 @@ on_draw(JoyBubble *window, cairo_t *cr, gpointer data)
 	cairo_set_source_rgba(cr, 1., 1., 1., 1.);
 	cairo_set_line_width(cr, 2.);
 	cairo_stroke(cr);
+	return TRUE;
 }
 
 static void

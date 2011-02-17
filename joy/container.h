@@ -7,8 +7,10 @@
 
 /**
  * \file
- * \brief Abstract container base class
+ * \brief A widget that contains others
  * \author Mike Steinert <michael.steinert@echostar.com>
+ *
+ * This widget is the base class for containers.
  */
 
 #ifndef JOY_CONTAINER_H

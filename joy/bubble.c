@@ -8,10 +8,14 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "joy/accumulator.h"
+#include "joy/application.h"
 #include "joy/bubble.h"
 #include "joy/buffer.h"
 #include "joy/marshal.h"
 #include "joy/screen.h"
+#include "joy/style.h"
+#include "joy/theme.h"
 
 G_DEFINE_ABSTRACT_TYPE(JoyBubble, joy_bubble, G_TYPE_INITIALLY_UNOWNED)
 
@@ -44,7 +48,6 @@ static guint signals[SIGNAL_LAST] = { 0 };
 
 struct Private {
 	gchar *name;
-	GQuark quark;
 	JoyBubble *parent;
 	cairo_region_t *area;
 	cairo_region_t *draw;
@@ -55,6 +58,7 @@ struct Private {
 	gboolean horizontal_expand;
 	gboolean vertical_expand;
 	JoyBuffer *buffer;
+	JoyStyle *style;
 };
 
 static void
@@ -77,6 +81,10 @@ dispose(GObject *base)
 	if (priv->buffer) {
 		joy_buffer_destroy(priv->buffer);
 		priv->buffer = NULL;
+	}
+	if (priv->style) {
+		g_object_unref(priv->style);
+		priv->style = NULL;
 	}
 	G_OBJECT_CLASS(joy_bubble_parent_class)->dispose(base);
 }
@@ -140,6 +148,22 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 	}
 }
 
+static void
+set_style(JoyBubble *self, JoyTheme *theme)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->style) {
+		g_object_unref(priv->style);
+	}
+	JoyStyle *style = joy_theme_get_style(theme, self);
+	if (style) {
+		priv->style = g_object_ref(style);
+		joy_bubble_damage(self, 0, 0, priv->width, priv->height);
+	} else {
+		priv->style = NULL;
+	}
+}
+
 static JoyApplication *
 get_application(JoyBubble *self)
 {
@@ -200,6 +224,16 @@ at(JoyBubble *self, gint x, gint y)
 	return NULL;
 }
 
+static gboolean
+draw(JoyBubble *self, cairo_t *cr)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_LIKELY(priv->style)) {
+		return joy_style_draw(priv->style, self, cr);
+	}
+	return FALSE;
+}
+
 static void
 joy_bubble_class_init(JoyBubbleClass *klass)
 {
@@ -207,12 +241,14 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	object_class->dispose = dispose;
 	object_class->finalize = finalize;
 	object_class->set_property = set_property;
+	klass->set_style = set_style;
 	klass->get_application = get_application;
 	klass->get_screen = get_screen;
 	klass->get_window = get_window;
 	klass->set_buffered = set_buffered;
 	klass->get_buffered = get_buffered;
 	klass->at = at;
+	klass->draw = draw;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoyBubble::move
 	signals[SIGNAL_MOVE] =
@@ -316,7 +352,8 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 		g_signal_new(g_intern_static_string("draw"),
 			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
 			G_STRUCT_OFFSET(JoyBubbleClass, draw),
-			NULL, NULL, joy_marshal_VOID__POINTER, G_TYPE_NONE,
+			joy_boolean_accumulator, NULL,
+			joy_marshal_BOOLEAN__POINTER, G_TYPE_BOOLEAN,
 			1, G_TYPE_POINTER);
 	g_object_class_install_property(object_class, PROP_X_COORDINATE,
 		g_param_spec_int("x-coordinate", Q_("X-coordinate"),
@@ -398,7 +435,13 @@ joy_bubble_set_name(JoyBubble *self, const gchar *name)
 	struct Private *priv = GET_PRIVATE(self);
 	g_free(priv->name);
 	priv->name = g_strdup(name);
-	priv->quark = 0;
+	JoyApplication *app = joy_bubble_get_application(self);
+	if (app) {
+		JoyTheme *theme = joy_application_get_theme(app);
+		if (theme) {
+			joy_bubble_set_style(self, theme);
+		}
+	}
 }
 
 const gchar *
@@ -413,15 +456,12 @@ joy_bubble_get_name(JoyBubble *self)
 	}
 }
 
-GQuark
-joy_bubble_get_quark(JoyBubble *self)
+void
+joy_bubble_set_style(JoyBubble *self, JoyTheme *theme)
 {
-	g_return_val_if_fail(JOY_IS_BUBBLE(self), 0);
-	struct Private *priv = GET_PRIVATE(self);
-	if (G_UNLIKELY(!priv->quark)) {
-		priv->quark = g_quark_from_string(joy_bubble_get_name(self));
-	}
-	return priv->quark;
+	g_return_if_fail(JOY_IS_BUBBLE(self));
+	g_return_if_fail(JOY_IS_THEME(theme));
+	JOY_BUBBLE_GET_CLASS(self)->set_style(self, theme);
 }
 
 void
@@ -464,7 +504,13 @@ joy_bubble_get_alpha(JoyBubble *self)
 {
 	g_return_val_if_fail(JOY_IS_BUBBLE(self), 0.);
 	struct Private *priv = GET_PRIVATE(self);
-	return priv->buffer ? joy_buffer_get_alpha(priv->buffer) : 1.;
+	if (priv->visible) {
+		if (priv->buffer) {
+			return joy_buffer_get_alpha(priv->buffer);
+		}
+		return 1.;
+	}
+	return 0.;
 }
 
 void
@@ -934,11 +980,14 @@ joy_bubble_draw(JoyBubble *self, cairo_t *cr)
 		cairo_region_get_rectangle(priv->draw, i, &rect);
 		cairo_rectangle(cr, rect.x, rect.y, rect.width, rect.height);
 	}
+	gboolean status;
 	cairo_clip(cr);
 	if (!priv->buffer) {
-		g_signal_emit(self, signals[SIGNAL_DRAW], 0, cr);
+		g_signal_emit(self, signals[SIGNAL_DRAW], 0,
+				cr, &status);
 	} else {
-		joy_buffer_draw(priv->buffer, self, signals[SIGNAL_DRAW], cr);
+		joy_buffer_draw(priv->buffer, self, signals[SIGNAL_DRAW],
+				cr, &status);
 	}
 	cairo_restore(cr);
 	cairo_region_subtract(priv->draw, priv->draw);

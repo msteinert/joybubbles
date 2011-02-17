@@ -43,6 +43,7 @@ struct Private {
 	JoyAnimationState state;
 	gdouble duration;
 	GTimer *timer;
+	gboolean looping;
 	gint loop;
 	gint count;
 	gpointer object;
@@ -182,20 +183,11 @@ joy_animation_get_duration(JoyAnimation *self)
 }
 
 void
-joy_animation_add_duration(JoyAnimation *self, gdouble seconds)
+joy_animation_set_looping(JoyAnimation *self, gboolean looping)
 {
 	g_return_if_fail(JOY_IS_ANIMATION(self));
-	GET_PRIVATE(self)->duration += seconds;
+	GET_PRIVATE(self)->looping = looping;
 }
-
-void
-joy_animation_set_looping(JoyAnimation *self)
-{
-	g_return_if_fail(JOY_IS_ANIMATION(self));
-	GET_PRIVATE(self)->loop = -1;
-}
-
-#include "joy/easing.h"
 
 void
 joy_animation_set_easing(JoyAnimation *self, JoyAnimationEasing function,
@@ -220,14 +212,15 @@ joy_animation_start(JoyAnimation *self)
 {
 	g_return_if_fail(JOY_IS_ANIMATION(self));
 	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(!priv->widget)) {
+		return;
+	}
 	if (JOY_ANIMATION_START != priv->state) {
 		if (JOY_ANIMATION_STOP == priv->state) {
-			if (G_LIKELY(priv->widget)) {
-				JoyScreen *screen;
-				screen = joy_bubble_get_screen(priv->widget);
-				if (G_LIKELY(screen)) {
-					joy_screen_add_animation(screen, self);
-				}
+			JoyScreen *screen;
+			screen = joy_bubble_get_screen(priv->widget);
+			if (G_LIKELY(screen)) {
+				joy_screen_add_animation(screen, self);
 			}
 		}
 		g_timer_start(priv->timer);
@@ -245,12 +238,10 @@ joy_animation_stop(JoyAnimation *self)
 		return;
 	}
 	if (JOY_ANIMATION_STOP != priv->state) {
-		if (G_LIKELY(priv->widget)) {
-			JoyScreen *screen;
-			screen = joy_bubble_get_screen(priv->widget);
-			if (G_LIKELY(screen)) {
-				joy_screen_remove_animation(screen, self);
-			}
+		JoyScreen *screen;
+		screen = joy_bubble_get_screen(priv->widget);
+		if (G_LIKELY(screen)) {
+			joy_screen_remove_animation(screen, self);
 		}
 		g_timer_stop(priv->timer);
 		g_signal_emit(self, signals[SIGNAL_STOP], 0, priv->widget);
@@ -296,7 +287,7 @@ joy_animation_frame(JoyAnimation *self)
 			? priv->function(priv->object, elapsed)
 			: elapsed);
 	if (G_UNLIKELY(1. == elapsed)) {
-		if (++priv->count >= priv->loop) {
+		if (++priv->count >= priv->loop && !priv->looping) {
 			joy_animation_stop(self);
 		} else {
 			joy_animation_start(self);
