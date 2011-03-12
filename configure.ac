@@ -100,9 +100,9 @@ AC_ARG_ENABLE([trace],
 joy_platform_default=x11
 AC_ARG_WITH([platform],
 	[AC_HELP_STRING([--with-platform],
-		[select the graphics platform @<:@x11@:>@])],
+		[select the graphics platform @<:@x11|gfx3d@:>@])],
 	[AS_CASE([$withval],
-	[x11],
+	[x11|gfx3d],
 		[joy_platform=$withval],
 	[*],
 		[AC_MSG_WARN([Unknown platform selected @<:@$withval:>@, defaulting to @<:@$joy_platform_default@:>@])
@@ -112,14 +112,14 @@ AC_DEFINE_UNQUOTED([JOY_PLATFORM], ["$joy_platform"],
 	[Define to the platform.])
 AC_SUBST([joy_platform])
 # Easing support
-joy_easing=yes
 AC_ARG_ENABLE([easing],
 	[AC_HELP_STRING([--disable-easing],
 		[disable easing support for animation tweening])],
-	[joy_easing=$enableval])
+	[joy_easing=$enableval],
+	[joy_easing=yes])
 AS_IF([test "x$joy_easing" = "xyes"],
-		[AC_DEFINE([JOY_ENABLE_EASING], [1],
-			[Define to 1 to enable easing functions.])])
+	[AC_DEFINE([JOY_ENABLE_EASING], [1],
+	[Define to 1 to enable easing functions.])])
 # Native language support
 AC_ARG_ENABLE([nls],
 	[AC_HELP_STRING([--enable-nls],
@@ -142,6 +142,19 @@ AS_CASE([$joy_platform],
 		[:])
 	AC_DEFINE([JOY_PLATFORM_X11], [1],
 		[Define to 1 if the platform is x11.])],
+[gfx3d],
+	[GFX3D_DIR="/vobs/drivers/linux/broadcom/74xxD"
+	AC_ARG_VAR([GFX3D_CFLAGS], [C compiler flags for GFX3D, overriding defaults])
+	AS_IF([test "x$GFX3D_CFLAGS" = "x"],
+		[GFX3D_CFLAGS="-I$GFX3D_DIR/app/lib/gfx3d -I$GFX3D_DIR/pi/vip922/basemodules/std/types/linuxuser"])
+	AC_ARG_VAR([GFX3D_LIBS], [linker flags for GFX3D, overriding defaults])
+	AS_IF([test "x$GFX3D_LIBS" = "x"],
+		[GFX3D_LIBS="-L$GFX3D_DIR/build/bin/vip922 -lbcmgfx"])
+	AC_ARG_VAR([INPUT_MGR_CFLAGS], [C compiler flags for INPUT_MGR, overriding defaults])
+	AS_IF([test "x$INPUT_MGR_CFLAGS" = "x"],
+		[INPUT_MGR_CFLAGS="-I/vobs/input_mgr/include"])
+	AC_DEFINE([JOY_PLATFORM_GFX3D], [1],
+		[Define to 1 if the platform is gfx3d.])],
 [*],
 	[:])
 # Set input files for keysyms
@@ -178,6 +191,7 @@ AC_CONFIG_FILES([
 	joy/filter/Makefile
 	joy/iterator/Makefile
 	joy/platform/Makefile
+	joy/platform/gfx3d/Makefile
 	joy/platform/x11/Makefile
 	joy/style/Makefile
 	joy/Makefile

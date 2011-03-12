@@ -20,8 +20,10 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_SOURCES = \
 	container.c \
 	cursor.c \
 	device.c \
+	error.c \
 	filter.c \
 	iterator.c \
+	macros.h \
 	marshal.c \
 	marshal.h \
 	screen.c \
@@ -66,6 +68,7 @@ pkginclude_HEADERS = \
 	cursor.h \
 	device.h \
 	easing.h \
+	error.h \
 	filter.h \
 	iterator.h \
 	screen.h \

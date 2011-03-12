@@ -61,6 +61,7 @@ joy_sink_get_type(void) G_GNUC_CONST;
  * \return A new input sink object.
  */
 G_GNUC_INTERNAL
+G_GNUC_WARN_UNUSED_RESULT
 JoySink *
 joy_sink_new(void);
 
@@ -77,8 +78,10 @@ joy_sink_add(JoySink *self, JoySource *source);
 /**
  * \brief Poll an input sink for events.
  *
+ * This function processes events for the specified maximum number of seconds.
+ *
  * \param self [in] An input sink object.
- * \param seconds [in] The number of seconds to poll for.
+ * \param seconds [in] The number of seconds to process events.
  *
  * \return The number of elapsed seconds.
  */
@@ -89,13 +92,17 @@ joy_sink_poll(JoySink *self, gdouble seconds);
 /**
  * \brief Wait for an event to become available.
  *
+ * This function blocks until an event is available. Events will be processed
+ * for the specified minimum number of seconds before returning.
+ *
  * \param self [in] An input sink object.
+ * \param seconds [in] The number of seconds to process events.
  *
  * \return The number of elapsed seconds.
  */
 G_GNUC_INTERNAL
 gdouble
-joy_sink_wait(JoySink *self);
+joy_sink_wait(JoySink *self, gdouble seconds);
 
 G_END_DECLS
 

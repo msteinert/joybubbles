@@ -11,6 +11,7 @@
 #include "joy/animation.h"
 #include "joy/application.h"
 #include "joy/iterator.h"
+#include "joy/macros.h"
 #include "joy/screen.h"
 #include "joy/theme.h"
 #include "joy/window.h"
@@ -100,6 +101,14 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 	}
 }
 
+static gboolean
+mirroring(JoyScreen *self, JoyScreen *mirror, GError **error)
+{
+	g_set_error(error, JOY_ERROR, JOY_ERROR_FAILURE,
+			Q_("mirroring is not implemented on this platform"));
+	return FALSE;
+}
+
 static void
 joy_screen_class_init(JoyScreenClass *klass)
 {
@@ -107,6 +116,8 @@ joy_screen_class_init(JoyScreenClass *klass)
 	object_class->set_property = set_property;
 	object_class->dispose = dispose;
 	object_class->finalize = finalize;
+	klass->enable_mirroring = mirroring;
+	klass->disable_mirroring = mirroring;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	g_object_class_install_property(object_class, PROP_APPLICATION,
 		g_param_spec_object("application", Q_("Application"),
@@ -310,4 +321,24 @@ joy_screen_submit(JoyScreen *self)
 {
 	g_return_if_fail(JOY_IS_SCREEN(self));
 	JOY_SCREEN_GET_CLASS(self)->submit(self);
+}
+
+gboolean
+joy_screen_enable_mirroring(JoyScreen *self, JoyScreen *mirror,
+		GError **error)
+{
+	joy_return_error_if_fail(JOY_IS_SCREEN(self), FALSE, error);
+	joy_return_error_if_fail(JOY_IS_SCREEN(mirror), FALSE, error);
+	return JOY_SCREEN_GET_CLASS(self)->
+		enable_mirroring(self, mirror, error);
+}
+
+gboolean
+joy_screen_disable_mirroring(JoyScreen *self, JoyScreen *mirror,
+		GError **error)
+{
+	joy_return_error_if_fail(JOY_IS_SCREEN(self), FALSE, error);
+	joy_return_error_if_fail(JOY_IS_SCREEN(mirror), FALSE, error);
+	return JOY_SCREEN_GET_CLASS(self)->
+		disable_mirroring(self, mirror, error);
 }

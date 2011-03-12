@@ -143,11 +143,11 @@ joy_sink_poll(JoySink *self, gdouble seconds)
 	g_return_val_if_fail(JOY_IS_SINK(self), 0.);
 	struct Private *priv = GET_PRIVATE(self);
 	gdouble elapsed = 0.;
+	GPollFD *fds = &g_array_index(priv->fds, GPollFD, 0);
+	guint nfds = priv->fds->len;
 	g_timer_start(priv->timer);
 	while (elapsed < seconds) {
 		if (!prepare_sources(priv->sources)) {
-			GPollFD *fds = &g_array_index(priv->fds, GPollFD, 0);
-			guint nfds = priv->fds->len;
 			gint timeout = (gint)((seconds - elapsed) * 1000.);
 			poll_sources(priv->sources, fds, nfds, timeout);
 		}
@@ -157,15 +157,21 @@ joy_sink_poll(JoySink *self, gdouble seconds)
 }
 
 gdouble
-joy_sink_wait(JoySink *self)
+joy_sink_wait(JoySink *self, gdouble seconds)
 {
 	g_return_val_if_fail(JOY_IS_SINK(self), 0.);
 	struct Private *priv = GET_PRIVATE(self);
+	gdouble elapsed = 0.;
+	GPollFD *fds = &g_array_index(priv->fds, GPollFD, 0);
+	guint nfds = priv->fds->len;
+	gint timeout = -1;
 	g_timer_start(priv->timer);
-	if (!prepare_sources(priv->sources)) {
-		GPollFD *fds = &g_array_index(priv->fds, GPollFD, 0);
-		guint nfds = priv->fds->len;
-		poll_sources(priv->sources, fds, nfds, -1);
+	while (elapsed < seconds) {
+		if (!prepare_sources(priv->sources)) {
+			poll_sources(priv->sources, fds, nfds, timeout);
+		}
+		elapsed = g_timer_elapsed(priv->timer, NULL);
+		timeout = (gint)((seconds - elapsed) * 1000.);
 	}
-	return g_timer_elapsed(priv->timer, NULL);
+	return elapsed;
 }

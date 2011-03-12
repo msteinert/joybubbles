@@ -55,7 +55,7 @@ joy_iterator_class_init(JoyIteratorClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->set_property = set_property;
 	g_type_class_add_private(klass, sizeof(struct Private));
-	/* properties */
+	// properties
 	g_object_class_install_property(object_class, PROP_ITEM,
 		g_param_spec_pointer("item", Q_("Item"), Q_("The first item"),
 			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));

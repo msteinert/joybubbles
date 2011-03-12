@@ -188,6 +188,9 @@ resize(JoyBubble *self, gint width, gint height)
 	}
 	XResizeWindow(joy_x11_window_get_display(self), priv->window,
 			width, height);
+	if (priv->surface) {
+		cairo_xlib_surface_set_size(priv->surface, width, height);
+	}
 exit:
 	JOY_BUBBLE_CLASS(joy_x11_window_parent_class)->
 		resize(self, width, height);
@@ -197,14 +200,10 @@ static void
 expose(JoyBubble *self, const cairo_rectangle_int_t *rect)
 {
 	struct Private *priv = GET_PRIVATE(self);
-	if (G_UNLIKELY(!priv->region)) {
-		goto exit;
-	}
 	XRectangle rectangle = {
 		rect->x, rect->y, rect->width, rect->height
 	};
 	XUnionRectWithRegion(&rectangle, priv->region, priv->region);
-exit:
 	JOY_BUBBLE_CLASS(joy_x11_window_parent_class)->expose(self, rect);
 }
 
@@ -358,6 +357,8 @@ joy_x11_window_set_event(JoyBubble *self, XEvent *event)
 void
 joy_x11_window_submit(JoyBubble *self, Display *display)
 {
+	g_return_if_fail(JOY_IS_X11_WINDOW(self));
+	g_return_if_fail(display);
 	struct Private *priv = GET_PRIVATE(self);
 	if (G_UNLIKELY(!priv->window || !priv->surface || !priv->gc)) {
 		return;

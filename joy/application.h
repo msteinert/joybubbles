@@ -176,6 +176,7 @@ joy_application_get_screen(JoyApplication *self, guint n);
  *
  * \return An iterator starting with the first screen of \e self.
  */
+G_GNUC_WARN_UNUSED_RESULT
 JoyIterator *
 joy_application_begin(JoyApplication *self);
 

@@ -23,17 +23,13 @@ set_cursor(JoyDevice *self, JoyCursor *cursor)
 }
 
 static void
-warp(JoyDevice *self, JoyScreen *screen, gint x, gint y)
+warp(JoyDevice *self, gint x, gint y)
 {
 }
 
 static void
-get_location(JoyDevice *self, JoyScreen **screen,
-		gint *x, gint *y)
+get_location(JoyDevice *self, gint *x, gint *y)
 {
-	if (screen) {
-		*screen = NULL;
-	}
 	if (x) {
 		*x = 0;
 	}
@@ -43,12 +39,31 @@ get_location(JoyDevice *self, JoyScreen **screen,
 }
 
 static void
+show(JoyDevice *self)
+{
+}
+
+static void
+hide(JoyDevice *self)
+{
+}
+
+static gboolean
+visible(JoyDevice *self)
+{
+	return TRUE;
+}
+
+static void
 joy_x11_mouse_class_init(JoyX11MouseClass *klass)
 {
 	JoyDeviceMouseClass *mouse_class = JOY_DEVICE_MOUSE_CLASS(klass);
 	mouse_class->set_cursor = set_cursor;
 	mouse_class->warp = warp;
 	mouse_class->get_location = get_location;
+	mouse_class->show = show;
+	mouse_class->hide = hide;
+	mouse_class->visible = visible;
 }
 
 JoyDevice *

@@ -44,45 +44,52 @@ G_BEGIN_DECLS
  * \brief Mouse button IDs
  */
 typedef enum {
-	JOY_BUTTON_NONE = 0,
-	JOY_BUTTON_LEFT,
-	JOY_BUTTON_MIDDLE,
-	JOY_BUTTON_RIGHT,
-	JOY_BUTTON_X1,
-	JOY_BUTTON_X2,
-	JOY_BUTTON_MAX
+	JOY_BUTTON_NONE = 0, /**< Sentinel value */
+	JOY_BUTTON_LEFT = 1 << 1, /**< Left mouse button */
+	JOY_BUTTON_MIDDLE = 1 << 2, /**< Middle mouse button */
+	JOY_BUTTON_RIGHT = 1 << 3, /**< Right mouse button */
+	JOY_BUTTON_X1 = 1 << 4, /**< First extra mouse button */
+	JOY_BUTTON_X2 = 1 << 5, /**< Second extra mouse button */
+	JOY_BUTTON_MAX = G_MAXINT /**< Sentinel value */
 } JoyButton;
 
 /**
  * \brief Indicates the direction of a scroll-wheel motion.
  */
 typedef enum {
-	JOY_SCROLL_NONE = 0,
-	JOY_SCROLL_UP,
-	JOY_SCROLL_DOWN,
-	JOY_SCROLL_LEFT,
-	JOY_SCROLL_RIGHT
+	JOY_SCROLL_NONE = 0, /**< Sentinel value */
+	JOY_SCROLL_UP, /**< Scroll-wheel up */
+	JOY_SCROLL_DOWN, /**< Scroll-wheel down */
+	JOY_SCROLL_LEFT, /**< Scroll-wheel left */
+	JOY_SCROLL_RIGHT, /*< Scroll-wheel right */
+	JOY_SCROLL_MAX /**< Sentinel value */
 } JoyScroll;
-
 
 typedef struct JoyDeviceMouseClass_ JoyDeviceMouseClass;
 
 struct JoyDeviceMouse_ {
 	/*< private >*/
 	JoyDevice parent_instance;
+	gpointer priv;
 };
 
 typedef void
-(*JoyDeviceMouseSetCursor)(JoyDevice *self,
-		JoyCursor *cursor);
+(*JoyDeviceMouseSetCursor)(JoyDevice *self, JoyCursor *cursor);
 
 typedef void
-(*JoyDeviceMouseWarp)(JoyDevice *self, JoyScreen *screen,
-		gint x, gint y);
+(*JoyDeviceMouseWarp)(JoyDevice *self, gint x, gint y);
 
 typedef void
-(*JoyDeviceMouseGetLocation)(JoyDevice *self,
-		JoyScreen **screen, gint *x, gint *y);
+(*JoyDeviceMouseGetLocation)(JoyDevice *self, gint *x, gint *y);
+
+typedef void
+(*JoyDeviceMouseShow)(JoyDevice *self);
+
+typedef void
+(*JoyDeviceMouseHide)(JoyDevice *self);
+
+typedef gboolean
+(*JoyDeviceMouseVisible)(JoyDevice *self);
 
 struct JoyDeviceMouseClass_ {
 	/*< private >*/
@@ -91,11 +98,61 @@ struct JoyDeviceMouseClass_ {
 	JoyDeviceMouseSetCursor set_cursor;
 	JoyDeviceMouseWarp warp;
 	JoyDeviceMouseGetLocation get_location;
+	JoyDeviceMouseShow show;
+	JoyDeviceMouseHide hide;
+	JoyDeviceMouseVisible visible;
 };
 
 G_GNUC_NO_INSTRUMENT
 GType
 joy_device_mouse_get_type(void) G_GNUC_CONST;
+
+/**
+ * \brief Set the state of a mouse button.
+ *
+ * \param self [in] A mouse device object.
+ * \param sym [in] A mouse button.
+ */
+void
+joy_device_mouse_button_down(JoyDevice *self, JoyButton button);
+
+/**
+ * \brief Unset the state of a mouse button.
+ *
+ * \param self [in] A mouse device object.
+ * \param sym [in] A mouse button
+ */
+void
+joy_device_mouse_button_up(JoyDevice *self, JoyButton button);
+
+/**
+ * \brief Retrieve the state of the buttons for a mouse.
+ *
+ * \param self [in] A mouse device object.
+ *
+ * \param The button state for \e self.
+ */
+glong
+joy_device_mouse_button_state(JoyDevice *self);
+
+/**
+ * \brief Set the keyboard device associated with this mouse.
+ *
+ * \param self [in] A mouse device object.
+ * \param keyboard [in] A keyboard device object.
+ */
+void
+joy_device_mouse_set_keyboard(JoyDevice *self, JoyDevice *keyboard);
+
+/**
+ * \brief Get the keyboard device associated with this mouse.
+ *
+ * \param self [in] A mouse device object.
+ *
+ * \return The keyboard device associated with \e self.
+ */
+JoyDevice *
+joy_device_mouse_get_keyboard(JoyDevice *self);
 
 /**
  * \brief Set the cursor image.
@@ -113,24 +170,47 @@ joy_device_mouse_set_cursor(JoyDevice *self, JoyCursor *cursor);
  * successfully moved to a new location.
  *
  * \param self [in] A mouse device object.
- * \param screen [in] The screen the mouse cursor should appear on.
- * \param x [in] The new X-axis coordinate (in pixels).
- * \param y [in] The new Y-axis coordinate (in pixels).
+ * \param x [in] The new X-axis coordinate (relative to the screen).
+ * \param y [in] The new Y-axis coordinate (relative to the screen).
  */
 void
-joy_device_mouse_warp(JoyDevice *self, JoyScreen *screen, gint x, gint y);
+joy_device_mouse_warp(JoyDevice *self, gint x, gint y);
 
 /**
  * \brief Get the absolute location of the mouse cursor.
  *
  * \param self [in] A mouse device object.
- * \param screen [out] The screen the mouse cursor is on (may be \e NULL).
- * \param x [out] The X-axis coordinate (in pixels, may be \e NULL).
- * \param y [out] The Y-axis coordinate (in pixels, may be \e NULL).
+ * \param x [out] The X-axis coordinate (relative to the screen, may be NULL).
+ * \param y [out] The Y-axis coordinate (relative to the screen, may be NULL).
  */
 void
-joy_device_mouse_get_location(JoyDevice *self, JoyScreen **screen,
-		gint *x, gint *y);
+joy_device_mouse_get_location(JoyDevice *self, gint *x, gint *y);
+
+/**
+ * \brief Show the mouse cursor.
+ *
+ * \param self [in] A mouse device object.
+ */
+void
+joy_device_mouse_show(JoyDevice *self);
+
+/**
+ * \brief Hide the mouse cursor.
+ *
+ * \param self [in] A mouse device object.
+ */
+void
+joy_device_mouse_hide(JoyDevice *self);
+
+/**
+ * \brief Determine if the mouse cursor is visible.
+ *
+ * \param self [in] A mouse device object.
+ *
+ * \return TRUE if the cursor is visible, FALSE otherwise.
+ */
+gboolean
+joy_device_mouse_visible(JoyDevice *self);
 
 G_END_DECLS
 

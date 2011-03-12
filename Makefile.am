@@ -5,7 +5,7 @@ SUBDIRS = joy tests
 ACLOCAL_AMFLAGS = -I m4
 # install pkg-config script
 joybubbles-$(joy_series).pc: joybubbles.pc
-	cp $< $@
+	$(AM_V_GEN)cp $< $@
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = joybubbles-$(joy_series).pc
 # cleanup

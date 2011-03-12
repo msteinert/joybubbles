@@ -18,10 +18,10 @@
 #define NAME "Joybubbles Example"
 
 static gboolean
-on_draw(JoyBubble *window, cairo_t *cr, gpointer data)
+on_draw(JoyBubble *sketch, cairo_t *cr, gpointer data)
 {
-	gint width = joy_bubble_get_width(window) - 2;
-	gint height = joy_bubble_get_height(window) - 2;
+	gint width = joy_bubble_get_width(sketch) - 2;
+	gint height = joy_bubble_get_height(sketch) - 2;
 	double aspect = 0.75;
 	double corner_radius = height / 30.;
 	double radius = corner_radius / aspect;
@@ -57,18 +57,22 @@ on_key_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
 	switch (sym) {
 	case JOY_KEY_w:
 	case JOY_KEY_k:
+	case JOY_KEY_Up:
 		dy = -5;
 		break;
 	case JOY_KEY_a:
 	case JOY_KEY_h:
+	case JOY_KEY_Left:
 		dx = -5;
 		break;
 	case JOY_KEY_s:
 	case JOY_KEY_j:
+	case JOY_KEY_Down:
 		dy = 5;
 		break;
 	case JOY_KEY_d:
 	case JOY_KEY_l:
+	case JOY_KEY_Right:
 		dx = 5;
 		break;
 	default:
@@ -90,6 +94,7 @@ on_key_up(JoyBubble *window, JoyDevice *device, gulong timestamp,
 	switch (sym) {
 	case JOY_KEY_q:
 	case JOY_KEY_Q:
+	case JOY_KEY_Cancel:
 		{
 			JoyApplication *app =
 				joy_bubble_get_application(window);
@@ -114,13 +119,7 @@ on_button_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
 		gint x, gint y, JoyButton button, gpointer data)
 {
 	struct ButtonDown *down = (struct ButtonDown *)data;
-	if (JOY_BUTTON_RIGHT == button) {
-		JoyAnimation *move = down->move;
-		joy_animation_pause(move);
-		joy_animation_move_set_x(move, x);
-		joy_animation_move_set_y(move, y);
-		joy_animation_start(move);
-	} else if (JOY_BUTTON_MIDDLE == button) {
+	if (JOY_BUTTON_LEFT == button) {
 		JoyAnimation *fade = down->fade;
 		joy_animation_pause(fade);
 		gdouble alpha;
@@ -137,19 +136,23 @@ on_button_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
 		}
 		joy_animation_fade_set_alpha(fade, alpha);
 		joy_animation_start(fade);
+	} else if (JOY_BUTTON_RIGHT == button) {
+		JoyAnimation *move = down->move;
+		joy_animation_pause(move);
+		joy_animation_move_set_x(move, x);
+		joy_animation_move_set_y(move, y);
+		joy_animation_start(move);
 	}
 }
 
 static void
-on_button_up(JoyBubble *window, JoyDevice *device, gulong timestamp,
+on_button_up(JoyBubble *sketch, JoyDevice *device, gulong timestamp,
 		gint x, gint y, JoyButton button, gpointer data)
 {
 	if (JOY_BUTTON_LEFT == button) {
-		JoyBubble *widget = (JoyBubble *)data;
-		if (joy_bubble_get_visible(widget)) {
-			joy_bubble_hide(widget);
-		} else {
-			joy_bubble_show(widget);
+		JoyApplication *app = joy_bubble_get_application(sketch);
+		if (app) {
+			joy_application_quit(app, EXIT_SUCCESS);
 		}
 	}
 }
@@ -269,7 +272,7 @@ main(int argc, char *argv[])
 	if (!window) {
 		goto error;
 	}
-	joy_bubble_resize(window, 400, 200);
+	//joy_bubble_resize(window, 400, 200);
 	g_signal_connect(window, "key-down", G_CALLBACK(on_key_down), NULL);
 	g_signal_connect(window, "key-up", G_CALLBACK(on_key_up), NULL);
 	g_signal_connect(window, "scroll", G_CALLBACK(on_scroll), NULL);
@@ -279,7 +282,8 @@ main(int argc, char *argv[])
 	}
 	joy_container_add(window, sketch);
 	joy_bubble_set_expand(sketch, FALSE);
-	joy_bubble_move(sketch, 100, 50);
+	joy_bubble_move(sketch, joy_bubble_get_width(window) / 2 - 100,
+			joy_bubble_get_height(window) / 2 - 50);
 	joy_bubble_resize(sketch, 200, 100);
 	g_signal_connect(sketch, "draw", G_CALLBACK(on_draw), NULL);
 	crossing.resize = joy_animation_resize_new(sketch, 220, 110);
@@ -291,8 +295,7 @@ main(int argc, char *argv[])
 			G_CALLBACK(on_enter), &crossing.resize);
 	g_signal_connect(sketch, "leave",
 			G_CALLBACK(on_leave), &crossing.resize);
-	g_signal_connect(window, "button-up",
-			G_CALLBACK(on_button_up), sketch);
+	g_signal_connect(sketch, "button-up", G_CALLBACK(on_button_up), NULL);
 	down.move = joy_animation_move_new(sketch, 0, 0);
 	if (!down.move) {
 		goto error;

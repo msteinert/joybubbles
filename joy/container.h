@@ -84,6 +84,7 @@ joy_container_get_type(void) G_GNUC_CONST;
  *         not have any children.
  * 
  */
+G_GNUC_WARN_UNUSED_RESULT
 JoyIterator *
 joy_container_begin(JoyBubble *self);
 
@@ -96,6 +97,7 @@ joy_container_begin(JoyBubble *self);
  *         not have any children.
  * 
  */
+G_GNUC_WARN_UNUSED_RESULT
 JoyIterator *
 joy_container_end(JoyBubble *self);
 

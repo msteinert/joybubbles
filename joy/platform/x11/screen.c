@@ -296,9 +296,10 @@ cairo_surface_t *
 joy_x11_screen_cairo_surface_create(JoyScreen *self, Display *display,
 		Pixmap pixmap, gint width, gint height)
 {
-	cairo_surface_t *surface = NULL;
-	// create cairo surface
 	static const cairo_user_data_key_t key;
+	cairo_surface_t *surface = NULL;
+	struct Data *data = NULL;
+	// create cairo surface
 	surface = cairo_xlib_surface_create(display, pixmap,
 			GET_PRIVATE(self)->visual, width, height);
 	cairo_status_t status = cairo_surface_status(surface);
@@ -306,7 +307,7 @@ joy_x11_screen_cairo_surface_create(JoyScreen *self, Display *display,
 		goto error;
 	}
 	// attach destroy data
-	struct Data *data = g_slice_new0(struct Data);
+	data = g_slice_new0(struct Data);
 	if (G_UNLIKELY(!data)) {
 		goto error;
 	}
@@ -319,6 +320,9 @@ joy_x11_screen_cairo_surface_create(JoyScreen *self, Display *display,
 	}
 	return surface;
 error:
+	if (data) {
+		g_slice_free(struct Data, data);
+	}
 	if (surface) {
 		cairo_surface_destroy(surface);
 	}

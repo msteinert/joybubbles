@@ -81,6 +81,7 @@ joy_source_get_type(void) G_GNUC_CONST;
  *
  * \return A new source object.
  */
+G_GNUC_WARN_UNUSED_RESULT
 JoySource *
 joy_source_new(gint descriptor);
 

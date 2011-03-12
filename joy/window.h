@@ -67,7 +67,7 @@ joy_window_get_type(void) G_GNUC_CONST;
 /**
  * \brief Create a new window.
  *
- * \param screen [in] The screen to create the window on.
+ * \param screen [in] The screen upon which to create the new window.
  *
  * \return A new window object.
  */

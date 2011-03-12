@@ -83,7 +83,7 @@ joy_iterator_hash_class_init(JoyIteratorHashClass *klass)
 	JoyIteratorClass *iterator_class = JOY_ITERATOR_CLASS(klass);
 	iterator_class->next_item = next_item;
 	g_type_class_add_private(klass, sizeof(struct Private));
-	/* properties */
+	// properties
 	g_object_class_install_property(object_class, PROP_HASH_ITER,
 		g_param_spec_pointer("hash-iterator", Q_("Hash Iterator"),
 			Q_("The hash table iterator"),

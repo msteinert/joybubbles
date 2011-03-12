@@ -1,12 +1,12 @@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
-includedir=@includedir@/joybubbles-@jb_series@
+includedir=@includedir@/joybubbles-@joy_series@
 
 Name: Joybubbles
 Description: A GUI toolkit & platform abstraction layer
 Version: @VERSION@
-Requires: @jb_glib_version@ @jb_gobject_version@ @jb_cairo_version@
-Requires.private: @jb_requires@
-Libs: -L${libdir} -ljoybubbles-@jb_series@
+Requires: @joy_glib_version@ @joy_gobject_version@ @joy_cairo_version@
+Requires.private: @joy_requires@
+Libs: -L${libdir} -ljoybubbles-@joy_series@
 CFlags: -I${includedir}

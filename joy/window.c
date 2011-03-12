@@ -95,6 +95,17 @@ get_buffered(JoyBubble *self)
 	return TRUE;
 }
 
+static gboolean
+draw(JoyBubble *self, cairo_t *cr)
+{
+	// clear exposed areas
+	cairo_save(cr);
+	cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+	cairo_paint(cr);
+	cairo_restore(cr);
+	return JOY_BUBBLE_CLASS(joy_window_parent_class)->draw(self, cr);
+}
+
 static void
 joy_window_class_init(JoyWindowClass *klass)
 {
@@ -107,8 +118,9 @@ joy_window_class_init(JoyWindowClass *klass)
 	bubble_class->get_window = get_window;
 	bubble_class->set_buffered = set_buffered;
 	bubble_class->get_buffered = get_buffered;
+	bubble_class->draw = draw;
 	g_type_class_add_private(klass, sizeof(struct Private));
-	/* properties */
+	// properties
 	g_object_class_install_property(object_class, PROP_SCREEN,
 		g_param_spec_object("screen", Q_("Screen"),
 			Q_("The screen this window is on"), JOY_TYPE_SCREEN,

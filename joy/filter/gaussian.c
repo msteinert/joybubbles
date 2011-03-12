@@ -118,7 +118,7 @@ joy_filter_gaussian_class_init(JoyFilterGaussianClass *klass)
 	JoyFilterClass *filter_class = JOY_FILTER_CLASS(klass);
 	filter_class->apply = apply;
 	g_type_class_add_private(klass, sizeof(struct Private));
-	/* properties */
+	// properties
 	g_object_class_install_property(object_class, PROP_RADIUS,
 		g_param_spec_double("radius", Q_("Radius"),
 			Q_("The blur radius."), 0., G_MAXDOUBLE, 0.,

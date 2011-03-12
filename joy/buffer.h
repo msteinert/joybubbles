@@ -64,6 +64,13 @@ G_GNUC_INTERNAL
 void
 joy_buffer_set_alpha(JoyBuffer *self, gdouble alpha);
 
+/**
+ * \brief Get the alpha value for the entire buffer.
+ *
+ * \param self [in] A back buffer object.
+ *
+ * \return The alpha value for \e self.
+ */
 G_GNUC_INTERNAL
 gdouble
 joy_buffer_get_alpha(JoyBuffer *self);

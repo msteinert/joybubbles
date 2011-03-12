@@ -355,6 +355,7 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 			joy_boolean_accumulator, NULL,
 			joy_marshal_BOOLEAN__POINTER, G_TYPE_BOOLEAN,
 			1, G_TYPE_POINTER);
+	// properties
 	g_object_class_install_property(object_class, PROP_X_COORDINATE,
 		g_param_spec_int("x-coordinate", Q_("X-coordinate"),
 			Q_("X-coordinate relative to the parent"),
@@ -537,15 +538,23 @@ void
 joy_bubble_set_expand(JoyBubble *self, gboolean expand)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
-	GET_PRIVATE(self)->horizontal_expand = expand;
-	GET_PRIVATE(self)->vertical_expand = expand;
+	struct Private *priv = GET_PRIVATE(self);
+	if (!priv->parent) {
+		return;
+	}
+	priv->horizontal_expand = expand;
+	priv->vertical_expand = expand;
 }
 
 void
 joy_bubble_set_horizontal_expand(JoyBubble *self, gboolean expand)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
-	GET_PRIVATE(self)->horizontal_expand = expand;
+	struct Private *priv = GET_PRIVATE(self);
+	if (!priv->parent) {
+		return;
+	}
+	priv->horizontal_expand = expand;
 }
 
 gboolean
@@ -559,7 +568,11 @@ void
 joy_bubble_set_vertical_expand(JoyBubble *self, gboolean expand)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
-	GET_PRIVATE(self)->vertical_expand = expand;
+	struct Private *priv = GET_PRIVATE(self);
+	if (!priv->parent) {
+		return;
+	}
+	priv->vertical_expand = expand;
 }
 
 gboolean

@@ -46,14 +46,10 @@ struct JoyStyleWindow_ {
 	JoyStyle parent_instance;
 };
 
-typedef void
-(*JoyStyleWindowDrawBackground)(JoyStyle *self, JoyBubble *widget,
-		cairo_t *cr);
-
 struct JoyStyleWindowClass_ {
 	/*< private >*/
 	JoyStyleClass parent_class;
-	JoyStyleWindowDrawBackground draw_background;
+	JoyStyleDraw draw_background;
 };
 
 G_GNUC_NO_INSTRUMENT

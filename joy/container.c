@@ -143,11 +143,6 @@ expose(JoyBubble *self, const cairo_rectangle_int_t *rect)
 static gboolean
 draw(JoyBubble *self, cairo_t *cr)
 {
-	// clear expose areas
-	cairo_save(cr);
-	cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-	cairo_paint(cr);
-	cairo_restore(cr);
 	struct Private *priv = GET_PRIVATE(self);
 	for (GList *node = g_queue_peek_head_link(priv->children); node;
 			node = node->next) {

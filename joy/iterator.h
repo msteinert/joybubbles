@@ -70,7 +70,7 @@ joy_iterator_get_type(void) G_GNUC_CONST;
  *
  * \param self [in] An iterator object.
  *
- * \return The new iterator value. If this function returns \e NULL then
+ * \return The new iterator value. If this function returns NULL then
  *         \e self has been destroyed and should no longer be referenced.
  */
 G_GNUC_WARN_UNUSED_RESULT
@@ -82,7 +82,7 @@ joy_iterator_next(JoyIterator *self);
  *
  * \param self [in] An iterator object.
  *
- * \return The new iterator value. If this function returns \e NULL then
+ * \return The new iterator value. If this function returns NULL then
  *         \e self has been destroyed and should no longer be referenced.
  */
 G_GNUC_WARN_UNUSED_RESULT

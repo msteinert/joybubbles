@@ -16,8 +16,6 @@
 
 #include <cairo.h>
 #include <glib-object.h>
-#include <joy/device/mouse.h>
-#include <joy/device/keyboard.h>
 #include <joy/types.h>
 
 G_BEGIN_DECLS
@@ -68,6 +66,8 @@ joy_style_get_type(void) G_GNUC_CONST;
  * \param self [in] A style object.
  * \param widget [in] The widget to draw.
  * \param cr [in] The cairo context to draw to.
+ *
+ * \return TRUE if \e widget was drawn, FALSE otherwise.
  */
 gboolean
 joy_style_draw(JoyStyle *self, JoyBubble *widget, cairo_t *cr);

@@ -11,7 +11,7 @@ INCLUDES = \
 LIBS = \
 	$(top_builddir)/joy/libjoybubbles-$(joy_series).la
 # add unit tests
-check_PROGRAMS = \
+bin_PROGRAMS = \
 	joybubbles-test \
 	iterator-test
 TESTS = $(check_PROGRAMS)

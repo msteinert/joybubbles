@@ -62,6 +62,9 @@ typedef JoyIterator *
 typedef void
 (*JoyScreenSubmit)(JoyScreen *self);
 
+typedef gboolean
+(*JoyScreenMirror)(JoyScreen *self, JoyScreen *mirror, GError **error);
+
 struct JoyScreenClass_ {
 	/*< private >*/
 	GObjectClass parent_class;
@@ -71,6 +74,8 @@ struct JoyScreenClass_ {
 	JoyScreenBegin begin;
 	JoyScreenEnd end;
 	JoyScreenSubmit submit;
+	JoyScreenMirror enable_mirroring;
+	JoyScreenMirror disable_mirroring;
 };
 
 G_GNUC_NO_INSTRUMENT
@@ -146,6 +151,7 @@ joy_screen_window_at(JoyScreen *self, gint x, gint y);
  *
  * \return An iterator to the first window of \e self.
  */
+G_GNUC_WARN_UNUSED_RESULT
 JoyIterator *
 joy_screen_begin(JoyScreen *self);
 
@@ -156,6 +162,7 @@ joy_screen_begin(JoyScreen *self);
  *
  * \return An iterator to the last window of \e self.
  */
+G_GNUC_WARN_UNUSED_RESULT
 JoyIterator *
 joy_screen_end(JoyScreen *self);
 
@@ -166,6 +173,7 @@ joy_screen_end(JoyScreen *self);
  *
  * \return A new window object.
  */
+G_GNUC_WARN_UNUSED_RESULT
 JoyBubble *
 joy_screen_window_create(JoyScreen *self);
 
@@ -206,12 +214,31 @@ joy_screen_get_at_device(JoyScreen *self, JoyDevice *device);
 void
 joy_screen_set_at_device(JoyScreen *self, JoyDevice *device, JoyBubble *at);
 
+/**
+ * \brief Add an animation object to the specified screen.
+ *
+ * \param self [in] A screen object.
+ * \param animation [in] The animation to add to \e self.
+ */
 void
 joy_screen_add_animation(JoyScreen *self, JoyAnimation *animation);
 
+/**
+ * \brief Remove an animation object from the specified screen.
+ *
+ * \param self [in] A screen object.
+ * \param animation [in] The animation to remove from \e self.
+ */
 void
 joy_screen_remove_animation(JoyScreen *self, JoyAnimation *animation);
 
+/**
+ * \brief Determine if a screen has any active animations.
+ *
+ * \param self [in] A screen object.
+ *
+ * \return TRUE if \e self has active animations, FALSE otherwise.
+ */
 gboolean
 joy_screen_in_animation(JoyScreen *self);
 
@@ -241,6 +268,28 @@ joy_screen_draw(JoyScreen *self);
  */
 void
 joy_screen_submit(JoyScreen *self);
+
+/**
+ * \brief Enable mirroring from one screen to another.
+ *
+ * If mirroring is successfully enabled then all of the windows on \e else
+ * will be mirrored on \e mirror. Backends may choose not to implement
+ * mirroring so applications must be able to gracefully handle errors from
+ * this function.
+ *
+ * \param self [in] A screen object.
+ * \param mirror [in] A screen object to mirror \e self onto.
+ * \param error [out] A description of any errors.
+ *
+ * \return TRUE if mirroring was successfully enabled, FALSE otherwise.
+ */
+gboolean
+joy_screen_enable_mirroring(JoyScreen *self, JoyScreen *mirror,
+		GError **error);
+
+gboolean
+joy_screen_disable_mirroring(JoyScreen *self, JoyScreen *mirror,
+		GError **error);
 
 G_END_DECLS
 

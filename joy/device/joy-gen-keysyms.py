@@ -13,6 +13,35 @@ class keysyms:
         self.keys = {}
     def parse(self, file):
         """Parse an X11 keysym definition."""
+        self.keys[0x1] = ['Power']
+        self.keys[0x2] = ['Sat']
+        self.keys[0x3] = ['TV']
+        self.keys[0x4] = ['DVD']
+        self.keys[0x5] = ['AUX']
+        self.keys[0x6] = ['Guide']
+        self.keys[0x7] = ['DVR']
+        self.keys[0x8] = ['Search']
+        self.keys[0x9] = ['Input']
+        self.keys[0xa] = ['Live_TV']
+        self.keys[0xb] = ['Recall']
+        self.keys[0xc] = ['Jump']
+        self.keys[0xd] = ['Swap']
+        self.keys[0xe] = ['PiP']
+        self.keys[0xf] = ['Position']
+        self.keys[0x10] = ['Dish']
+        self.keys[0x11] = ['Info']
+        self.keys[0x12] = ['Red']
+        self.keys[0x13] = ['Green']
+        self.keys[0x14] = ['Yellow']
+        self.keys[0x15] = ['Blue']
+        self.keys[0x16] = ['Skip_Forward']
+        self.keys[0x17] = ['Skip_Back']
+        self.keys[0x18] = ['Forward']
+        self.keys[0x19] = ['Back']
+        self.keys[0x1a] = ['Record']
+        self.keys[0x1b] = ['Stop']
+        self.keys[0x1c] = ['Play']
+        self.keys[0x1d] = ['Rewind']
         pattern = re.compile('#define (XK|XF86XK)_(\S*)\s*((0x)?[0-9a-fA-F]*)')
         for line in file:
             match = re.match(pattern, line)
@@ -22,7 +51,9 @@ class keysyms:
                     sym = int(match.group(3), 0)
                 except Exception, err:
                     continue
-                self.keys[sym] = name
+                if not self.keys.has_key(sym):
+                    self.keys[sym] = []
+                self.keys[sym].append(name)
     def write(self, filename):
         """Write a keysym definition to a file."""
         file = open(filename, 'w')
@@ -52,7 +83,8 @@ typedef enum {
 \tJOY_KEY_RESERVED = 0x0,"""
             max = 0
             for sym in sorted(self.keys):
-                print >>file, '\tJOY_KEY_' + self.keys[sym], '=', hex(sym) + ','
+                for identifier in self.keys[sym]:
+                    print >>file, '\tJOY_KEY_' + identifier, '=', hex(sym) + ','
                 max = sym
             print >>file, '\tJOY_KEY_MAX =', hex(max + 1)
             print >>file, """\

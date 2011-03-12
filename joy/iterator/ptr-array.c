@@ -83,7 +83,7 @@ joy_iterator_ptr_array_class_init(JoyIteratorPtrArrayClass *klass)
 	iterator_class->next_item = next_item;
 	iterator_class->previous_item = previous_item;
 	g_type_class_add_private(klass, sizeof(struct Private));
-	/* properties */
+	// properties
 	g_object_class_install_property(object_class, PROP_ARRAY,
 		g_param_spec_pointer("array", Q_("Array"),
 			Q_("The pointer array"),

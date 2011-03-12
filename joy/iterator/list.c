@@ -78,7 +78,7 @@ joy_iterator_list_class_init(JoyIteratorListClass *klass)
 	iterator_class->next_item = next_item;
 	iterator_class->previous_item = previous_item;
 	g_type_class_add_private(klass, sizeof(struct Private));
-	/* properties */
+	// properties
 	g_object_class_install_property(object_class, PROP_NODE,
 		g_param_spec_pointer("node", Q_("Node"), Q_("The first node"),
 			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));

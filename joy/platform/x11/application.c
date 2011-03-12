@@ -57,13 +57,10 @@ constructed(GObject *base)
 	if (G_UNLIKELY(!priv->display)) {
 		goto exit;
 	}
-	/* initialize screen(s) */
+	// initialize screen(s)
 	priv->screens = g_ptr_array_sized_new(ScreenCount(priv->display));
-	if (G_UNLIKELY(!priv->screens)) {
-		goto exit;
-	}
-	g_ptr_array_set_free_func(priv->screens, destroy);
 	if (priv->screens) {
+		g_ptr_array_set_free_func(priv->screens, destroy);
 		for (gint n = 0; n < ScreenCount(priv->display); ++n) {
 			JoyBubble *screen = joy_x11_screen_new(self, n);
 			g_ptr_array_add(priv->screens, screen);
@@ -72,6 +69,8 @@ constructed(GObject *base)
 	joy_application_add_source(self, joy_x11_source_new(self));
 	priv->keyboard = joy_x11_keyboard_new();
 	priv->mouse = joy_x11_mouse_new();
+	joy_device_keyboard_set_mouse(priv->keyboard, priv->mouse);
+	joy_device_mouse_set_keyboard(priv->mouse, priv->keyboard);
 exit:
 	if (G_OBJECT_CLASS(joy_x11_application_parent_class)->constructed) {
 		G_OBJECT_CLASS(joy_x11_application_parent_class)->

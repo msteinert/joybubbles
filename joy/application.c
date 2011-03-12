@@ -11,6 +11,7 @@
 #include <errno.h>
 #include "joy/application.h"
 #include "joy/iterator.h"
+#include "joy/macros.h"
 #include "joy/sink.h"
 #include "joy/screen.h"
 #include "joy/source.h"
@@ -306,6 +307,7 @@ joy_application_quit(JoyApplication *self, gint status)
 	priv->quit = TRUE;
 }
 
+JOY_GNUC_HOT
 gint
 joy_application_run(JoyApplication *self, JoyScreen *screen)
 {
@@ -320,22 +322,23 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 	gdouble elapsed = 0.;
 	gdouble ptime = priv->min;
 	while (!priv->quit) {
-		if (joy_screen_in_animation(screen)) {
-			gdouble timeout = priv->frame - ptime;
-			if (G_LIKELY(0. < timeout)) {
-				elapsed = joy_sink_poll(priv->sink, timeout);
+		if (ptime + elapsed < priv->frame) {
+			if (joy_screen_in_animation(screen)) {
+				elapsed = joy_sink_poll(priv->sink,
+						priv->frame - ptime);
 			} else {
 				elapsed = 0.;
+				joy_sink_wait(priv->sink,
+						priv->frame - priv->min);
 			}
 		} else {
-			joy_sink_wait(priv->sink);
 			elapsed = 0.;
 		}
 		g_timer_start(timer);
 		joy_screen_animate(screen);
 		joy_screen_draw(screen);
 		ptime = g_timer_elapsed(timer, NULL);
-		if (G_LIKELY(ptime + elapsed < priv->frame)) {
+		if (ptime + elapsed < priv->frame) {
 			joy_screen_submit(screen);
 			if (ptime < priv->min) {
 				ptime = priv->min;

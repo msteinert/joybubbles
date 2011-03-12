@@ -412,52 +412,166 @@ joy_bubble_at(JoyBubble *self, gint x, gint y);
 JoyBubble *
 joy_bubble_at_device(JoyBubble *self, JoyDevice *device);
 
+/**
+ * \brief Move a widget to a new location within its parent container.
+ *
+ * \param self [in] A widget object.
+ * \param x [in] The new X-coordinate (relative to the parent container).
+ * \param y [in] The new Y-coordinate (relative to the parent container).
+ */
 void
 joy_bubble_move(JoyBubble *self, gint x, gint y);
 
+/**
+ * \brief Translate a widget to a new location within its parent container.
+ *
+ * \param self [in] A widget object.
+ * \param x [in] The amount to move on the X-axis.
+ * \param y [in] The amount to move on the Y-axis.
+ */
 void
 joy_bubble_translate(JoyBubble *self, gint x, gint y);
 
+/**
+ * \brief Resize a widget.
+ *
+ * \param self [in] A widget object.
+ * \param width [in] The width of \e self.
+ * \param height [in] The new height of \e self.
+ */
 void
 joy_bubble_resize(JoyBubble *self, gint width, gint height);
 
+/**
+ * \brief Send an expose event to a widget.
+ *
+ * \param self [in] A widget object.
+ * \param rect [in] The exposed area of \e self.
+ */
 void
 joy_bubble_expose(JoyBubble *self, const cairo_rectangle_int_t *rect);
 
+/**
+ * \brief Send a key-down event to a widget.
+ *
+ * \param self [in] A widget object.
+ * \param device [in] The keyboard device that generated the event.
+ * \param timestamp [in] The event timestamp.
+ * \param x [in] The X-coordinate of the cursor (relative to \e self).
+ * \param y [in] The Y-coordinate of the cursor (relative to \e self).
+ * \param sym [in] The sym for the key that was pressed.
+ */
 void
 joy_bubble_key_down(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y, JoyKeySym sym);
 
+/**
+ * \brief Send a key-up even to a widget.
+ *
+ * \param self [in] A widget object.
+ * \param device [in] The keyboard device that generated the event.
+ * \param timestamp [in] The event timestamp.
+ * \param x [in] The X-coordinate of the cursor (relative to \e self).
+ * \param y [in] The Y-coordinate of the cursor (relative to \e self).
+ * \param sym [in] The sym for the key that was pressed.
+ */
 void
 joy_bubble_key_up(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y, JoyKeySym sym);
 
+/**
+ * \brief Show a widget.
+ *
+ * \param self [in] A widget object.
+ */
 void
 joy_bubble_show(JoyBubble *self);
 
+/**
+ * \brief Hide a widget.
+ *
+ * \param self [in] A widget object.
+ */
 void
 joy_bubble_hide(JoyBubble *self);
 
+/**
+ * \brief Send a mouse motion event to a widget.
+ *
+ * \param self [in] A widget object.
+ * \param device [in] The mouse device that generated the event.
+ * \param timestamp [in] The event timestamp.
+ * \param x [in] The X-coordinate of the cursor (relative to \e self).
+ * \param y [in] The Y-coordinate of the cursor (relative to \e self).
+ */
 void
 joy_bubble_motion(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y);
 
+/**
+ * \brief Send a mouse button-down event to a widget.
+ *
+ * \param self [in] A widget object.
+ * \param device [in] The mouse device that generated the event.
+ * \param timestamp [in] The event timestamp.
+ * \param x [in] The X-coordinate of the cursor (relative to \e self).
+ * \param y [in] The Y-coordinate of the cursor (relative to \e self).
+ * \param button [in] The button that was pressed.
+ */
 void
 joy_bubble_button_down(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y, JoyButton button);
 
+/**
+ * \brief Send a mouse button-up event to a widget.
+ *
+ * \param self [in] A widget object.
+ * \param device [in] The mouse device that generated the event.
+ * \param timestamp [in] The event timestamp.
+ * \param x [in] The X-coordinate of the cursor (relative to \e self).
+ * \param y [in] The Y-coordinate of the cursor (relative to \e self).
+ * \param button [in] The button that was released.
+ */
 void
 joy_bubble_button_up(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y, JoyButton button);
 
+/**
+ * \brief Send a mouse scroll-wheel event to a widget.
+ *
+ * \param self [in] A widget object.
+ * \param device [in] The mouse device that generated the event.
+ * \param timestamp [in] The event timestamp.
+ * \param x [in] The X-coordinate of the cursor (relative to \e self).
+ * \param y [in] The Y-coordinate of the cursor (relative to \e self).
+ * \param direction [in] The direction of the scroll-wheel.
+ */
 void
 joy_bubble_scroll(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y, JoyScroll direction);
 
+/**
+ * \brief Send an enter crossing event to a widget.
+ *
+ * \param self [in] A widget object.
+ * \param device [in] The mouse device that generated the event.
+ * \param timestamp [in] The event timestamp.
+ * \param x [in] The X-coordinate of the cursor (relative to \e self).
+ * \param y [in] The Y-coordinate of the cursor (relative to \e self).
+ */
 void
 joy_bubble_enter(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y);
 
+/**
+ * \brief Send an exit crossing event to a widget.
+ *
+ * \param self [in] A widget object.
+ * \param device [in] The mouse device that generated the event.
+ * \param timestamp [in] The event timestamp.
+ * \param x [in] The X-coordinate of the cursor (relative to \e self).
+ * \param y [in] The Y-coordinate of the cursor (relative to \e self).
+ */
 void
 joy_bubble_leave(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y);
