@@ -34,6 +34,8 @@ typedef struct JoyDisplay_ JoyDisplay;
 
 typedef struct JoyFilter_ JoyFilter;
 
+typedef struct JoyImage_ JoyImage;
+
 typedef struct JoyIterator_ JoyIterator;
 
 typedef struct JoyScreen_ JoyScreen;

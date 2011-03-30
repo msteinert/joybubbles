@@ -9,6 +9,8 @@
 #include "config.h"
 #endif
 #include <cairo.h>
+#include "joy/animation/fade.h"
+#include "joy/macros.h"
 #include "joy/platform/gfx3d/application.h"
 #include "joy/platform/gfx3d/screen.h"
 #include "joy/platform/gfx3d/window.h"
@@ -27,6 +29,7 @@ struct Private {
 	cairo_surface_t *surface;
 	cairo_region_t *area;
 	cairo_region_t *expose;
+	JoyAnimation *fade;
 };
 
 static void
@@ -36,6 +39,21 @@ joy_gfx3d_window_init(JoyGfx3dWindow *self)
 	struct Private *priv = GET_PRIVATE(self);
 	priv->expose = cairo_region_create();
 	priv->area = cairo_region_create();
+	priv->fade = joy_animation_fade_new((JoyBubble *)self, 1.);
+	if (priv->fade) {
+		joy_animation_set_duration(priv->fade, 0.1);
+	}
+}
+
+static void
+dispose(GObject *base)
+{
+	struct Private *priv = GET_PRIVATE(base);
+	if (priv->fade) {
+		g_object_unref(priv->fade);
+		priv->fade = NULL;
+	}
+	G_OBJECT_CLASS(joy_gfx3d_window_parent_class)->dispose(base);
 }
 
 static void
@@ -79,7 +97,12 @@ expose(JoyBubble *self, const cairo_rectangle_int_t *rect)
 static void
 show(JoyBubble *self)
 {
+	struct Private *priv = GET_PRIVATE(self);
 	JOY_BUBBLE_CLASS(joy_gfx3d_window_parent_class)->show(self);
+	if (priv->fade) {
+		joy_animation_fade_set_alpha(priv->fade, 1.);
+		joy_animation_start(priv->fade);
+	}
 	cairo_rectangle_int_t rect = {
 		0, 0,
 		joy_bubble_get_width(self),
@@ -128,6 +151,7 @@ static void
 joy_gfx3d_window_class_init(JoyGfx3dWindowClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
+	object_class->dispose = dispose;
 	object_class->finalize = finalize;
 	JoyBubbleClass *bubble_class = JOY_BUBBLE_CLASS(klass);
 	bubble_class->resize = resize;
@@ -153,6 +177,7 @@ joy_gfx3d_window_new(JoyScreen *screen)
 			NULL);
 }
 
+JOY_GNUC_HOT
 void
 joy_gfx3d_window_submit(JoyBubble *self, GFX3D_NATIVE_Display display,
 		GFX3D_NATIVE_Surface fb, cairo_region_t *area)
@@ -173,17 +198,35 @@ joy_gfx3d_window_submit(JoyBubble *self, GFX3D_NATIVE_Display display,
 	}
 	GFX3D_NATIVE_Surface surface =
 		GFX3D_Image_Get_NATIVE_Surface(priv->image);
-	for (gint i = 0; i < cairo_region_num_rectangles(priv->expose); ++i) {
-		cairo_rectangle_int_t rect;
-		cairo_region_get_rectangle(priv->expose, i, &rect);
-		GFX3D_NATIVE_Rect dst = {
-			rect.x + x,
-			rect.y + y,
-			rect.width,
-			rect.height
-		};
-		GFX3D_NATIVE_Blit_Blend_PixelAlpha(display, fb, &dst, surface,
-				(gpointer)&rect);
+	gdouble alpha = joy_bubble_get_alpha(self);
+	gint n = cairo_region_num_rectangles(priv->expose);
+	if (1. == alpha) {
+		for (gint i = 0; i < n; ++i) {
+			cairo_rectangle_int_t rect;
+			cairo_region_get_rectangle(priv->expose, i, &rect);
+			GFX3D_NATIVE_Rect dst = {
+				rect.x + x,
+				rect.y + y,
+				rect.width,
+				rect.height
+			};
+			GFX3D_NATIVE_Blit_Blend_PixelAlpha(display, fb, &dst,
+					surface, (gpointer)&rect);
+		}
+	} else {
+		for (gint i = 0; i < n; ++i) {
+			cairo_rectangle_int_t rect;
+			cairo_region_get_rectangle(priv->expose, i, &rect);
+			GFX3D_NATIVE_Rect dst = {
+				rect.x + x,
+				rect.y + y,
+				rect.width,
+				rect.height
+			};
+			GFX3D_NATIVE_Blit_Blend_ModulateAlpha(display, fb,
+					&dst, surface, (gpointer)&rect,
+					(uint8_t)(alpha * 255.));
+		}
 	}
 	cairo_region_subtract(priv->expose, priv->expose);
 }

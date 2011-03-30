@@ -50,6 +50,9 @@ struct JoyScreen_ {
 typedef JoyBubble *
 (*JoyScreenWindowCreate)(JoyScreen *self);
 
+typedef cairo_surface_type_t
+(*JoyScreenCairoSurfaceType)(JoyScreen *self);
+
 typedef cairo_surface_t *
 (*JoyScreenCairoSurfaceCreate)(JoyScreen *self, gint width, gint height);
 
@@ -70,6 +73,7 @@ struct JoyScreenClass_ {
 	GObjectClass parent_class;
 	/*< public >*/
 	JoyScreenWindowCreate window_create;
+	JoyScreenCairoSurfaceType cairo_surface_type;
 	JoyScreenCairoSurfaceCreate cairo_surface_create;
 	JoyScreenBegin begin;
 	JoyScreenEnd end;
@@ -176,6 +180,18 @@ joy_screen_end(JoyScreen *self);
 G_GNUC_WARN_UNUSED_RESULT
 JoyBubble *
 joy_screen_window_create(JoyScreen *self);
+
+/**
+ * \brief Get the native surface type created by the backend.
+ *
+ * Sub-classes must provide an implementation of this function.
+ *
+ * \param self [in] A screen object.
+ *
+ * \return The Cairo surface type created by the screen backend.
+ */
+cairo_surface_type_t
+joy_screen_cairo_surface_type(JoyScreen *self);
 
 /**
  * \brief Create an empty off-screen surface.

@@ -53,10 +53,10 @@ static void
 set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 {
 	struct Private *priv = GET_PRIVATE(base);
+	JoyCursor *self = (JoyCursor *)base;
 	switch (id) {
 	case PROP_IMAGE:
-		priv->image = g_value_get_pointer(value);
-		cairo_surface_reference(priv->image);
+		joy_cursor_set_image(self, g_value_get_pointer(value));
 		break;
 	case PROP_X_HOTSPOT:
 		priv->x = g_value_get_int(value);
@@ -80,7 +80,7 @@ joy_cursor_class_init(JoyCursorClass *klass)
 	g_object_class_install_property(object_class, PROP_IMAGE,
 		g_param_spec_pointer("image", Q_("Image"),
 			Q_("The image for this cursor"),
-			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT));
 	g_object_class_install_property(object_class, PROP_X_HOTSPOT,
 		g_param_spec_int("x-hotspot", Q_("X Hotspot"),
 			Q_("The X-axis hotspot for this cursor"),
@@ -103,6 +103,18 @@ joy_cursor_new(cairo_surface_t *image, gint x, gint y)
 			"y-hotspot", y,
 			NULL);
 	return self;
+}
+
+void
+joy_cursor_set_image(JoyCursor *self, cairo_surface_t *image)
+{
+	g_return_if_fail(JOY_IS_CURSOR(self));
+	g_return_if_fail(image);
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->image) {
+		cairo_surface_destroy(priv->image);
+	}
+	priv->image = cairo_surface_reference(image);
 }
 
 cairo_surface_t *

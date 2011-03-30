@@ -9,6 +9,7 @@
 #include "config.h"
 #endif
 #include <cairo-xlib.h>
+#include "joy/macros.h"
 #include "joy/platform/x11/application.h"
 #include "joy/platform/x11/screen.h"
 #include "joy/platform/x11/window.h"
@@ -74,7 +75,7 @@ constructed(GObject *base)
 	// set the window name
 	const gchar *name = joy_application_get_name(app);
 	if (G_LIKELY(name)) {
-		int format = XInternAtom(display, "UTF8_STRING", False);
+		Atom format = XInternAtom(display, "UTF8_STRING", False);
 		XChangeProperty(display, priv->window,
 				XInternAtom(display, "_NET_WM_NAME", False),
 				format, 8, PropModeReplace, (guchar *)name,
@@ -354,6 +355,7 @@ joy_x11_window_set_event(JoyBubble *self, XEvent *event)
 	GET_PRIVATE(self)->event = event;
 }
 
+JOY_GNUC_HOT
 void
 joy_x11_window_submit(JoyBubble *self, Display *display)
 {

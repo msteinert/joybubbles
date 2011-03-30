@@ -12,6 +12,7 @@
 #include "joy/application.h"
 #include "joy/bubble.h"
 #include "joy/buffer.h"
+#include "joy/container.h"
 #include "joy/marshal.h"
 #include "joy/screen.h"
 #include "joy/style.h"
@@ -58,6 +59,7 @@ struct Private {
 	gboolean horizontal_expand;
 	gboolean vertical_expand;
 	JoyBuffer *buffer;
+	gdouble alpha;
 	JoyStyle *style;
 };
 
@@ -68,13 +70,16 @@ joy_bubble_init(JoyBubble *self)
 	struct Private *priv = GET_PRIVATE(self);
 	priv->area = cairo_region_create();
 	priv->draw = cairo_region_create();
+	priv->alpha = 1.;
 }
 
 static void
 dispose(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
+	JoyBubble *self = (JoyBubble *)base;
 	if (priv->parent) {
+		joy_container_remove(priv->parent, self);
 		g_object_unref(priv->parent);
 		priv->parent = NULL;
 	}
@@ -167,19 +172,31 @@ set_style(JoyBubble *self, JoyTheme *theme)
 static JoyApplication *
 get_application(JoyBubble *self)
 {
-	return joy_bubble_get_application(GET_PRIVATE(self)->parent);
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_LIKELY(priv->parent)) {
+		return joy_bubble_get_application(priv->parent);
+	}
+	return NULL;
 }
 
 static JoyScreen *
 get_screen(JoyBubble *self)
 {
-	return joy_bubble_get_screen(GET_PRIVATE(self)->parent);
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_LIKELY(priv->parent)) {
+		return joy_bubble_get_screen(priv->parent);
+	}
+	return NULL;
 }
 
 static JoyBubble *
 get_window(JoyBubble *self)
 {
-	return joy_bubble_get_window(GET_PRIVATE(self)->parent);
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_LIKELY(priv->parent)) {
+		return joy_bubble_get_window(priv->parent);
+	}
+	return NULL;
 }
 
 static void
@@ -484,12 +501,13 @@ joy_bubble_set_alpha(JoyBubble *self, gdouble alpha)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	struct Private *priv = GET_PRIVATE(self);
-	if (0. == alpha) {
+	priv->alpha = CLAMP(alpha, 0., 1.);
+	if (0. == priv->alpha) {
 		joy_bubble_hide(self);
 		return;
 	} else {
 		if (priv->buffer) {
-			joy_buffer_set_alpha(priv->buffer, alpha);
+			joy_buffer_set_alpha(priv->buffer, priv->alpha);
 		}
 		if (!priv->visible) {
 			joy_bubble_show(self);
@@ -506,10 +524,7 @@ joy_bubble_get_alpha(JoyBubble *self)
 	g_return_val_if_fail(JOY_IS_BUBBLE(self), 0.);
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->visible) {
-		if (priv->buffer) {
-			return joy_buffer_get_alpha(priv->buffer);
-		}
-		return 1.;
+		return priv->alpha;
 	}
 	return 0.;
 }

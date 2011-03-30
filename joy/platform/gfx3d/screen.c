@@ -15,6 +15,7 @@
 #include "joy/cursor.h"
 #include "joy/error.h"
 #include "joy/iterator/ptr-array.h"
+#include "joy/macros.h"
 #include "joy/platform/gfx3d/application.h"
 #include "joy/platform/gfx3d/mouse.h"
 #include "joy/platform/gfx3d/keyboard.h"
@@ -149,6 +150,8 @@ constructed(GObject *base)
 	GFX3D_Display_Location_Set(priv->display, 0, 0, 0);
 	// setup the screen area
 	cairo_region_union_rectangle(priv->area, (gpointer)&rect);
+	priv->x = (gdouble)width / 2.;
+	priv->y = (gdouble)height / 2.;
 	// setup devices
 	priv->keyboard = joy_gfx3d_keyboard_new(self);
 	priv->mouse = joy_gfx3d_mouse_new(self);
@@ -274,6 +277,16 @@ window_create(JoyScreen *self)
 	return window;
 }
 
+static cairo_surface_type_t
+cairo_surface_type(JoyScreen *self)
+{
+#if CAIRO_HAS_GFX3D_SURFACE
+	return CAIRO_SURFACE_TYPE_GFX3D;
+#else // CAIRO_HAS_GFX3D_SURFACE
+	return CAIRO_SURFACE_TYPE_IMAGE;
+#endif // CAIRO_HAS_GFX3D_SURFACE
+}
+
 static cairo_surface_t *
 cairo_surface_create(JoyScreen *self, gint width, gint height)
 {
@@ -301,6 +314,7 @@ error:
 	return NULL;
 }
 
+JOY_GNUC_HOT
 static void
 submit(JoyScreen *self)
 {
@@ -411,6 +425,7 @@ joy_gfx3d_screen_class_init(JoyGfx3dScreenClass *klass)
 	screen_class->begin = begin;
 	screen_class->end = end;
 	screen_class->window_create = window_create;
+	screen_class->cairo_surface_type = cairo_surface_type;
 	screen_class->cairo_surface_create = cairo_surface_create;
 	screen_class->submit = submit;
 	screen_class->enable_mirroring = enable_mirroring;
@@ -462,8 +477,8 @@ joy_gfx3d_screen_cairo_surface_create(JoyScreen *self, GFX3D_Image image)
 	g_return_val_if_fail(image, NULL);
 	struct Private *priv = GET_PRIVATE(self);
 #if CAIRO_HAS_GFX3D_SURFACE
-	cairo_surface_t *surface =
-		cairo_gfx3d_surface_create(priv->display, image);
+	cairo_surface_t *surface = cairo_gfx3d_surface_create(priv->display,
+			image, CAIRO_FORMAT_ARGB32);
 	cairo_status_t status = cairo_surface_status(surface);
 	if (G_UNLIKELY(CAIRO_STATUS_SUCCESS != status)) {
 		return NULL;
@@ -473,15 +488,17 @@ joy_gfx3d_screen_cairo_surface_create(JoyScreen *self, GFX3D_Image image)
 #else // CAIRO_HAS_GFX3D_SURFACE
 	GFX3D_Rect rect;
 	GFX3D_Image_GetRect(image, &rect);
-	gint pitch;
+	gint stride;
 	void *pixels = GFX3D_NATIVE_Surface_GetAddress(
-			GFX3D_Image_Get_NATIVE_Surface(image), &pitch);
+			GFX3D_Image_Get_NATIVE_Surface(image), &stride);
 	if (G_UNLIKELY(!pixels)) {
 		goto error;
 	}
+	stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32,
+			rect.iWidth);
 	cairo_surface_t *surface = cairo_image_surface_create_for_data(pixels,
 			CAIRO_FORMAT_ARGB32, rect.iWidth, rect.iHeight,
-			pitch);
+			stride);
 	cairo_status_t status = cairo_surface_status(surface);
 	if (G_UNLIKELY(CAIRO_STATUS_SUCCESS != status)) {
 		cairo_surface_destroy(surface);
@@ -530,11 +547,49 @@ joy_gfx3d_screen_set_cursor(JoyScreen *self, JoyCursor *cursor)
 		return;
 	}
 #if CAIRO_HAS_GFX3D_SURFACE
+	cairo_surface_type_t type = cairo_surface_get_type(surface);
+	if (CAIRO_SURFACE_TYPE_GFX3D != type) {
+		if (CAIRO_SURFACE_TYPE_IMAGE != type) {
+			return;
+		}
+		gint width = cairo_image_surface_get_width(surface);
+		gint height = cairo_image_surface_get_height(surface);
+		cairo_surface_t *gfx3d_surface =
+			joy_screen_cairo_surface_create(self, width, height);
+		if (G_UNLIKELY(!gfx3d_surface)) {
+			return;
+		}
+		cairo_t *cr = cairo_create(gfx3d_surface);
+		cairo_set_source_surface(cr, surface, 0., 0.);
+		cairo_paint(cr);
+		cairo_destroy(cr);
+		joy_cursor_set_image(cursor, gfx3d_surface);
+		surface = gfx3d_surface;
+	}
 	GFX3D_Image image = cairo_gfx3d_surface_get_image(surface);
 #else // CAIRO_HAS_GFX3D_SURFACE
 	struct Data *data = cairo_surface_get_user_data(surface, &key);
 	if (!data) {
-		return;
+		cairo_surface_type_t type = cairo_surface_get_type(surface);
+		if (CAIRO_SURFACE_TYPE_IMAGE != type) {
+			return;
+		}
+		gint width = cairo_image_surface_get_width(surface);
+		gint height = cairo_image_surface_get_height(surface);
+		cairo_surface_t *gfx3d_surface =
+			joy_screen_cairo_surface_create(self, width, height);
+		if (G_UNLIKELY(!gfx3d_surface)) {
+			return;
+		}
+		cairo_t *cr = cairo_create(gfx3d_surface);
+		cairo_set_source_surface(cr, surface, 0., 0.);
+		cairo_paint(cr);
+		cairo_destroy(cr);
+		joy_cursor_set_image(cursor, gfx3d_surface);
+		data = cairo_surface_get_user_data(gfx3d_surface, &key);
+		if (G_UNLIKELY(!data)) {
+			return;
+		}
 	}
 	GFX3D_Image image = data->image;
 #endif // CAIRO_HAS_GFX3D_SURFACE
@@ -556,6 +611,7 @@ joy_gfx3d_screen_set_cursor(JoyScreen *self, JoyCursor *cursor)
 	}
 	priv->x_hot = joy_cursor_get_hotspot_x(cursor);
 	priv->y_hot = joy_cursor_get_hotspot_y(cursor);
+	priv->moved = TRUE;
 }
 
 void

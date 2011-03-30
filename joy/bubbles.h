@@ -20,9 +20,11 @@
 #include <joy/animation/resize.h>
 #include <joy/animation/series.h>
 #include <joy/application.h>
+#include <joy/bubble.h>
 #include <joy/container.h>
 #include <joy/easing.h>
 #include <joy/filter/gaussian.h>
+#include <joy/image.h>
 #include <joy/iterator.h>
 #include <joy/screen.h>
 #include <joy/sketch.h>

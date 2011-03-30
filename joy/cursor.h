@@ -70,6 +70,18 @@ JoyCursor *
 joy_cursor_new(cairo_surface_t *image, gint x, gint y);
 
 /**
+ * \brief Set the image for this cursor.
+ *
+ * This function may be used by platform-specific code to update the cursor
+ * image surface to something compatible with the target hardware.
+ *
+ * \param self [in] A cursor object.
+ * \param image [in] The cursor image.
+ */
+void
+joy_cursor_set_image(JoyCursor *self, cairo_surface_t *image);
+
+/**
  * \brief Get the image for this cursor.
  *
  * \param self [in] A cursor object.

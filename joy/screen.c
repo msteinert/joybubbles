@@ -227,6 +227,13 @@ joy_screen_window_create(JoyScreen *self)
 	return JOY_SCREEN_GET_CLASS(self)->window_create(self);
 }
 
+cairo_surface_type_t
+joy_screen_cairo_surface_type(JoyScreen *self)
+{
+	g_return_val_if_fail(JOY_IS_SCREEN(self), -1);
+	return JOY_SCREEN_GET_CLASS(self)->cairo_surface_type(self);
+}
+
 cairo_surface_t *
 joy_screen_cairo_surface_create(JoyScreen *self,
 		gint width, gint height)
@@ -288,6 +295,7 @@ joy_screen_in_animation(JoyScreen *self)
 	return GET_PRIVATE(self)->animations->len ? TRUE : FALSE;
 }
 
+JOY_GNUC_HOT
 void
 joy_screen_animate(JoyScreen *self)
 {
@@ -299,6 +307,7 @@ joy_screen_animate(JoyScreen *self)
 	}
 }
 
+JOY_GNUC_HOT
 void
 joy_screen_draw(JoyScreen *self)
 {

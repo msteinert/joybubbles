@@ -7,6 +7,6 @@ Name: Joybubbles
 Description: A GUI toolkit & platform abstraction layer
 Version: @VERSION@
 Requires: @joy_glib_version@ @joy_gobject_version@ @joy_cairo_version@
-Requires.private: @joy_requires@
+Requires.private: @joy_gdk_pixbuf_version@ @joy_requires@
 Libs: -L${libdir} -ljoybubbles-@joy_series@
 CFlags: -I${includedir}

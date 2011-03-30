@@ -10,6 +10,7 @@
 #endif
 #include <cairo-xlib.h>
 #include "joy/iterator/ptr-array.h"
+#include "joy/macros.h"
 #include "joy/platform/x11/application.h"
 #include "joy/platform/x11/screen.h"
 #include "joy/platform/x11/window.h"
@@ -150,6 +151,12 @@ window_create(JoyScreen *self)
 	return window;
 }
 
+static cairo_surface_type_t
+cairo_surface_type(JoyScreen *self)
+{
+	return CAIRO_SURFACE_TYPE_XLIB;
+}
+
 static cairo_surface_t *
 cairo_surface_create(JoyScreen *self, gint width, gint height)
 {
@@ -185,6 +192,7 @@ error:
 	return NULL;
 }
 
+JOY_GNUC_HOT
 static void
 submit(JoyScreen *self)
 {
@@ -206,6 +214,7 @@ joy_x11_screen_class_init(JoyX11ScreenClass *klass)
 	screen_class->begin = begin;
 	screen_class->end = end;
 	screen_class->window_create = window_create;
+	screen_class->cairo_surface_type = cairo_surface_type;
 	screen_class->cairo_surface_create = cairo_surface_create;
 	screen_class->submit = submit;
 	g_type_class_add_private(klass, sizeof(struct Private));

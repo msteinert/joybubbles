@@ -60,6 +60,9 @@ PKG_CHECK_MODULES([GOBJECT], [$joy_gobject_version])
 joy_cairo_version="cairo >= 1.10"
 AC_SUBST([joy_cairo_version])
 PKG_CHECK_MODULES([CAIRO], [$joy_cairo_version])
+joy_gdk_pixbuf_version="gdk-pixbuf-2.0"
+AC_SUBST([joy_gdk_pixbuf_version])
+PKG_CHECK_MODULES([GDK_PIXBUF], [$joy_gdk_pixbuf_version])
 # Check for glib-genmarshal
 AC_ARG_VAR([GLIB_GENMARSHAL], [path to the glib-genmarshal(1) utility])
 AS_IF([test "x$GLIB_GENMARSHAL" = "x"],
@@ -81,11 +84,11 @@ AC_ARG_ENABLE([trace],
 		[enable runtime tracing features @<:@default=no@:>@])],
 	[AS_IF([test "x$joy_debug" = "xno"],
 		[AC_MSG_ERROR([Debugging must be enabled to enable tracing.])])
-	AC_CHECK_LIB([bfd], [bfd_openr],
+	AC_SEARCH_LIBS([bfd_openr], [bfd],
 		[AC_MSG_WARN([Linking with libbfd makes this library subject to the terms of the GPL!])
 		AC_DEFINE([HAVE_BFD], [1],
 			[Define to 1 if libbfd is available.])])
-	AC_CHECK_LIB([dl], [dladdr],
+	AC_SEARCH_LIBS([dladdr], [dl],
 		[AC_DEFINE([_GNU_SOURCE], [1],
 			[Define to 1 to enable GNU extensions.])
 		AC_DEFINE([HAVE_DLADDR], [1],
@@ -126,7 +129,7 @@ AC_ARG_ENABLE([nls],
 		[enable native language support @<:@default=no@:>@])],
 	[joy_nls=$enableval],
 	[joy_nls=no])
-AS_IF([test "x$js_nls" = "xyes"],
+AS_IF([test "x$joy_nls" = "xyes"],
 	[AC_DEFINE([ENABLE_NLS], [1], [Define to 1 to enable i18n.])
 	AC_CHECK_FUNCS([bind_textdomain_codeset])])
 # Platform-specific setup

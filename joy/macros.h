@@ -32,18 +32,18 @@ G_BEGIN_DECLS
 #ifdef __GNUC__
 #define joy_return_error_if_fail(expr, val, error) \
 G_STMT_START { \
-	if G_UNLIKELY(!expr) { \
+	if G_UNLIKELY(!(expr)) { \
 		g_set_error(error, JOY_ERROR, JOY_ERROR_FAILURE, \
 				"%s: assertion `%s' failed", \
 				G_STRLOC, #expr); \
 		g_return_if_fail_warning(G_LOG_DOMAIN, G_STRLOC, #expr); \
-		return (val); \
+		return val; \
 	} \
 } G_STMT_END
 #else // __GNUC__
 #define joy_return_error_if_fail(expr, val, error) \
 G_STMT_START { \
-	if (!expr) { \
+	if G_UNLIKELY(!(expr)) { \
 		g_set_error(error, JOY_ERROR, JOY_ERROR_FAILURE, \
 				"file %s: line %s: assertion `%s' failed", \
 				__FILE__, __LINE__, #expr); \
@@ -53,7 +53,6 @@ G_STMT_START { \
 		return val; \
 	} \
 } G_STMT_END
-
 #endif // __GNUC__
 #endif // G_DISABLE_CHECKS
 

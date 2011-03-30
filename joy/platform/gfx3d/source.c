@@ -88,256 +88,208 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 	}
 }
 
-static inline JoyKeySym
-get_key(IM_INPUT *event, JoyDevice *keyboard)
+/**
+ * \brief Set a modifier key for the specified keyboard device.
+ *
+ * \param event [in] An input_mgr event.
+ * \param keyboard [in] The keyboard device that generated \e event.
+ * \param sym [in] The translated key sym.
+ */
+static void
+modifier(const IM_INPUT *event, JoyDevice *keyboard, JoyKeySym sym)
 {
-	gboolean modifier = FALSE;
-	JoyKeySym sym = event->key;
+	switch (event->state) {
+	case IM_KEY_DOWN:
+		joy_device_keyboard_modifier_down(keyboard, sym);
+		return;
+	case IM_KEY_UP:
+		joy_device_keyboard_modifier_up(keyboard, sym);
+		return;
+	default:
+		return;
+	}
+}
+
+/**
+ * \brief Translate input_mgr key codes into Joybubbles key syms.
+ *
+ * \param event [in] An input_mgr event.
+ * \param keyboard [in] The keyboard device that generated \e event.
+ */
+static inline JoyKeySym
+get_key(const IM_INPUT *event, JoyDevice *keyboard)
+{
 	switch (event->key) {
 	case INPUT_KEY_POWERTOGGLE:
 	case INPUT_KEY_POWER_ON:
 	case INPUT_KEY_POWER_OFF:
-		sym = JOY_KEY_Power;
-		break;
+		return JOY_KEY_Power;
 	case INPUT_KEY_SAT_MODE:
-		sym = JOY_KEY_Sat;
-		break;
+		return JOY_KEY_Sat;
 	case INPUT_KEY_TV_MODE:
-		sym = JOY_KEY_TV;
-		break;
+		return JOY_KEY_TV;
 	case INPUT_KEY_DVD_MODE:
-		sym = JOY_KEY_DVD;
-		break;
+		return JOY_KEY_DVD;
 	case INPUT_KEY_AUX_MODE:
-		sym = JOY_KEY_AUX;
-		break;
+		return JOY_KEY_AUX;
 	case INPUT_KEY_ENTER:
-		sym = JOY_KEY_Return;
-		break;
+		return JOY_KEY_Return;
 	case INPUT_KEY_GUIDE:
-		sym = JOY_KEY_Guide;
-		break;
+		return JOY_KEY_Guide;
 	case INPUT_KEY_MENU:
-		sym = JOY_KEY_Menu;
-		break;
+		return JOY_KEY_Menu;
 	case INPUT_KEY_PIP_TOGGLE:
-		sym = JOY_KEY_PiP;
-		break;
+		return JOY_KEY_PiP;
 	case INPUT_KEY_PIP_POSITION:
-		sym = JOY_KEY_Position;
-		break;
+		return JOY_KEY_Position;
 	case INPUT_KEY_PIP_SWAP:
-		sym = JOY_KEY_Swap;
-		break;
+		return JOY_KEY_Swap;
 	case INPUT_KEY_RED:
-		sym = JOY_KEY_Red;
-		break;
+		return JOY_KEY_Red;
 	case INPUT_KEY_GREEN:
-		sym = JOY_KEY_Green;
-		break;
+		return JOY_KEY_Green;
 	case INPUT_KEY_YELLOW:
-		sym = JOY_KEY_Yellow;
-		break;
+		return JOY_KEY_Yellow;
 	case INPUT_KEY_BLUE:
-		sym = JOY_KEY_Blue;
-		break;
+		return JOY_KEY_Blue;
 	case INPUT_KEY_DVR:
-		sym = JOY_KEY_DVR;
-		break;
+		return JOY_KEY_DVR;
 	case INPUT_KEY_SEARCH:
-		sym = JOY_KEY_Search;
-		break;
+		return JOY_KEY_Search;
 	case INPUT_KEY_PAUSE:
-		sym = JOY_KEY_Pause;
-		break;
+		return JOY_KEY_Pause;
 	case INPUT_KEY_PLAY:
-		sym = JOY_KEY_Play;
-		break;
+		return JOY_KEY_Play;
 	case INPUT_KEY_RECORD:
-		sym = JOY_KEY_Record;
-		break;
+		return JOY_KEY_Record;
 	case INPUT_KEY_REWIND:
-		sym = JOY_KEY_Rewind;
-		break;
+		return JOY_KEY_Rewind;
 	case INPUT_KEY_FASTFORWARD:
-		sym = JOY_KEY_Forward;
-		break;
+		return JOY_KEY_Forward;
 	case INPUT_KEY_STOP:
-		sym = JOY_KEY_Stop;
-		break;
+		return JOY_KEY_Stop;
 	case INPUT_KEY_SKIPBACK:
-		sym = JOY_KEY_Skip_Back;
-		break;
+		return JOY_KEY_Skip_Back;
 	case INPUT_KEY_SKIPAHEAD:
-		sym = JOY_KEY_Skip_Forward;
-		break;
+		return JOY_KEY_Skip_Forward;
 	case INPUT_KEY_INPUT:
-		sym = JOY_KEY_Input;
-		break;
+		return JOY_KEY_Input;
 	case INPUT_KEY_JUMP:
-		sym = JOY_KEY_Jump;
-		break;
+		return JOY_KEY_Jump;
 	case INPUT_KEY_INFO:
-		sym = JOY_KEY_Info;
-		break;
+		return JOY_KEY_Info;
 	case INPUT_KEY_LIVE_TV:
-		sym = JOY_KEY_Live_TV;
-		break;
+		return JOY_KEY_Live_TV;
 	case INPUT_KEY_DISH:
-		sym = JOY_KEY_Dish;
-		break;
+		return JOY_KEY_Dish;
 	case INPUT_KEY_UP:
-		sym = JOY_KEY_Up;
-		break;
+		return JOY_KEY_Up;
 	case INPUT_KEY_DOWN:
-		sym = JOY_KEY_Down;
-		break;
+		return JOY_KEY_Down;
 	case INPUT_KEY_LEFT:
-		sym = JOY_KEY_Left;
-		break;
+		return JOY_KEY_Left;
 	case INPUT_KEY_RIGHT:
-		sym = JOY_KEY_Right;
-		break;
+		return JOY_KEY_Right;
 	case INPUT_KEY_CANCEL:
-		sym = JOY_KEY_Cancel;
-		break;
+		return JOY_KEY_Cancel;
 	case INPUT_KEY_PAGE_UP:
-		sym = JOY_KEY_Page_Up;
-		break;
+		return JOY_KEY_Page_Up;
 	case INPUT_KEY_PAGE_DOWN:
-		sym = JOY_KEY_Page_Down;
-		break;
+		return JOY_KEY_Page_Down;
 	case INPUT_KEY_1:
-		sym = JOY_KEY_1;
-		break;
+		return JOY_KEY_1;
 	case INPUT_KEY_2:
-		sym = JOY_KEY_2;
-		break;
+		return JOY_KEY_2;
 	case INPUT_KEY_3:
-		sym = JOY_KEY_3;
-		break;
+		return JOY_KEY_3;
 	case INPUT_KEY_4:
-		sym = JOY_KEY_4;
-		break;
+		return JOY_KEY_4;
 	case INPUT_KEY_5:
-		sym = JOY_KEY_5;
-		break;
+		return JOY_KEY_5;
 	case INPUT_KEY_6:
-		sym = JOY_KEY_6;
-		break;
+		return JOY_KEY_6;
 	case INPUT_KEY_7:
-		sym = JOY_KEY_7;
-		break;
+		return JOY_KEY_7;
 	case INPUT_KEY_8:
-		sym = JOY_KEY_8;
-		break;
+		return JOY_KEY_8;
 	case INPUT_KEY_9:
-		sym = JOY_KEY_9;
-		break;
+		return JOY_KEY_9;
 	case INPUT_KEY_0:
-		sym = JOY_KEY_0;
-		break;
+		return JOY_KEY_0;
 	case INPUT_KEY_STAR:
-		sym = JOY_KEY_asterisk;
-		break;
+		return JOY_KEY_asterisk;
 	case INPUT_KEY_POUND:
-		sym = JOY_KEY_numbersign;
-		break;
+		return JOY_KEY_numbersign;
 	case INPUT_KEY_LSHIFT:
-		modifier = TRUE;
-		sym = JOY_KEY_Shift_L;
-		break;
+		modifier(event, keyboard, JOY_KEY_Shift_L);
+		return JOY_KEY_Shift_L;
 	case INPUT_KEY_RSHIFT:
-		modifier = TRUE;
-		sym = JOY_KEY_Shift_R;
-		break;
+		modifier(event, keyboard, JOY_KEY_Shift_R);
+		return JOY_KEY_Shift_R;
 	case LINUX_KEY_LEFTCTRL:
-		modifier = TRUE;
-		sym = JOY_KEY_Control_L;
-		break;
+		modifier(event, keyboard, JOY_KEY_Control_L);
+		return JOY_KEY_Control_L;
 	case LINUX_KEY_RIGHTCTRL:
-		modifier = TRUE;
-		sym = JOY_KEY_Control_R;
-		break;
+		modifier(event, keyboard, JOY_KEY_Control_R);
+		return JOY_KEY_Control_R;
 	case LINUX_KEY_CAPSLOCK:
-		modifier = TRUE;
-		sym = JOY_KEY_Caps_Lock;
+		modifier(event, keyboard, JOY_KEY_Caps_Lock);
+		return JOY_KEY_Caps_Lock;
 	case LINUX_KEY_LEFTMETA:
-		modifier = TRUE;
-		sym = JOY_KEY_Meta_L;
-		break;
+		modifier(event, keyboard, JOY_KEY_Meta_L);
+		return JOY_KEY_Meta_L;
 	case LINUX_KEY_RIGHTMETA:
-		modifier = TRUE;
-		sym = JOY_KEY_Meta_R;
-		break;
+		modifier(event, keyboard, JOY_KEY_Meta_R);
+		return JOY_KEY_Meta_R;
 	case LINUX_KEY_LEFTALT:
-		modifier = TRUE;
-		sym = JOY_KEY_Alt_L;
-		break;
+		modifier(event, keyboard, JOY_KEY_Alt_L);
+		return JOY_KEY_Alt_L;
 	case LINUX_KEY_RIGHTALT:
-		modifier = TRUE;
-		sym = JOY_KEY_Alt_R;
-		break;
+		modifier(event, keyboard, JOY_KEY_Alt_R);
+		return JOY_KEY_Alt_R;
 	case LINUX_KEY_ESC:
-		sym = JOY_KEY_Escape;
-		break;
+		return JOY_KEY_Escape;
 	case INPUT_KEY_F1:
-		sym = JOY_KEY_F1;
-		break;
+		return JOY_KEY_F1;
 	case INPUT_KEY_F2:
-		sym = JOY_KEY_F2;
-		break;
+		return JOY_KEY_F2;
 	case INPUT_KEY_F3:
-		sym = JOY_KEY_F3;
-		break;
+		return JOY_KEY_F3;
 	case INPUT_KEY_F4:
-		sym = JOY_KEY_F4;
-		break;
+		return JOY_KEY_F4;
 	case INPUT_KEY_F5:
-		sym = JOY_KEY_F5;
-		break;
+		return JOY_KEY_F5;
 	case INPUT_KEY_F6:
-		sym = JOY_KEY_F6;
-		break;
+		return JOY_KEY_F6;
 	case INPUT_KEY_F7:
-		sym = JOY_KEY_F7;
-		break;
+		return JOY_KEY_F7;
 	case INPUT_KEY_F8:
-		sym = JOY_KEY_F8;
-		break;
+		return JOY_KEY_F8;
 	case INPUT_KEY_F9:
-		sym = JOY_KEY_F9;
-		break;
+		return JOY_KEY_F9;
 	case INPUT_KEY_F10:
-		sym = JOY_KEY_F10;
-		break;
+		return JOY_KEY_F10;
 	case INPUT_KEY_F11:
-		sym = JOY_KEY_F11;
-		break;
+		return JOY_KEY_F11;
 	case INPUT_KEY_F12:
-		sym = JOY_KEY_F12;
-		break;
+		return JOY_KEY_F12;
 	default:
 		g_message(Q_("gfx3d: untranslated key: %d"), event->key);
-		break;
+		return event->key;
 	}
-	if (modifier) {
-		switch (event->state) {
-		case IM_KEY_DOWN:
-			joy_device_keyboard_modifier_down(keyboard, sym);
-			break;
-		case IM_KEY_UP:
-			joy_device_keyboard_modifier_up(keyboard, sym);
-		default:
-			break;
-		}
-	}
-	return sym;
 }
 
+/**
+ * \param Handle key & mouse button events.
+ *
+ * \param self [in] A source object.
+ * \param screen [in] The screen \e event occurred on.
+ * \param event [in] An input_mgr event.
+ * \param timestamp [in] The timestamp for \e event.
+ */
 static inline void
-non_motion_event(JoySource *self, JoyScreen *screen, IM_INPUT *event,
-		unsigned long timestamp)
+non_motion_event(JoySource *self, JoyScreen *screen, const IM_INPUT *event,
+		gulong timestamp)
 {
 	gint x, y;
 	joy_gfx3d_screen_get_cursor_position(screen, &x, &y);
@@ -345,20 +297,21 @@ non_motion_event(JoySource *self, JoyScreen *screen, IM_INPUT *event,
 	if (!window) {
 		return;
 	}
-	JoyDevice *mouse = joy_gfx3d_screen_get_mouse(screen);
-	JoyDevice *keyboard = joy_gfx3d_screen_get_keyboard(screen);
+	JoyDevice *device;
 	switch (event->key) {
 	case 0x8110: // left mouse button
 		switch (event->state) {
 		case IM_KEY_DOWN:
-			joy_device_mouse_button_down(mouse, JOY_BUTTON_LEFT);
-			joy_bubble_button_down(window, mouse, timestamp, x, y,
-					JOY_BUTTON_LEFT);
+			device = joy_gfx3d_screen_get_mouse(screen);
+			joy_device_mouse_button_down(device, JOY_BUTTON_LEFT);
+			joy_bubble_button_down(window, device, timestamp,
+					x, y, JOY_BUTTON_LEFT);
 			break;
 		case IM_KEY_UP:
-			joy_device_mouse_button_up(mouse, JOY_BUTTON_LEFT);
-			joy_bubble_button_up(window, mouse, timestamp, x, y,
-					JOY_BUTTON_LEFT);
+			device = joy_gfx3d_screen_get_mouse(screen);
+			joy_device_mouse_button_up(device, JOY_BUTTON_LEFT);
+			joy_bubble_button_up(window, device, timestamp,
+					x, y, JOY_BUTTON_LEFT);
 			break;
 		default:
 			g_message(Q_("gfx3d: unknown button state: %d"),
@@ -369,14 +322,16 @@ non_motion_event(JoySource *self, JoyScreen *screen, IM_INPUT *event,
 	case 0x88: // right mouse button
 		switch (event->state) {
 		case IM_KEY_DOWN:
-			joy_device_mouse_button_down(mouse, JOY_BUTTON_RIGHT);
-			joy_bubble_button_down(window, mouse, timestamp, x, y,
-					JOY_BUTTON_RIGHT);
+			device = joy_gfx3d_screen_get_mouse(screen);
+			joy_device_mouse_button_down(device, JOY_BUTTON_RIGHT);
+			joy_bubble_button_down(window, device, timestamp,
+					x, y, JOY_BUTTON_RIGHT);
 			break;
 		case IM_KEY_UP:
-			joy_device_mouse_button_up(mouse, JOY_BUTTON_RIGHT);
-			joy_bubble_button_up(window, mouse, timestamp, x, y,
-					JOY_BUTTON_RIGHT);
+			device = joy_gfx3d_screen_get_mouse(screen);
+			joy_device_mouse_button_up(device, JOY_BUTTON_RIGHT);
+			joy_bubble_button_up(window, device, timestamp,
+					x, y, JOY_BUTTON_RIGHT);
 			break;
 		default:
 			g_message(Q_("gfx3d: unknown button state: %d"),
@@ -387,12 +342,14 @@ non_motion_event(JoySource *self, JoyScreen *screen, IM_INPUT *event,
 	case 0x6005: // scroll wheel
 		switch (event->data[0]) {
 		case 255:
-			joy_bubble_scroll(window, mouse, timestamp, x, y,
-					JOY_SCROLL_DOWN);
+			device = joy_gfx3d_screen_get_mouse(screen);
+			joy_bubble_scroll(window, device, timestamp,
+					x, y, JOY_SCROLL_DOWN);
 			break;
 		case 1:
-			joy_bubble_scroll(window, mouse, timestamp, x, y,
-					JOY_SCROLL_UP);
+			device = joy_gfx3d_screen_get_mouse(screen);
+			joy_bubble_scroll(window, device, timestamp,
+					x, y, JOY_SCROLL_UP);
 			break;
 		default:
 			g_message(Q_("gfx3d: unknown scroll direction: %d"),
@@ -401,30 +358,30 @@ non_motion_event(JoySource *self, JoyScreen *screen, IM_INPUT *event,
 		}
 		break;
 	default: // key/button press
-		{
-			JoyKeySym sym = get_key(event, keyboard);
-			switch (event->state) {
-			case IM_KEY_DISCRETE:
-				joy_bubble_key_down(window, keyboard,
-						timestamp, x, y, sym);
-				joy_bubble_key_up(window, keyboard,
-						timestamp, x, y, sym);
-				break;
-			case IM_KEY_DOWN:
-				joy_bubble_key_down(window, keyboard,
-						timestamp, x, y, sym);
-				break;
-			case IM_KEY_UP:
-				joy_bubble_key_up(window, keyboard,
-						timestamp, x, y, sym);
-				break;
-			default:
-				g_message(Q_("gfx3d: unknown key state: %d"),
-						event->state);
-				break;
-			}
+		switch (event->state) {
+		case IM_KEY_DISCRETE:
+			device = joy_gfx3d_screen_get_keyboard(screen);
+			joy_bubble_key_down(window, device, timestamp,
+					x, y, get_key(event, device));
+			joy_bubble_key_up(window, device, timestamp,
+					x, y, get_key(event, device));
+			break;
+		case IM_KEY_DOWN:
+			device = joy_gfx3d_screen_get_keyboard(screen);
+			joy_bubble_key_down(window, device, timestamp,
+					x, y, get_key(event, device));
+			break;
+		case IM_KEY_UP:
+			device = joy_gfx3d_screen_get_keyboard(screen);
+			joy_bubble_key_up(window, device, timestamp,
+					x, y, get_key(event, device));
+			break;
+		default:
+			g_message(Q_("gfx3d: unknown key state: %d"),
+					event->state);
 			break;
 		}
+		break;
 	}
 }
 
@@ -438,19 +395,29 @@ input(JoySource *self)
 	if (-1 == bytes || sizeof(IM_INPUT) != bytes) {
 		return;
 	}
-	unsigned long timestamp = g_timer_elapsed(priv->timer, NULL) * 1000;
-	JoyScreen *screen = joy_application_get_screen(priv->app,
-			event.tv == IM_TV1 ? 0 : 1);
+	JoyScreen *screen;
+	switch (event.tv) {
+	case IM_TV1:
+		screen = joy_application_get_screen(priv->app, 0);
+		break;
+	case IM_TV2:
+		screen = joy_application_get_screen(priv->app, 1);
+		break;
+	default:
+		g_message("gfx3d: unrecognized TV: %d", event.tv);
+		return;
+	}
 	if (G_UNLIKELY(!screen)) {
 		return;
 	}
 	gint x, y;
 	JoyBubble *window;
+	gulong timestamp = g_timer_elapsed(priv->timer, NULL) * 1000;
 	switch (event.key) {
 	case INPUT_KEY_RELATIVE_POINT: // relative mouse motion
 		joy_gfx3d_screen_move_cursor(screen,
-				(short)(event.data[0] | event.data[1] << 8),
-				-(short)(event.data[2] | event.data[3] << 8));
+				(gshort)(event.data[0] | event.data[1] << 8),
+				-(gshort)(event.data[2] | event.data[3] << 8));
 		joy_gfx3d_screen_get_cursor_position(screen, &x, &y);
 		window = joy_screen_window_at(screen, x, y);
 		if (window) {
@@ -460,8 +427,8 @@ input(JoySource *self)
 		break;
 	case INPUT_KEY_ABSOLUTE_POINT: // absolute mouse motion
 		joy_gfx3d_screen_warp_cursor(screen,
-				(short)(event.data[0] | event.data[1] << 8),
-				(short)(event.data[2] | event.data[3] << 8));
+				(gshort)(event.data[0] | event.data[1] << 8),
+				(gshort)(event.data[2] | event.data[3] << 8));
 		joy_gfx3d_screen_get_cursor_position(screen, &x, &y);
 		window = joy_screen_window_at(screen, x, y);
 		if (window) {
