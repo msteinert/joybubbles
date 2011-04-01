@@ -8,9 +8,10 @@ libjoybubbles_filter_la_SOURCES = \
 # include directories & compiler switches
 libjoybubbles_filter_la_CFLAGS = \
 	-I$(top_srcdir) \
-	$(CAIRO_CFLAGS) \
 	$(GLIB_CFLAGS) \
-	$(GOBJECT_CFLAGS)
+	$(GOBJECT_CFLAGS) \
+	$(CAIRO_CFLAGS) \
+	$(PANGO_CFLAGS)
 # install development headers
 pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/filter
 pkginclude_HEADERS = \

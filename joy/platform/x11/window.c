@@ -44,9 +44,20 @@ static void
 constructed(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
-	// set window attributes
 	JoyBubble *self = JOY_BUBBLE(base);
+	// set window attributes
 	JoyScreen *screen = joy_bubble_get_screen(self);
+	if (G_UNLIKELY(!screen)) {
+		goto exit;
+	}
+	JoyApplication *app = joy_screen_get_application(screen);
+	if (G_UNLIKELY(!app)) {
+		goto exit;
+	}
+	Display *display = joy_x11_application_get_display(app);
+	if (G_UNLIKELY(!display)) {
+		goto exit;
+	}
 	gulong mask = CWBackPixel | CWBorderPixel | CWEventMask | CWColormap;
 	XSetWindowAttributes attr;
 	attr.background_pixel = 0;
@@ -56,11 +67,6 @@ constructed(GObject *base)
 		| EnterWindowMask | LeaveWindowMask | StructureNotifyMask;
 	attr.colormap = joy_x11_screen_get_colormap(screen);
 	// create window
-	JoyApplication *app = joy_screen_get_application(screen);
-	Display *display = joy_x11_application_get_display(app);
-	if (G_UNLIKELY(!display)) {
-		goto exit;
-	}
 	priv->window = XCreateWindow(display,
 			RootWindow(display, joy_screen_get_id(screen)),
 			joy_bubble_get_x(self),
@@ -91,7 +97,9 @@ constructed(GObject *base)
 	}
 	// create the graphics context & clip region
 	priv->gc = XCreateGC(display, priv->window, 0, NULL);
-	XSetGraphicsExposures(display, priv->gc, False);
+	if (G_LIKELY(priv->gc)) {
+		XSetGraphicsExposures(display, priv->gc, False);
+	}
 	priv->region = XCreateRegion();
 	// hide the titlebar & borders
 	struct {

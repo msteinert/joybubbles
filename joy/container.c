@@ -194,7 +194,7 @@ add(JoyBubble *self, JoyBubble *child)
 }
 
 static void
-remove(JoyBubble *self, JoyBubble *child)
+remove_(JoyBubble *self, JoyBubble *child)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (G_UNLIKELY(!priv->children)) {
@@ -225,7 +225,7 @@ joy_container_class_init(JoyContainerClass *klass)
 	klass->begin = begin;
 	klass->end = end;
 	klass->add = add;
-	klass->remove = remove;
+	klass->remove = remove_;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoyContainer::add
 	signals[SIGNAL_ADD] =

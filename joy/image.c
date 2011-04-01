@@ -40,6 +40,21 @@ joy_image_init(JoyImage *self)
 }
 
 static void
+on_notify(JoyBubble *self)
+{
+	joy_image_get_surface(self);
+}
+
+static void
+constructed(GObject *base)
+{
+	g_signal_connect(base, "notify::parent", G_CALLBACK(on_notify), NULL);
+	if (G_OBJECT_CLASS(joy_image_parent_class)->constructed) {
+		G_OBJECT_CLASS(joy_image_parent_class)->constructed(base);
+	}
+}
+
+static void
 finalize(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
@@ -211,10 +226,7 @@ draw(JoyBubble *self, cairo_t *cr)
 	struct Private *priv = GET_PRIVATE(self);
 	cairo_surface_t *surface = priv->surface;
 	if (G_UNLIKELY(!surface)) {
-		surface = joy_image_get_surface(self);
-		if (G_UNLIKELY(!surface)) {
-			return FALSE;
-		}
+		return FALSE;
 	}
 	if (1. != priv->dx || 1. != priv->dy) {
 		cairo_scale(cr, priv->dx, priv->dy);
@@ -228,6 +240,7 @@ static void
 joy_image_class_init(JoyImageClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
+	object_class->constructed = constructed;
 	object_class->finalize = finalize;
 	object_class->set_property = set_property;
 	JoyBubbleClass *bubble_class = JOY_BUBBLE_CLASS(klass);
@@ -261,6 +274,7 @@ joy_image_set_surface(JoyBubble *self, cairo_surface_t *surface,
 	priv->filename = NULL;
 	if (priv->surface) {
 		cairo_surface_destroy(priv->surface);
+		priv->surface = NULL;
 	}
 	if (priv->image) {
 		cairo_surface_destroy(priv->image);

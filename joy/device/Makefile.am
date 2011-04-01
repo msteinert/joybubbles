@@ -11,7 +11,8 @@ libjoybubbles_device_la_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GLIB_CFLAGS) \
 	$(GOBJECT_CFLAGS) \
-	$(CAIRO_CFLAGS)
+	$(CAIRO_CFLAGS) \
+	$(PANGO_CFLAGS)
 # generate keysyms
 JOY_GEN_KEYSYMS = $(srcdir)/joy-gen-keysyms.py
 $(top_srcdir)/joy/device/keysym.h: $(JOY_GEN_KEYSYMS)

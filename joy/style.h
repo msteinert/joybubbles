@@ -17,6 +17,7 @@
 #include <cairo.h>
 #include <glib-object.h>
 #include <joy/types.h>
+#include <pango/pango.h>
 
 G_BEGIN_DECLS
 
@@ -44,6 +45,7 @@ typedef struct JoyStyleClass_ JoyStyleClass;
 struct JoyStyle_ {
 	/*< private >*/
 	GObject parent_instance;
+	gpointer priv;
 };
 
 typedef gboolean
@@ -71,6 +73,38 @@ joy_style_get_type(void) G_GNUC_CONST;
  */
 gboolean
 joy_style_draw(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
+
+JoyTheme *
+joy_style_get_theme(JoyStyle *self);
+
+/**
+ * \brief Get the font description for the specified style.
+ *
+ * \param self [in] A style object.
+ *
+ * \return The font description for \e self. If no font description is
+ *         associated with this style then the default font description for
+ *         the theme will be returned.
+ */
+PangoFontDescription *
+joy_style_get_font_description(JoyStyle *self);
+
+void
+joy_style_set_font_description(JoyStyle *self,
+		const PangoFontDescription *desc);
+
+cairo_pattern_t *
+joy_style_get_font_pattern(JoyStyle *self);
+
+void
+joy_style_set_font_pattern(JoyStyle *self, cairo_pattern_t *font);
+
+G_GNUC_WARN_UNUSED_RESULT
+PangoLayout *
+joy_style_pango_layout_create(JoyStyle *self);
+
+gboolean
+joy_style_cairo_set_source_font(JoyStyle *self, cairo_t *cr);
 
 G_END_DECLS
 

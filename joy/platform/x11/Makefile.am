@@ -23,6 +23,7 @@ libjoybubbles_platform_la_CFLAGS = \
 	$(GLIB_CFLAGS) \
 	$(GOBJECT_CFLAGS) \
 	$(CAIRO_CFLAGS) \
+	$(PANGO_CFLAGS) \
 	$(X11_CFLAGS) \
 	$(XCOMPOSITE_CFLAGS) \
 	$(CAIRO_XLIB_CFLAGS)

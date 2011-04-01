@@ -50,7 +50,7 @@ AC_SUBST([LT_CURRENT])
 AC_SUBST([LT_REVISION])
 AC_SUBST([LT_AGE])
 # Checks for dependencies
-joy_glib_minimum_version=2.12 # should be 2.24
+joy_glib_minimum_version=2.24
 joy_glib_version="glib-2.0 >= $joy_glib_minimum_version"
 AC_SUBST([joy_glib_version])
 PKG_CHECK_MODULES([GLIB], [$joy_glib_version])
@@ -60,6 +60,13 @@ PKG_CHECK_MODULES([GOBJECT], [$joy_gobject_version])
 joy_cairo_version="cairo >= 1.10"
 AC_SUBST([joy_cairo_version])
 PKG_CHECK_MODULES([CAIRO], [$joy_cairo_version])
+joy_pango_minimum_version=1.28
+joy_pango_version="pango >= $joy_pango_minimum_version"
+AC_SUBST([joy_pango_version])
+PKG_CHECK_MODULES([PANGO], [$joy_pango_version])
+joy_pangocairo_version="pangocairo >= $joy_pango_minimum_version"
+AC_SUBST([joy_pangocairo_version])
+PKG_CHECK_MODULES([PANGOCAIRO], [$joy_pangocairo_version])
 joy_gdk_pixbuf_version="gdk-pixbuf-2.0"
 AC_SUBST([joy_gdk_pixbuf_version])
 PKG_CHECK_MODULES([GDK_PIXBUF], [$joy_gdk_pixbuf_version])

@@ -17,6 +17,7 @@
 #include "joy/screen.h"
 #include "joy/style.h"
 #include "joy/theme.h"
+#include <pango/pangocairo.h>
 
 G_DEFINE_ABSTRACT_TYPE(JoyBubble, joy_bubble, G_TYPE_INITIALLY_UNOWNED)
 
@@ -74,6 +75,29 @@ joy_bubble_init(JoyBubble *self)
 }
 
 static void
+on_notify(JoyBubble *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	cairo_rectangle_int_t rect = {
+		0, 0,
+		joy_bubble_get_width(self),
+		joy_bubble_get_height(self)
+	};
+	cairo_region_subtract(priv->area, priv->area);
+	cairo_region_union_rectangle(priv->area, &rect);
+}
+
+static void
+constructed(GObject *base)
+{
+	on_notify(JOY_BUBBLE(base));
+	g_signal_connect(base, "notify::parent", G_CALLBACK(on_notify), NULL);
+	if (G_OBJECT_CLASS(joy_bubble_parent_class)->constructed) {
+		G_OBJECT_CLASS(joy_bubble_parent_class)->constructed(base);
+	}
+}
+
+static void
 dispose(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
@@ -117,8 +141,12 @@ enum Properties {
 	PROP_HORIZONTAL_EXPAND,
 	PROP_VERTICAL_EXPAND,
 	PROP_BUFFERED,
+	PROP_STYLE,
+	PROP_PARENT,
 	PROP_MAX
 };
+
+static GParamSpec *properties[PROP_MAX];
 
 static void
 set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
@@ -147,6 +175,30 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 		joy_bubble_set_buffered(JOY_BUBBLE(base),
 				g_value_get_boolean(value));
 		break;
+	case PROP_STYLE:
+		joy_bubble_set_style(JOY_BUBBLE(base),
+				g_value_get_object(value));
+		break;
+	case PROP_PARENT:
+		joy_bubble_set_parent(JOY_BUBBLE(base),
+				g_value_get_object(value));
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
+		break;
+	}
+}
+
+static void
+get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
+{
+	struct Private *priv = GET_PRIVATE(base);
+	switch (id) {
+	case PROP_STYLE:
+		g_value_set_object(value, priv->style);
+		break;
+	case PROP_PARENT:
+		g_value_set_object(value, priv->parent);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
 		break;
@@ -160,13 +212,8 @@ set_style(JoyBubble *self, JoyTheme *theme)
 	if (priv->style) {
 		g_object_unref(priv->style);
 	}
-	JoyStyle *style = joy_theme_get_style(theme, self);
-	if (style) {
-		priv->style = g_object_ref(style);
-		joy_bubble_damage(self, 0, 0, priv->width, priv->height);
-	} else {
-		priv->style = NULL;
-	}
+	priv->style = joy_theme_get_style(theme, self);
+	joy_bubble_damage(self, 0, 0, priv->width, priv->height);
 }
 
 static JoyApplication *
@@ -223,17 +270,6 @@ at(JoyBubble *self, gint x, gint y)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->visible) {
-		if (G_UNLIKELY(cairo_region_is_empty(priv->area))) {
-			gint width = joy_bubble_get_width(self);
-			gint height = joy_bubble_get_height(self);
-			if (!width || !height) {
-				return NULL;
-			}
-			cairo_rectangle_int_t rect = {
-				0, 0, width, height
-			};
-			cairo_region_union_rectangle(priv->area, &rect);
-		}
 		if (cairo_region_contains_point(priv->area, x, y)) {
 			return self;
 		}
@@ -255,9 +291,11 @@ static void
 joy_bubble_class_init(JoyBubbleClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
+	object_class->constructed = constructed;
 	object_class->dispose = dispose;
 	object_class->finalize = finalize;
 	object_class->set_property = set_property;
+	object_class->get_property = get_property;
 	klass->set_style = set_style;
 	klass->get_application = get_application;
 	klass->get_screen = get_screen;
@@ -291,7 +329,8 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	// JoyBubble::key-down
 	signals[SIGNAL_KEY_DOWN] =
 		g_signal_new(g_intern_static_string("key-down"),
-			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
+			G_OBJECT_CLASS_TYPE(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
 			G_STRUCT_OFFSET(JoyBubbleClass, key_down),
 			NULL, NULL, joy_marshal_VOID__OBJECT_ULONG_INT_INT_INT,
 			G_TYPE_NONE, 5, G_TYPE_OBJECT, G_TYPE_ULONG,
@@ -299,7 +338,8 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	// JoyBubble::key-up
 	signals[SIGNAL_KEY_UP] =
 		g_signal_new(g_intern_static_string("key-up"),
-			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
+			G_OBJECT_CLASS_TYPE(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
 			G_STRUCT_OFFSET(JoyBubbleClass, key_up),
 			NULL, NULL, joy_marshal_VOID__OBJECT_ULONG_INT_INT_INT,
 			G_TYPE_NONE, 5, G_TYPE_OBJECT, G_TYPE_ULONG,
@@ -319,7 +359,8 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	// JoyBubble::motion
 	signals[SIGNAL_MOTION] =
 		g_signal_new(g_intern_static_string("motion"),
-			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_FIRST,
+			G_OBJECT_CLASS_TYPE(klass),
+			G_SIGNAL_RUN_FIRST | G_SIGNAL_DETAILED,
 			G_STRUCT_OFFSET(JoyBubbleClass, motion),
 			NULL, NULL, joy_marshal_VOID__OBJECT_ULONG_INT_INT,
 			G_TYPE_NONE, 4, G_TYPE_OBJECT, G_TYPE_ULONG,
@@ -327,7 +368,8 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	// JoyBubble::button-down
 	signals[SIGNAL_BUTTON_DOWN] =
 		g_signal_new(g_intern_static_string("button-down"),
-			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
+			G_OBJECT_CLASS_TYPE(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
 			G_STRUCT_OFFSET(JoyBubbleClass, button_down),
 			NULL, NULL, joy_marshal_VOID__OBJECT_ULONG_INT_INT_INT,
 			G_TYPE_NONE, 5, G_TYPE_OBJECT, G_TYPE_ULONG,
@@ -335,7 +377,8 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	// JoyBubble::button-up
 	signals[SIGNAL_BUTTON_UP] =
 		g_signal_new(g_intern_static_string("button-up"),
-			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
+			G_OBJECT_CLASS_TYPE(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
 			G_STRUCT_OFFSET(JoyBubbleClass, button_up),
 			NULL, NULL, joy_marshal_VOID__OBJECT_ULONG_INT_INT_INT,
 			G_TYPE_NONE, 5, G_TYPE_OBJECT, G_TYPE_ULONG,
@@ -343,7 +386,8 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	// JoyBubble::scroll
 	signals[SIGNAL_SCROLL] =
 		g_signal_new(g_intern_static_string("scroll"),
-			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
+			G_OBJECT_CLASS_TYPE(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
 			G_STRUCT_OFFSET(JoyBubbleClass, scroll),
 			NULL, NULL, joy_marshal_VOID__OBJECT_ULONG_INT_INT_INT,
 			G_TYPE_NONE, 5, G_TYPE_OBJECT, G_TYPE_ULONG,
@@ -351,7 +395,8 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	// JoyBubble::enter
 	signals[SIGNAL_ENTER] =
 		g_signal_new(g_intern_static_string("enter"),
-			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
+			G_OBJECT_CLASS_TYPE(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
 			G_STRUCT_OFFSET(JoyBubbleClass, enter),
 			NULL, NULL, joy_marshal_VOID__OBJECT_ULONG_INT_INT,
 			G_TYPE_NONE, 4, G_TYPE_OBJECT, G_TYPE_ULONG,
@@ -359,7 +404,8 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	// JoyBubble::leave
 	signals[SIGNAL_LEAVE] =
 		g_signal_new(g_intern_static_string("leave"),
-			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
+			G_OBJECT_CLASS_TYPE(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
 			G_STRUCT_OFFSET(JoyBubbleClass, leave),
 			NULL, NULL, joy_marshal_VOID__OBJECT_ULONG_INT_INT,
 			G_TYPE_NONE, 4, G_TYPE_OBJECT, G_TYPE_ULONG,
@@ -404,6 +450,18 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 		g_param_spec_boolean("buffered", Q_("Buffered"),
 			Q_("Indicates if this widget is double buffered"),
 			FALSE, G_PARAM_WRITABLE));
+	properties[PROP_STYLE] =
+		g_param_spec_object("style", Q_("Style"),
+			Q_("The style for this widget"), JOY_TYPE_THEME,
+			G_PARAM_READABLE | G_PARAM_WRITABLE);
+	g_object_class_install_property(object_class, PROP_STYLE,
+			properties[PROP_STYLE]);
+	properties[PROP_PARENT] =
+		g_param_spec_object("parent", Q_("Parent"),
+			Q_("The parent of this widget"), JOY_TYPE_BUBBLE,
+			G_PARAM_READABLE | G_PARAM_WRITABLE);
+	g_object_class_install_property(object_class, PROP_PARENT,
+			properties[PROP_PARENT]);
 }
 
 static void
@@ -454,9 +512,9 @@ joy_bubble_set_name(JoyBubble *self, const gchar *name)
 	g_free(priv->name);
 	priv->name = g_strdup(name);
 	JoyApplication *app = joy_bubble_get_application(self);
-	if (app) {
+	if (G_LIKELY(app)) {
 		JoyTheme *theme = joy_application_get_theme(app);
-		if (theme) {
+		if (G_LIKELY(theme)) {
 			joy_bubble_set_style(self, theme);
 		}
 	}
@@ -467,7 +525,7 @@ joy_bubble_get_name(JoyBubble *self)
 {
 	g_return_val_if_fail(JOY_IS_BUBBLE(self), NULL);
 	struct Private *priv = GET_PRIVATE(self);
-	if (priv->name) {
+	if (G_UNLIKELY(priv->name)) {
 		return priv->name;
 	} else {
 		return G_OBJECT_TYPE_NAME(self);
@@ -479,7 +537,27 @@ joy_bubble_set_style(JoyBubble *self, JoyTheme *theme)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_THEME(theme));
-	JOY_BUBBLE_GET_CLASS(self)->set_style(self, theme);
+	JOY_BUBBLE_CLASS(self)->set_style(self, theme);
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_STYLE]);
+}
+
+JoyStyle *
+joy_bubble_get_style(JoyBubble *self)
+{
+	g_return_val_if_fail(JOY_IS_BUBBLE(self), NULL);
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(!priv->style)) {
+		JoyApplication *app = joy_bubble_get_application(self);
+		if (G_UNLIKELY(!app)) {
+			return NULL;
+		}
+		JoyTheme *theme = joy_application_get_theme(app);
+		if (G_UNLIKELY(!theme)) {
+			return NULL;
+		}
+		joy_bubble_set_style(self, theme);
+	}
+	return priv->style;
 }
 
 void
@@ -501,20 +579,21 @@ joy_bubble_set_alpha(JoyBubble *self, gdouble alpha)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	struct Private *priv = GET_PRIVATE(self);
-	priv->alpha = CLAMP(alpha, 0., 1.);
-	if (0. == priv->alpha) {
+	alpha = CLAMP(alpha, 0., 1.);
+	if (0. == alpha) {
 		joy_bubble_hide(self);
 		return;
 	} else {
-		if (priv->buffer) {
-			joy_buffer_set_alpha(priv->buffer, priv->alpha);
-		}
 		if (!priv->visible) {
 			joy_bubble_show(self);
 		} else {
 			damage(self, 0, 0, joy_bubble_get_width(self),
 					joy_bubble_get_height(self), FALSE);
 		}
+		if (priv->buffer) {
+			joy_buffer_set_alpha(priv->buffer, alpha);
+		}
+		priv->alpha = alpha;
 	}
 }
 
@@ -540,6 +619,7 @@ joy_bubble_set_parent(JoyBubble *self, JoyBubble *parent)
 		g_object_unref(priv->parent);
 	}
 	priv->parent = parent ? g_object_ref(parent) : NULL;
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_PARENT]);
 }
 
 JoyBubble *
@@ -661,6 +741,68 @@ joy_bubble_get_window(JoyBubble *self)
 	return JOY_BUBBLE_GET_CLASS(self)->get_window(self);
 }
 
+PangoLayout *
+joy_bubble_pango_layout_create(JoyBubble *self)
+{
+	g_return_val_if_fail(JOY_IS_BUBBLE(self), NULL);
+	struct Private *priv = GET_PRIVATE(self);
+	PangoLayout *layout = NULL;
+	if (G_UNLIKELY(!priv->style)) {
+		JoyApplication *app = joy_bubble_get_application(self);
+		if (G_UNLIKELY(!app)) {
+			goto exit;
+		}
+		JoyTheme *theme = joy_application_get_theme(app);
+		if (G_UNLIKELY(!theme)) {
+			goto exit;
+		}
+		layout = joy_theme_pango_layout_create(theme);
+	} else {
+		layout = joy_style_pango_layout_create(priv->style);
+	}
+exit:
+	if (G_UNLIKELY(!layout)) {
+		PangoFontMap *map = pango_cairo_font_map_get_default();
+		if (G_UNLIKELY(!map)) {
+			return NULL;
+		}
+		PangoContext *context = pango_font_map_create_context(map);
+		if (G_UNLIKELY(!context)) {
+			return NULL;
+		}
+		layout = pango_layout_new(context);
+		g_object_unref(context);
+	}
+	return layout;
+}
+
+void
+joy_bubble_cairo_set_source_font(JoyBubble *self, cairo_t *cr)
+{
+	g_return_if_fail(JOY_IS_BUBBLE(self));
+	g_return_if_fail(cr);
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(!priv->style)) {
+		JoyApplication *app = joy_bubble_get_application(self);
+		if (G_UNLIKELY(!app)) {
+			goto exit;
+		}
+		JoyTheme *theme = joy_application_get_theme(app);
+		if (G_UNLIKELY(!theme)) {
+			goto exit;
+		}
+		if (joy_theme_cairo_set_source_font(theme, cr)) {
+			return;
+		}
+	} else {
+		if (joy_style_cairo_set_source_font(priv->style, cr)) {
+			return;
+		}
+	}
+exit:
+	cairo_set_source_rgb(cr, 1., 1., 1.);
+}
+
 JoyBubble *
 joy_bubble_at(JoyBubble *self, gint x, gint y)
 {
@@ -772,11 +914,16 @@ joy_bubble_expose(JoyBubble *self, const cairo_rectangle_int_t *rect)
 	g_return_if_fail(rect);
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->visible) {
+		if (cairo_region_contains_rectangle(priv->area, rect)
+				== CAIRO_REGION_OVERLAP_OUT) {
+			return;
+		}
 		if (cairo_region_contains_rectangle(priv->draw, rect)
 				== CAIRO_REGION_OVERLAP_IN) {
 			return;
 		}
 		cairo_region_union_rectangle(priv->draw, rect);
+		cairo_region_intersect(priv->draw, priv->area);
 		g_signal_emit(self, signals[SIGNAL_EXPOSE], 0, rect);
 	}
 }
@@ -830,6 +977,9 @@ joy_bubble_show(JoyBubble *self)
 	struct Private *priv = GET_PRIVATE(self);
 	if (!priv->visible) {
 		priv->visible = TRUE;
+		if (0. == priv->alpha) {
+			priv->alpha = 1.;
+		}
 		g_signal_emit(self, signals[SIGNAL_SHOW], 0);
 		if (priv->parent) {
 			damage(priv->parent, priv->x, priv->y,
@@ -847,6 +997,7 @@ joy_bubble_hide(JoyBubble *self)
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->visible) {
 		priv->visible = FALSE;
+		priv->alpha = 0.;
 		g_signal_emit(self, signals[SIGNAL_HIDE], 0);
 		if (priv->parent) {
 			damage(priv->parent, priv->x, priv->y,

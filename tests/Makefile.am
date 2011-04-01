@@ -6,7 +6,8 @@ INCLUDES = \
 	-I$(top_srcdir) \
 	$(GLIB_CFLAGS) \
 	$(GOBJECT_CFLAGS) \
-	$(CAIRO_CFLAGS)
+	$(CAIRO_CFLAGS) \
+	$(PANGO_CFLAGS)
 # add libraries
 LIBS = \
 	$(top_builddir)/joy/libjoybubbles-$(joy_series).la

@@ -65,7 +65,7 @@ void
 joy_buffer_set_alpha(JoyBuffer *self, gdouble alpha)
 {
 	g_return_if_fail(self);
-	g_return_if_fail(alpha >= 0. && 1. >= alpha);
+	alpha = CLAMP(alpha, 0., 1.);
 	if (1. == alpha) {
 		self->paint_with_alpha = FALSE;
 	} else {

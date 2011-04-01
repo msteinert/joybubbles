@@ -26,6 +26,7 @@
 #include <joy/filter/gaussian.h>
 #include <joy/image.h>
 #include <joy/iterator.h>
+#include <joy/label.h>
 #include <joy/screen.h>
 #include <joy/sketch.h>
 #include <joy/window.h>

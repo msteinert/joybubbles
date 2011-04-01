@@ -19,6 +19,7 @@
 #include <joy/device/mouse.h>
 #include <joy/device/keyboard.h>
 #include <joy/types.h>
+#include <pango/pango.h>
 
 G_BEGIN_DECLS
 
@@ -181,6 +182,9 @@ joy_bubble_get_name(JoyBubble *self);
  */
 void
 joy_bubble_set_style(JoyBubble *self, JoyTheme *theme);
+
+JoyStyle *
+joy_bubble_get_style(JoyBubble *self);
 
 /**
  * \brief Set back-buffering for a widget.
@@ -387,6 +391,33 @@ joy_bubble_get_screen(JoyBubble *self);
  */
 JoyBubble *
 joy_bubble_get_window(JoyBubble *self);
+
+/**
+ * \brief Create a Pango layout using the current style.
+ *
+ * This function will connect the appropriate signal handlers to update
+ * the layout if the Pango context changes or the font description for the
+ * associated style changes.
+ *
+ * Widgets that plan to keep the created layout should connect to the
+ * notify:style signal and destroy the layout when it is emitted.
+ *
+ * \param self [in] A Widget object.
+ *
+ * \return A new Pango layout for use with \e self.
+ */
+G_GNUC_WARN_UNUSED_RESULT
+PangoLayout *
+joy_bubble_pango_layout_create(JoyBubble *self);
+
+/**
+ * \brief Set the default Cairo source for drawing fonts.
+ *
+ * \param self [in] A Widget object.
+ * \param cr [in] A Cairo context.
+ */
+void
+joy_bubble_cairo_set_source_font(JoyBubble *self, cairo_t *cr);
 
 /**
  * \brief Get the widget at the given coordinates.

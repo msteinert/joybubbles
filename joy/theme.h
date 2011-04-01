@@ -17,6 +17,7 @@
 #include <cairo.h>
 #include <glib-object.h>
 #include <joy/types.h>
+#include <pango/pango.h>
 
 G_BEGIN_DECLS
 
@@ -71,6 +72,17 @@ joy_theme_get_type(void) G_GNUC_CONST;
  */
 JoyStyle *
 joy_theme_get_style(JoyTheme *self, JoyBubble *widget);
+
+void
+joy_theme_set_font_description(JoyTheme *self,
+		const PangoFontDescription *desc);
+
+G_GNUC_WARN_UNUSED_RESULT
+PangoLayout *
+joy_theme_pango_layout_create(JoyTheme *self);
+
+gboolean
+joy_theme_cairo_set_source_font(JoyTheme *self, cairo_t *cr);
 
 G_END_DECLS
 

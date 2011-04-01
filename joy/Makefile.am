@@ -24,6 +24,7 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_SOURCES = \
 	filter.c \
 	image.c \
 	iterator.c \
+	label.c \
 	macros.h \
 	marshal.c \
 	marshal.h \
@@ -45,12 +46,16 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_CFLAGS = \
 	$(GLIB_CFLAGS) \
 	$(GOBJECT_CFLAGS) \
 	$(CAIRO_CFLAGS) \
+	$(PANGO_CFLAGS) \
+	$(PANGOCAIRO_CFLAGS) \
 	$(GDK_PIXBUF_CFLAGS)
 libjoybubbles_@joy_series_major@_@joy_series_minor@_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	$(GLIB_LIBS) \
 	$(GOBJECT_LIBS) \
 	$(CAIRO_LIBS) \
+	$(PANGO_LIBS) \
+	$(PANGOCAIRO_LIBS) \
 	$(GDK_PIXBUF_LIBS)
 libjoybubbles_@joy_series_major@_@joy_series_minor@_la_LIBADD = \
 	animation/libjoybubbles-animation.la \
@@ -75,6 +80,7 @@ pkginclude_HEADERS = \
 	filter.h \
 	image.h \
 	iterator.h \
+	label.h \
 	screen.h \
 	source.h \
 	style.h \

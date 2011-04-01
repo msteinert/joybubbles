@@ -214,37 +214,31 @@ on_scroll(JoyBubble *window, JoyDevice *device, gulong timestamp,
 		gint x, gint y, JoyScroll direction,
 		struct Crossing *crossing)
 {
+	gint width, height;
+	JoyBubble *widget = joy_animation_get_widget(crossing->resize);
 	switch (direction) {
 	case JOY_SCROLL_UP:
-		for (JoyIterator *iter = joy_container_begin(window);
-				iter; iter = joy_iterator_next(iter)) {
-			JoyBubble *widget = joy_iterator_item(iter);
-			gint width = joy_bubble_get_width(widget);
-			gint height = joy_bubble_get_height(widget);
-			joy_bubble_resize(widget, width + crossing->dx,
-					height + crossing->dy);
-			crossing->w1 = joy_bubble_get_width(widget);
-			crossing->h1 = joy_bubble_get_height(widget);;
-			crossing->w2 = crossing->w1 * 1.25;
-			crossing->h2 = crossing->h1 * 1.25;
-		}
+		width = joy_bubble_get_width(widget);
+		height = joy_bubble_get_height(widget);
+		joy_bubble_resize(widget, width + crossing->dx,
+				height + crossing->dy);
+		crossing->w1 = joy_bubble_get_width(widget);
+		crossing->h1 = joy_bubble_get_height(widget);;
+		crossing->w2 = crossing->w1 * 1.25;
+		crossing->h2 = crossing->h1 * 1.25;
 		break;
 	case JOY_SCROLL_DOWN:
-		for (JoyIterator *iter = joy_container_begin(window);
-				iter; iter = joy_iterator_next(iter)) {
-			JoyBubble *widget = joy_iterator_item(iter);
-			gint width = joy_bubble_get_width(widget);
-			gint height = joy_bubble_get_height(widget);
-			if (width - 8 < 0 || height - 6 < 0) {
-				break;
-			}
-			joy_bubble_resize(widget, width - crossing->dx,
-					height - crossing->dy);
-			crossing->w1 = joy_bubble_get_width(widget);
-			crossing->h1 = joy_bubble_get_height(widget);;
-			crossing->w2 = crossing->w1 * 1.25;
-			crossing->h2 = crossing->h1 * 1.25;
+		width = joy_bubble_get_width(widget);
+		height = joy_bubble_get_height(widget);
+		if (width - 8 < 0 || height - 6 < 0) {
+			break;
 		}
+		joy_bubble_resize(widget, width - crossing->dx,
+				height - crossing->dy);
+		crossing->w1 = joy_bubble_get_width(widget);
+		crossing->h1 = joy_bubble_get_height(widget);;
+		crossing->w2 = crossing->w1 * 1.25;
+		crossing->h2 = crossing->h1 * 1.25;
 		break;
 	default:
 		return;
@@ -273,7 +267,6 @@ main(int argc, char *argv[])
 	g_option_context_add_main_entries(context, entries, GETTEXT_PACKAGE);
 	joy_application_add_options(app, context);
 	if (!g_option_context_parse(context, &argc, &argv, &error)) {
-		g_message("%s", error->message);
 		goto error;
 	}
 	g_option_context_free(context);
@@ -286,6 +279,9 @@ main(int argc, char *argv[])
 	if (!window) {
 		goto error;
 	}
+#ifdef JOY_PLATFORM_X11
+	joy_bubble_resize(window, 1280, 720);
+#endif // JOY_PLATFORM_X11
 	g_signal_connect(window, "key-down", G_CALLBACK(on_key_down), NULL);
 	g_signal_connect(window, "key-up", G_CALLBACK(on_key_up), NULL);
 	JoyBubble *image;
@@ -295,7 +291,6 @@ main(int argc, char *argv[])
 			goto error;
 		}
 		joy_container_add(window, image);
-		joy_image_get_surface(image);
 		gint width = (gdouble)joy_image_get_width(image) / 2.;
 		gint height = (gdouble)joy_image_get_height(image) / 2.;
 		joy_bubble_resize(image, width, height);
@@ -343,6 +338,9 @@ main(int argc, char *argv[])
 	joy_animation_set_duration(down.fade, 1.);
 	g_signal_connect(window, "button-down", G_CALLBACK(on_button_down),
 			&down);
+	JoyBubble *label = joy_label_new("Hello, World!");
+	joy_container_add(window, label);
+	joy_bubble_move(label, 100, 100);
 	joy_bubble_show(window);
 	gint status = joy_application_run(app, screen);
 exit:
@@ -358,6 +356,7 @@ exit:
 	return status;
 error:
 	if (error) {
+		g_message("%s", error->message);
 		g_error_free(error);
 	}
 	if (context) {

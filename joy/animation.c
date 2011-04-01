@@ -61,17 +61,6 @@ joy_animation_init(JoyAnimation *self)
 }
 
 static void
-dispose(GObject *base)
-{
-	struct Private *priv = GET_PRIVATE(base);
-	if (priv->widget) {
-		g_object_unref(priv->widget);
-		priv->widget = NULL;
-	}
-	G_OBJECT_CLASS(joy_animation_parent_class)->dispose(base);
-}
-
-static void
 finalize(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
@@ -95,7 +84,7 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 	struct Private *priv = GET_PRIVATE(base);
 	switch (id) {
 	case PROP_WIDGET:
-		priv->widget = g_value_dup_object(value);
+		priv->widget = g_value_get_object(value);
 		break;
 	case PROP_DURATION:
 		priv->duration = g_value_get_double(value);
@@ -113,7 +102,6 @@ static void
 joy_animation_class_init(JoyAnimationClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
-	object_class->dispose = dispose;
 	object_class->finalize = finalize;
 	object_class->set_property = set_property;
 	g_type_class_add_private(klass, sizeof(struct Private));

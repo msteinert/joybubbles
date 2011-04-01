@@ -13,7 +13,8 @@ libjoybubbles_iterator_la_SOURCES = \
 libjoybubbles_iterator_la_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GLIB_CFLAGS) \
-	$(GOBJECT_CFLAGS)
+	$(GOBJECT_CFLAGS) \
+	$(PANGO_CFLAGS)
 # install development headers
 pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/iterator
 pkginclude_HEADERS = \
