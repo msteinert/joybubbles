@@ -96,7 +96,7 @@ G_END_DECLS
         finally:
             file.close()
 
-def main():
+if __name__ == '__main__':
     """Generate a keysym definition based on one or more input files."""
     try:
         parser = argparse.ArgumentParser(description=
@@ -114,7 +114,7 @@ def main():
             file = urllib2.urlopen(uri)
         except ValueError, err:
             try:
-                file = open(args.URI)
+                file = open(uri)
             except Exception, err:
                 print uri, ':', err
                 continue
@@ -134,6 +134,3 @@ def main():
         print args.filename, ':', err
         sys.exit(1)
     sys.exit(0)
-
-if __name__ == '__main__':
-    main()
