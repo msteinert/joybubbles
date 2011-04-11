@@ -492,7 +492,7 @@ joy_gfx3d_screen_cairo_surface_create(JoyScreen *self, GFX3D_Image image)
 	void *pixels = GFX3D_NATIVE_Surface_GetAddress(
 			GFX3D_Image_Get_NATIVE_Surface(image), &stride);
 	if (G_UNLIKELY(!pixels)) {
-		goto error;
+		return NULL;
 	}
 	stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32,
 			rect.iWidth);

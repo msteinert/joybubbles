@@ -11,6 +11,7 @@ import argparse, re, sys, urllib2
 class keysyms:
     def __init__(self):
         self.keys = {}
+        self.names = {}
     def parse(self, file):
         """Parse an X11 keysym definition."""
         self.keys[0x1] = ['Power']
@@ -20,28 +21,20 @@ class keysyms:
         self.keys[0x5] = ['AUX']
         self.keys[0x6] = ['Guide']
         self.keys[0x7] = ['DVR']
-        self.keys[0x8] = ['Search']
-        self.keys[0x9] = ['Input']
-        self.keys[0xa] = ['Live_TV']
-        self.keys[0xb] = ['Recall']
-        self.keys[0xc] = ['Jump']
-        self.keys[0xd] = ['Swap']
-        self.keys[0xe] = ['PiP']
-        self.keys[0xf] = ['Position']
-        self.keys[0x10] = ['Dish']
-        self.keys[0x11] = ['Info']
-        self.keys[0x12] = ['Red']
-        self.keys[0x13] = ['Green']
-        self.keys[0x14] = ['Yellow']
-        self.keys[0x15] = ['Blue']
-        self.keys[0x16] = ['Skip_Forward']
-        self.keys[0x17] = ['Skip_Back']
-        self.keys[0x18] = ['Forward']
-        self.keys[0x19] = ['Back']
-        self.keys[0x1a] = ['Record']
-        self.keys[0x1b] = ['Stop']
-        self.keys[0x1c] = ['Play']
-        self.keys[0x1d] = ['Rewind']
+        self.keys[0x8] = ['Input']
+        self.keys[0x9] = ['Live_TV']
+        self.keys[0xa] = ['Recall']
+        self.keys[0xb] = ['Jump']
+        self.keys[0xc] = ['Swap']
+        self.keys[0xd] = ['PiP']
+        self.keys[0xe] = ['Position']
+        self.keys[0xf] = ['Dish']
+        self.keys[0x10] = ['Info']
+        self.keys[0x11] = ['Skip_Forward']
+        self.keys[0x12] = ['Skip_Back']
+        self.keys[0x13] = ['Record']
+        self.keys[0x14] = ['Play']
+        self.keys[0x15] = ['Rewind']
         pattern = re.compile('#define (XK|XF86XK)_(\S*)\s*((0x)?[0-9a-fA-F]*)')
         for line in file:
             match = re.match(pattern, line)
@@ -51,9 +44,11 @@ class keysyms:
                     sym = int(match.group(3), 0)
                 except Exception, err:
                     continue
-                if not self.keys.has_key(sym):
-                    self.keys[sym] = []
-                self.keys[sym].append(name)
+                if not self.names.has_key(name):
+                    if not self.keys.has_key(sym):
+                        self.keys[sym] = []
+                    self.keys[sym].append(name)
+                    self.names[name] = True
     def write(self, filename):
         """Write a keysym definition to a file."""
         file = open(filename, 'w')

@@ -16,7 +16,7 @@ libjoybubbles_device_la_CFLAGS = \
 # generate keysyms
 JOY_GEN_KEYSYMS = $(srcdir)/joy-gen-keysyms.py
 $(top_srcdir)/joy/device/keysym.h: $(JOY_GEN_KEYSYMS)
-	$(AM_V_GEN)$(PYTHON) $(JOY_GEN_KEYSYMS) -o $@ "$(JOY_KEYSYM_INPUT_H)"
+	$(AM_V_GEN)$(PYTHON) $(JOY_GEN_KEYSYMS) -o $@ $(JOY_KEYSYM_INPUT_H)
 EXTRA_DIST = $(JOY_GEN_KEYSYMS)
 # install development headers
 pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/device

@@ -102,6 +102,7 @@ joy_source_class_init(JoySourceClass *klass)
 JoySource *
 joy_source_new(gint descriptor)
 {
+	g_return_val_if_fail(0 > descriptor, NULL);
 	return g_object_new(JOY_TYPE_SOURCE,
 			"descriptor", descriptor,
 			NULL);

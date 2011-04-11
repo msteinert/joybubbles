@@ -385,6 +385,18 @@ non_motion_event(JoySource *self, JoyScreen *screen, const IM_INPUT *event,
 	}
 }
 
+static inline void
+motion_event(JoySource *self, JoyScreen *screen, gulong timestamp)
+{
+	gint x, y;
+	joy_gfx3d_screen_get_cursor_position(screen, &x, &y);
+	JoyBubble *window = joy_screen_window_at(screen, x, y);
+	if (window) {
+		JoyDevice *mouse = joy_gfx3d_screen_get_mouse(screen);
+		joy_bubble_motion(window, mouse, timestamp, x, y);
+	}
+}
+
 static void
 input(JoySource *self)
 {
@@ -410,31 +422,19 @@ input(JoySource *self)
 	if (G_UNLIKELY(!screen)) {
 		return;
 	}
-	gint x, y;
-	JoyBubble *window;
 	gulong timestamp = g_timer_elapsed(priv->timer, NULL) * 1000;
 	switch (event.key) {
 	case INPUT_KEY_RELATIVE_POINT: // relative mouse motion
 		joy_gfx3d_screen_move_cursor(screen,
 				(gshort)(event.data[0] | event.data[1] << 8),
 				-(gshort)(event.data[2] | event.data[3] << 8));
-		joy_gfx3d_screen_get_cursor_position(screen, &x, &y);
-		window = joy_screen_window_at(screen, x, y);
-		if (window) {
-			JoyDevice *mouse = joy_gfx3d_screen_get_mouse(screen);
-			joy_bubble_motion(window, mouse, timestamp, x, y);
-		}
+		motion_event(self, screen, timestamp);
 		break;
 	case INPUT_KEY_ABSOLUTE_POINT: // absolute mouse motion
 		joy_gfx3d_screen_warp_cursor(screen,
 				(gshort)(event.data[0] | event.data[1] << 8),
-				(gshort)(event.data[2] | event.data[3] << 8));
-		joy_gfx3d_screen_get_cursor_position(screen, &x, &y);
-		window = joy_screen_window_at(screen, x, y);
-		if (window) {
-			JoyDevice *mouse = joy_gfx3d_screen_get_mouse(screen);
-			joy_bubble_motion(window, mouse, timestamp, x, y);
-		}
+				-(gshort)(event.data[2] | event.data[3] << 8));
+		motion_event(self, screen, timestamp);
 		break;
 	default:
 		non_motion_event(self, screen, &event, timestamp);
