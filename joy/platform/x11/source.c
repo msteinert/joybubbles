@@ -27,7 +27,8 @@ G_DEFINE_TYPE(JoyX11Source, joy_x11_source, JOY_TYPE_SOURCE)
 struct Private {
 	JoyApplication *app;
 	Display *display;
-	gpointer cache[2];
+	JoyBubble *window;
+	XID xid;
 };
 
 static void
@@ -146,71 +147,58 @@ static const gchar *const events[] = {
 };
 #endif
 
-static void
-input(JoySource *self)
+static inline void
+handle_event(JoySource *self, JoyBubble *window, XEvent *event)
 {
 	struct Private *priv = GET_PRIVATE(self);
-	XEvent event;
-	XNextEvent(priv->display, &event);
-	if (G_UNLIKELY(priv->cache[0] != (gpointer)event.xany.window)) {
-		priv->cache[0] = (gpointer)event.xany.window;
-		priv->cache[1] = joy_x11_application_lookup_xid(priv->app,
-				event.xany.window);
-	}
-	JoyBubble *window = priv->cache[1];
-	if (G_UNLIKELY(!window)) {
-		g_message(Q_("x11: unknown XID [%lx]"),
-				event.xany.window);
-		return;
-	}
-	joy_x11_window_set_event(window, &event);
-	switch (event.type) {
+	joy_x11_window_set_event(window, event);
+	switch (event->type) {
 	case ButtonPress:
-		switch (event.xbutton.button) {
+		switch (event->xbutton.button) {
 		case 4:
 			joy_bubble_scroll(window,
 					joy_x11_application_get_mouse(
 						priv->app),
-					event.xbutton.time,
-					event.xbutton.x, event.xbutton.y,
+					event->xbutton.time,
+					event->xbutton.x, event->xbutton.y,
 					JOY_SCROLL_UP);
 			break;
 		case 5:
 			joy_bubble_scroll(window,
 					joy_x11_application_get_mouse(
 						priv->app),
-					event.xbutton.time,
-					event.xbutton.x, event.xbutton.y,
+					event->xbutton.time,
+					event->xbutton.x, event->xbutton.y,
 					JOY_SCROLL_DOWN);
 			break;
 		case 6:
 			joy_bubble_scroll(window,
 					joy_x11_application_get_mouse(
 						priv->app),
-					event.xbutton.time,
-					event.xbutton.x, event.xbutton.y,
+					event->xbutton.time,
+					event->xbutton.x, event->xbutton.y,
 					JOY_SCROLL_LEFT);
 			break;
 		case 7:
 			joy_bubble_scroll(window,
 					joy_x11_application_get_mouse(
 						priv->app),
-					event.xbutton.time,
-					event.xbutton.x, event.xbutton.y,
+					event->xbutton.time,
+					event->xbutton.x, event->xbutton.y,
 					JOY_SCROLL_RIGHT);
 			break;
 		default:
 			joy_bubble_button_down(window,
 					joy_x11_application_get_mouse(
 						priv->app),
-					event.xbutton.time,
-					event.xbutton.x, event.xbutton.y,
-					get_button(event.xbutton.button));
+					event->xbutton.time,
+					event->xbutton.x, event->xbutton.y,
+					get_button(event->xbutton.button));
 			break;
 		}
 		break;
         case ButtonRelease:
-		switch (event.xbutton.button) {
+		switch (event->xbutton.button) {
 		case 4:
 		case 5:
 		case 6:
@@ -220,37 +208,37 @@ input(JoySource *self)
 			joy_bubble_button_up(window,
 					joy_x11_application_get_mouse(
 						priv->app),
-					event.xbutton.time,
-					event.xbutton.x, event.xbutton.y,
-					get_button(event.xbutton.button));
+					event->xbutton.time,
+					event->xbutton.x, event->xbutton.y,
+					get_button(event->xbutton.button));
 			break;
 		}
 		break;
 	case ConfigureNotify:
-		joy_bubble_move(window, event.xconfigure.x,
-				event.xconfigure.y);
-		joy_bubble_resize(window, event.xconfigure.width,
-				event.xconfigure.height);
+		joy_bubble_move(window, event->xconfigure.x,
+				event->xconfigure.y);
+		joy_bubble_resize(window, event->xconfigure.width,
+				event->xconfigure.height);
 		break;
 	case EnterNotify:
-		if (NotifyNormal != event.xcrossing.mode) {
+		if (NotifyNormal != event->xcrossing.mode) {
 			break;
 		}
-		joy_bubble_enter(joy_bubble_at(window, event.xcrossing.x,
-					event.xcrossing.y),
+		joy_bubble_enter(joy_bubble_at(window, event->xcrossing.x,
+					event->xcrossing.y),
 				joy_x11_application_get_mouse(priv->app),
-				event.xcrossing.time, event.xcrossing.x,
-				event.xcrossing.y);
+				event->xcrossing.time, event->xcrossing.x,
+				event->xcrossing.y);
 		break;
 	case LeaveNotify:
-		if (NotifyNormal != event.xcrossing.mode) {
+		if (NotifyNormal != event->xcrossing.mode) {
 			break;
 		}
 		JoyDevice *mouse = joy_x11_application_get_mouse(priv->app);
 		joy_bubble_leave(joy_bubble_at_device(window, mouse),
 				joy_x11_application_get_mouse(priv->app),
-				event.xcrossing.time,
-				event.xcrossing.x, event.xcrossing.y);
+				event->xcrossing.time,
+				event->xcrossing.x, event->xcrossing.y);
 		JoyScreen *screen = joy_bubble_get_screen(window);
 		if (G_LIKELY(screen)) {
 			joy_screen_set_at_device(screen, mouse, NULL);
@@ -259,10 +247,10 @@ input(JoySource *self)
 	case Expose:
 		{
 			cairo_rectangle_int_t rect = {
-				event.xexpose.x,
-				event.xexpose.y,
-				event.xexpose.width,
-				event.xexpose.height
+				event->xexpose.x,
+				event->xexpose.y,
+				event->xexpose.width,
+				event->xexpose.height
 			};
 			joy_bubble_expose(window, &rect);
 		}
@@ -273,8 +261,8 @@ input(JoySource *self)
 	case MotionNotify:
 		joy_bubble_motion(window,
 				joy_x11_application_get_mouse(priv->app),
-				event.xmotion.time,
-				event.xmotion.x, event.xmotion.y);
+				event->xmotion.time,
+				event->xmotion.x, event->xmotion.y);
 		break;
 	case UnmapNotify:
 		joy_bubble_hide(window);
@@ -282,25 +270,24 @@ input(JoySource *self)
 	case KeyPress:
 		joy_bubble_key_down(window,
 				joy_x11_application_get_keyboard(priv->app),
-				event.xkey.time,
-				event.xkey.x, event.xkey.y,
-				get_key(&event.xkey));
+				event->xkey.time, event->xkey.x, event->xkey.y,
+				get_key(&event->xkey));
 		break;
 	case KeyRelease:
 		if (XPending(priv->display)) {
 			XEvent next;
 			XPeekEvent(priv->display, &next);
 			if (next.type == KeyPress
-				&& next.xkey.keycode == event.xkey.keycode
-				&& next.xkey.time == event.xkey.time) {
+				&& next.xkey.keycode == event->xkey.keycode
+				&& next.xkey.time == event->xkey.time) {
 				break;
 			}
 		}
 		joy_bubble_key_up(window,
 				joy_x11_application_get_keyboard(priv->app),
-				event.xkey.time,
-				event.xkey.x, event.xkey.y,
-				get_key(&event.xkey));
+				event->xkey.time,
+				event->xkey.x, event->xkey.y,
+				get_key(&event->xkey));
 		break;
 	case DestroyNotify:
 		joy_x11_window_destroy(window);
@@ -317,13 +304,35 @@ input(JoySource *self)
 	default:
 #ifdef JOY_DEBUG
 		g_message(Q_("x11: unhandled event %s [%d]"),
-				events[event.type], event.type);
+				events[event->type], event->type);
 #else // JOY_DEBUG
-		g_message(Q_("x11: unhandled event [%d]"), event.type);
+		g_message(Q_("x11: unhandled event [%d]"), event->type);
 		break;
 #endif // JOY_DEBUG
 	}
-	joy_x11_window_set_event(window, NULL);
+}
+
+static void
+input(JoySource *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	while (XPending(priv->display)) {
+		XEvent event;
+		XNextEvent(priv->display, &event);
+		if (G_UNLIKELY(priv->xid != event.xany.window)) {
+			priv->xid = event.xany.window;
+			priv->window = joy_x11_application_lookup_xid(
+					priv->app, event.xany.window);
+		}
+		if (G_UNLIKELY(!priv->window)) {
+			g_message(Q_("x11: unknown XID [%lx]"), priv->xid);
+			continue;
+		}
+		handle_event(self, priv->window, &event);
+	}
+	if (G_LIKELY(priv->window)) {
+		joy_x11_window_set_event(priv->window, NULL);
+	}
 }
 
 static void

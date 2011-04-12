@@ -8,6 +8,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <errno.h>
 #include <fcntl.h>
 #include <input_mgr_lite.h>
 #include "joy/bubble.h"
@@ -397,48 +398,71 @@ motion_event(JoySource *self, JoyScreen *screen, gulong timestamp)
 	}
 }
 
+static inline void
+relative_motion_event(JoySource *self, JoyScreen *screen, IM_INPUT *event,
+		gulong timestamp)
+{
+	gint x = (gshort)(event->data[0] | event->data[1] << 8);
+	gint y = -(gshort)(event->data[2] | event->data[3] << 8);
+	joy_gfx3d_screen_move_cursor(screen, x, y);
+	motion_event(self, screen, timestamp);
+}
+
+static inline void
+absolute_motion_event(JoySource *self, JoyScreen *screen, IM_INPUT *event,
+		gulong timestamp)
+{
+	gint x = (gshort)(event->data[0] | event->data[1] << 8);
+	gint y = -(gshort)(event->data[2] | event->data[3] << 8);
+	joy_gfx3d_screen_warp_cursor(screen, x, y);
+	motion_event(self, screen, timestamp);
+}
+
 static void
 input(JoySource *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	int fd = joy_source_get_descriptor(self);
 	IM_INPUT event;
-	ssize_t bytes = read(fd, &event, sizeof(IM_INPUT));
-	if (-1 == bytes || sizeof(IM_INPUT) != bytes) {
-		return;
-	}
-	JoyScreen *screen;
-	switch (event.tv) {
-	case IM_TV1:
-		screen = joy_application_get_screen(priv->app, 0);
-		break;
-	case IM_TV2:
-		screen = joy_application_get_screen(priv->app, 1);
-		break;
-	default:
-		g_message("gfx3d: unrecognized TV: %d", event.tv);
-		return;
-	}
-	if (G_UNLIKELY(!screen)) {
-		return;
-	}
-	gulong timestamp = g_timer_elapsed(priv->timer, NULL) * 1000;
-	switch (event.key) {
-	case INPUT_KEY_RELATIVE_POINT: // relative mouse motion
-		joy_gfx3d_screen_move_cursor(screen,
-				(gshort)(event.data[0] | event.data[1] << 8),
-				-(gshort)(event.data[2] | event.data[3] << 8));
-		motion_event(self, screen, timestamp);
-		break;
-	case INPUT_KEY_ABSOLUTE_POINT: // absolute mouse motion
-		joy_gfx3d_screen_warp_cursor(screen,
-				(gshort)(event.data[0] | event.data[1] << 8),
-				-(gshort)(event.data[2] | event.data[3] << 8));
-		motion_event(self, screen, timestamp);
-		break;
-	default:
-		non_motion_event(self, screen, &event, timestamp);
-		break;
+	while (TRUE) {
+		ssize_t bytes = read(fd, &event, sizeof(IM_INPUT));
+		if (-1 == bytes) {
+			if (G_UNLIKELY(EAGAIN != errno)) {
+				g_message("gfx3d: %s", strerror(errno));
+			}
+			return;
+		}
+		if (G_UNLIKELY(sizeof(IM_INPUT) != bytes)) {
+			g_message(Q_("gfx3d: message too short (%d)"), bytes);
+			return;
+		}
+		JoyScreen *screen;
+		switch (event.tv) {
+		case IM_TV1:
+			screen = joy_application_get_screen(priv->app, 0);
+			break;
+		case IM_TV2:
+			screen = joy_application_get_screen(priv->app, 1);
+			break;
+		default:
+			g_message(Q_("gfx3d: unrecognized TV: %d"), event.tv);
+			return;
+		}
+		if (G_UNLIKELY(!screen)) {
+			return;
+		}
+		gulong timestamp = g_timer_elapsed(priv->timer, NULL) * 1000;
+		switch (event.key) {
+		case INPUT_KEY_RELATIVE_POINT:
+			relative_motion_event(self, screen, &event, timestamp);
+			break;
+		case INPUT_KEY_ABSOLUTE_POINT:
+			absolute_motion_event(self, screen, &event, timestamp);
+			break;
+		default:
+			non_motion_event(self, screen, &event, timestamp);
+			break;
+		}
 	}
 }
 
@@ -463,7 +487,7 @@ JoySource *
 joy_gfx3d_source_new(JoyApplication *app)
 {
 	g_return_val_if_fail(JOY_IS_GFX3D_APPLICATION(app), NULL);
-	int fd = open(INPUT_MANAGER_FIFO_NAME, O_RDONLY);
+	int fd = open(INPUT_MANAGER_FIFO_NAME, O_RDONLY | O_NONBLOCK);
 	if (G_UNLIKELY(-1 == fd)) {
 		return NULL;
 	}
