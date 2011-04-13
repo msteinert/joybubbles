@@ -362,6 +362,7 @@ joy_x11_source_new(JoyApplication *app)
 	}
 	return g_object_new(JOY_TYPE_X11_SOURCE,
 			"descriptor", ConnectionNumber(display),
+			"condition", G_IO_IN,
 			"application", app,
 			NULL);
 }

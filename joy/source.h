@@ -7,7 +7,7 @@
 
 /**
  * \file
- * \brief Selectable input sources
+ * \brief Pollable input sources
  * \author Mike Steinert <michael.steinert@echostar.com>
  */
 
@@ -52,7 +52,13 @@ typedef gboolean
 (*JoySourcePrepare)(JoySource *self);
 
 typedef void
+(*JoySourceDispatch)(JoySource *self, gushort revents);
+
+typedef void
 (*JoySourceInput)(JoySource *self);
+
+typedef void
+(*JoySourceOutput)(JoySource *self);
 
 typedef void
 (*JoySourceHangup)(JoySource *self);
@@ -65,7 +71,9 @@ struct JoySourceClass_ {
 	GInitiallyUnownedClass parent_class;
 	/*< public >*/
 	JoySourcePrepare prepare;
+	JoySourceDispatch dispatch;
 	JoySourceInput input;
+	JoySourceOutput output;
 	JoySourceHangup hangup;
 	JoySourceError error;
 };
@@ -109,6 +117,34 @@ gint
 joy_source_get_descriptor(JoySource *self);
 
 /**
+ * \brief Set one or more condition flags for a source.
+ *
+ * \param self [in] A source object.
+ * \param flags [in] Flags to set for \e self.
+ */
+void
+joy_source_set_condition(JoySource *self, GIOCondition flags);
+
+/**
+ * \brief Clear one or more condition flags for a source.
+ *
+ * \param self [in] A source object.
+ * \param flags [in] Flags to clear for \e self.
+ */
+void
+joy_source_clear_condition(JoySource *self, GIOCondition flags);
+
+/**
+ * \brief Get condition flags set for a source.
+ *
+ * \param self [in] A source object.
+ *
+ * \return The condition flags set for \e self.
+ */
+GIOCondition
+joy_source_get_condition(JoySource *self);
+
+/**
  * \brief Dispatch a poll event for a source.
  *
  * \param self [in] A source object.
@@ -124,6 +160,14 @@ joy_source_dispatch(JoySource *self, gushort revents);
  */
 void
 joy_source_input(JoySource *self);
+
+/**
+ * \brief Dispatch an output event (G_IO_OUT) for a source.
+ *
+ * \param self [in] A source object.
+ */
+void
+joy_source_output(JoySource *self);
 
 /**
  * \brief Dispatch a hangup event (G_IO_HUP) for a source.

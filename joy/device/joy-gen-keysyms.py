@@ -8,7 +8,7 @@
 
 import argparse, re, sys, urllib2
 
-class keysyms:
+class Keysyms:
     def __init__(self):
         self.keys = {}
         self.names = {}
@@ -100,10 +100,10 @@ if __name__ == '__main__':
         parser.add_argument('-o', dest='filename', default='keysym.h',
                 help='the output file name')
         args = parser.parse_args()
+        ks = Keysyms()
     except Exception, err:
         print str(err)
         sys.exit(1)
-    ks = keysyms()
     for uri in args.URI:
         try:
             file = urllib2.urlopen(uri)

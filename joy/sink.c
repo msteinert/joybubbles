@@ -100,12 +100,18 @@ joy_sink_add(JoySink *self, JoySource *source)
 	g_ptr_array_add(priv->sources, g_object_ref_sink(source));
 	GPollFD fd = {
 		joy_source_get_descriptor(source),
-		G_IO_IN | G_IO_HUP | G_IO_ERR,
+		joy_source_get_condition(source),
 		0
 	};
 	g_array_append_val(priv->fds, fd);
-	g_signal_connect(source, "hangup", G_CALLBACK(source_destroy), self);
-	g_signal_connect(source, "error", G_CALLBACK(source_destroy), self);
+	if (G_LIKELY(G_IO_HUP & fd.events)) {
+		g_signal_connect(source, "hangup",
+				G_CALLBACK(source_destroy), self);
+	}
+	if (G_LIKELY(G_IO_ERR & fd.events)) {
+		g_signal_connect(source, "error",
+				G_CALLBACK(source_destroy), self);
+	}
 }
 
 static inline gboolean

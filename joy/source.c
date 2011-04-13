@@ -24,6 +24,7 @@ G_DEFINE_TYPE(JoySource, joy_source, G_TYPE_INITIALLY_UNOWNED)
 enum Signals {
 	SIGNAL_PREPARE,
 	SIGNAL_INPUT,
+	SIGNAL_OUTPUT,
 	SIGNAL_HANGUP,
 	SIGNAL_ERROR,
 	SIGNAL_LAST
@@ -33,6 +34,7 @@ static guint signals[SIGNAL_LAST] = { 0 };
 
 struct Private {
 	gint fd;
+	GIOCondition flags;
 };
 
 static void
@@ -41,21 +43,29 @@ joy_source_init(JoySource *self)
 	self->priv = ASSIGN_PRIVATE(self);
 	struct Private *priv = GET_PRIVATE(self);
 	priv->fd = -1;
+	priv->flags = G_IO_HUP | G_IO_ERR;
 }
 
 enum Properties {
 	PROP_0 = 0,
 	PROP_DESCRIPTOR,
+	PROP_CONDITION,
 	PROP_MAX
 };
+
+static GParamSpec *properties[PROP_MAX];
 
 static void
 set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 {
 	struct Private *priv = GET_PRIVATE(base);
+	JoySource *self = JOY_SOURCE(base);
 	switch (id) {
 	case PROP_DESCRIPTOR:
 		priv->fd = g_value_get_int(value);
+		break;
+	case PROP_CONDITION:
+		joy_source_set_condition(self, g_value_get_int(value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
@@ -64,10 +74,43 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 }
 
 static void
+get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
+{
+	JoySource *self = JOY_SOURCE(base);
+	switch (id) {
+	case PROP_CONDITION:
+		g_value_set_int(value, joy_source_get_condition(self));
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
+		break;
+	}
+}
+
+static void
+dispatch(JoySource *self, gushort revents)
+{
+	g_return_if_fail(JOY_IS_SOURCE(self));
+	if (G_LIKELY(revents & G_IO_IN)) {
+		g_signal_emit(self, signals[SIGNAL_INPUT], 0);
+	} else {
+		if (revents & G_IO_OUT) {
+			g_signal_emit(self, signals[SIGNAL_OUTPUT], 0);
+		} else if (revents & G_IO_HUP) {
+			g_signal_emit(self, signals[SIGNAL_HANGUP], 0);
+		} else if (revents & G_IO_ERR) {
+			g_signal_emit(self, signals[SIGNAL_ERROR], 0);
+		}
+	}
+}
+
+static void
 joy_source_class_init(JoySourceClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->set_property = set_property;
+	object_class->get_property = get_property;
+	klass->dispatch = dispatch;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoySource::prepare
 	signals[SIGNAL_PREPARE] =
@@ -76,11 +119,17 @@ joy_source_class_init(JoySourceClass *klass)
 			G_STRUCT_OFFSET(JoySourceClass, prepare),
 			joy_boolean_accumulator, NULL,
 			joy_marshal_BOOLEAN__VOID, G_TYPE_BOOLEAN, 0);
-	// JoySource::in
+	// JoySource::input
 	signals[SIGNAL_INPUT] =
 		g_signal_new(g_intern_static_string("input"),
 			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
 			G_STRUCT_OFFSET(JoySourceClass, input),
+			NULL, NULL, joy_marshal_VOID__VOID, G_TYPE_NONE, 0);
+	// JoySource::output
+	signals[SIGNAL_OUTPUT] =
+		g_signal_new(g_intern_static_string("output"),
+			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_LAST,
+			G_STRUCT_OFFSET(JoySourceClass, output),
 			NULL, NULL, joy_marshal_VOID__VOID, G_TYPE_NONE, 0);
 	// JoySource::hangup
 	signals[SIGNAL_HANGUP] =
@@ -99,6 +148,13 @@ joy_source_class_init(JoySourceClass *klass)
 		g_param_spec_int("descriptor", Q_("File Descriptor"),
 			Q_("A selectable file descriptor"), 0, G_MAXINT, 0,
 			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+	properties[PROP_CONDITION] =
+		g_param_spec_int("condition", Q_("Watch Conditions"),
+			Q_("The poll conditions to watch for"),
+			G_MININT, G_MAXINT, G_IO_HUP | G_IO_ERR,
+			G_PARAM_READWRITE);
+	g_object_class_install_property(object_class, PROP_CONDITION,
+			properties[PROP_CONDITION]);
 }
 
 JoySource *
@@ -127,16 +183,33 @@ joy_source_get_descriptor(JoySource *self)
 }
 
 void
+joy_source_set_condition(JoySource *self, GIOCondition flags)
+{
+	g_return_if_fail(JOY_IS_SOURCE(self));
+	GET_PRIVATE(self)->flags |= flags;
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_CONDITION]);
+}
+
+void
+joy_source_clear_condition(JoySource *self, GIOCondition flags)
+{
+	g_return_if_fail(JOY_IS_SOURCE(self));
+	GET_PRIVATE(self)->flags &= ~flags;
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_CONDITION]);
+}
+
+GIOCondition
+joy_source_get_condition(JoySource *self)
+{
+	g_return_val_if_fail(JOY_IS_SOURCE(self), 0);
+	return GET_PRIVATE(self)->flags;
+}
+
+void
 joy_source_dispatch(JoySource *self, gushort revents)
 {
 	g_return_if_fail(JOY_IS_SOURCE(self));
-	if (revents & G_IO_IN) {
-		g_signal_emit(self, signals[SIGNAL_INPUT], 0);
-	} else if (revents & G_IO_HUP) {
-		g_signal_emit(self, signals[SIGNAL_HANGUP], 0);
-	} else if (revents & G_IO_ERR) {
-		g_signal_emit(self, signals[SIGNAL_ERROR], 0);
-	}
+	JOY_SOURCE_GET_CLASS(self)->dispatch(self, revents);
 }
 
 void
@@ -144,6 +217,13 @@ joy_source_input(JoySource *self)
 {
 	g_return_if_fail(JOY_IS_SOURCE(self));
 	g_signal_emit(self, signals[SIGNAL_INPUT], 0);
+}
+
+void
+joy_source_output(JoySource *self)
+{
+	g_return_if_fail(JOY_IS_SOURCE(self));
+	g_signal_emit(self, signals[SIGNAL_OUTPUT], 0);
 }
 
 void

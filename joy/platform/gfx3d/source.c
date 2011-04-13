@@ -43,6 +43,7 @@ joy_gfx3d_source_init(JoyGfx3dSource *self)
 	struct Private *priv = GET_PRIVATE(self);
 	priv->timer = g_timer_new();
 	g_timer_start(priv->timer);
+	priv->tv = IM_TV_NONE;
 }
 
 static void
@@ -466,7 +467,7 @@ get_screen(JoySource *self, gint tv)
 		priv->screen = NULL;
 		break;
 	}
-	priv->tv = priv->screen ? tv : 0;
+	priv->tv = priv->screen ? tv : IM_TV_NONE;
 	return priv->screen;
 }
 
@@ -535,6 +536,7 @@ joy_gfx3d_source_new(JoyApplication *app)
 	}
 	return g_object_new(JOY_TYPE_GFX3D_SOURCE,
 			"descriptor", fd,
+			"condition", G_IO_IN,
 			"application", app,
 			NULL);
 }
