@@ -39,6 +39,8 @@ static void
 joy_source_init(JoySource *self)
 {
 	self->priv = ASSIGN_PRIVATE(self);
+	struct Private *priv = GET_PRIVATE(self);
+	priv->fd = -1;
 }
 
 enum Properties {
