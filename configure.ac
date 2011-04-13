@@ -106,6 +106,19 @@ AC_ARG_ENABLE([trace],
 	AC_DEFINE([JOY_TRACE], [1], [Define to 1 to enable runtime tracing.])
 	joy_trace=yes],
 	[joy_trace=no])
+# D-Bus
+AC_ARG_WITH([dbus],
+	[AC_HELP_STRING([--with-dbus],
+		[enable D-Bus bindings @<:@default=auto@:>@])],,
+	[withval=auto])
+AC_CACHE_CHECK([for D-Bus support], [joy_cv_with_dbus],
+	[joy_cv_with_dbus="$withval"])
+AS_IF([test "x$joy_cv_with_dbus" != "xno"],
+	[PKG_CHECK_MODULES([DBUS], [dbus-1 >= 1.2],
+		[joy_dbus=yes],
+		[joy_dbus=no])],
+	[joy_dbus=no])
+AM_CONDITIONAL([JOY_DBUS], [test "x$joy_dbus" = "xyes"])
 # Platform option
 joy_platform_default=x11
 AC_ARG_WITH([platform],
@@ -214,6 +227,7 @@ $PACKAGE_NAME build options:
 	Host: $host
 	Version: $VERSION
 	Platform: $joy_platform
+	D-Bus: $joy_dbus
 	Easing Functions: $joy_easing
 	Native Language Support: $joy_nls
 	Debugging: $joy_debug

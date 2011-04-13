@@ -114,5 +114,6 @@ joy_gfx3d_application_class_init(JoyGfx3dApplicationClass *klass)
 JoyApplication * 
 joy_platform_application_new(void) 
 { 
-	return g_object_new(JOY_TYPE_GFX3D_APPLICATION, NULL); 
+	return g_object_new(JOY_TYPE_GFX3D_APPLICATION,
+			NULL); 
 } 

@@ -75,7 +75,8 @@ joy_sink_class_init(JoySinkClass *klass)
 JoySink *
 joy_sink_new(void)
 {
-	return g_object_new(JOY_TYPE_SINK, NULL);
+	return g_object_new(JOY_TYPE_SINK,
+			NULL);
 }
 
 static void

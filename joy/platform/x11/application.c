@@ -149,7 +149,8 @@ joy_x11_application_class_init(JoyX11ApplicationClass *klass)
 JoyApplication * 
 joy_platform_application_new(void) 
 { 
-	return g_object_new(JOY_TYPE_X11_APPLICATION, NULL); 
+	return g_object_new(JOY_TYPE_X11_APPLICATION,
+			NULL); 
 } 
 
 Display *

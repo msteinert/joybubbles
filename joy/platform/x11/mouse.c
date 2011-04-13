@@ -69,5 +69,6 @@ joy_x11_mouse_class_init(JoyX11MouseClass *klass)
 JoyDevice *
 joy_x11_mouse_new(void)
 {
-	return g_object_new(JOY_TYPE_X11_MOUSE, NULL);
+	return g_object_new(JOY_TYPE_X11_MOUSE,
+			NULL);
 }
