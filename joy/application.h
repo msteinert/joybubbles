@@ -190,6 +190,15 @@ void
 joy_application_add_source(JoyApplication *self, JoySource *source);
 
 /**
+ * \brief Remove an input source from the application main loop.
+ *
+ * \param self [in] An application object.
+ * \param source [in] A file descriptor.
+ */
+void
+joy_application_remove_source(JoyApplication *self, JoySource *source);
+
+/**
  * \brief Force the application main loop to quit on the next iteration.
  *
  * \param self [in] An application object.

@@ -8,6 +8,9 @@ INCLUDES = \
 	$(GOBJECT_CFLAGS) \
 	$(CAIRO_CFLAGS) \
 	$(PANGO_CFLAGS)
+if JOY_DBUS
+INCLUDES += $(DBUS_CFLAGS)
+endif
 # add libraries
 LIBS = \
 	$(top_builddir)/joy/libjoybubbles-$(joy_series).la

@@ -24,21 +24,21 @@ G_BEGIN_DECLS
 
 #define JOY_GFX3D_MOUSE(instance) \
 	(G_TYPE_CHECK_INSTANCE_CAST((instance), JOY_TYPE_GFX3D_MOUSE, \
-		JoyGFX3DMouse))
+		JoyGfx3dMouse))
 
 #define JOY_IS_GFX3D_MOUSE(instance) \
 	(G_TYPE_CHECK_INSTANCE_TYPE((instance), JOY_TYPE_GFX3D_MOUSE))
 
 #define JOY_GFX3D_MOUSE_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_CAST((klass), JOY_TYPE_GFX3D_MOUSE, \
-		JoyGFX3DMouseClass))
+		JoyGfx3dMouseClass))
 
 #define JOY_IS_GFX3D_MOUSE_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_TYPE((klass), JOY_TYPE_GFX3D_MOUSE))
 
 #define JOY_GFX3D_MOUSE_GET_CLASS(instance) \
 	(G_TYPE_INSTANCE_GET_CLASS((instance), JOY_TYPE_GFX3D_MOUSE, \
-		JoyGFX3DMouseClass))
+		JoyGfx3dMouseClass))
 
 typedef struct JoyGfx3dMouseClass_ JoyGfx3dMouseClass;
 

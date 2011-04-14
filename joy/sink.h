@@ -76,6 +76,16 @@ void
 joy_sink_add(JoySink *self, JoySource *source);
 
 /**
+ * \brief Remove an input source from an input sink.
+ *
+ * \param self [in] An input sink object.
+ * \param source [in] An input source object.
+ */
+G_GNUC_INTERNAL
+void
+joy_sink_remove(JoySink *self, JoySource *source);
+
+/**
  * \brief Poll an input sink for events.
  *
  * This function processes events for the specified maximum number of seconds.

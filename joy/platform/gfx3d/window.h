@@ -25,21 +25,21 @@ G_BEGIN_DECLS
 
 #define JOY_GFX3D_WINDOW(instance) \
 	(G_TYPE_CHECK_INSTANCE_CAST((instance), JOY_TYPE_GFX3D_WINDOW, \
-		JoyGFX3DWindow))
+		JoyGfx3dWindow))
 
 #define JOY_IS_GFX3D_WINDOW(instance) \
 	(G_TYPE_CHECK_INSTANCE_TYPE((instance), JOY_TYPE_GFX3D_WINDOW))
 
 #define JOY_GFX3D_WINDOW_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_CAST((klass), JOY_TYPE_GFX3D_WINDOW, \
-		JoyGFX3DWindowClass))
+		JoyGfx3dWindowClass))
 
 #define JOY_IS_GFX3D_WINDOW_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_TYPE((klass), JOY_TYPE_GFX3D_WINDOW))
 
 #define JOY_GFX3D_WINDOW_GET_CLASS(instance) \
 	(G_TYPE_INSTANCE_GET_CLASS((instance), JOY_TYPE_GFX3D_WINDOW, \
-		JoyGFX3DWindowClass))
+		JoyGfx3dWindowClass))
 
 typedef struct JoyGfx3dWindowClass_ JoyGfx3dWindowClass;
 

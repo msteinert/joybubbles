@@ -11,6 +11,9 @@
 #include <ctype.h>
 #include <glib.h>
 #include "joy/bubbles.h"
+#ifdef JOY_HAVE_DBUS
+#include "joy/source/dbus.h"
+#endif
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -253,6 +256,9 @@ main(int argc, char *argv[])
 	struct ButtonDown down = { NULL, NULL, TRUE };
 	struct Crossing crossing = { NULL, { 5. }, 200, 100 };
 	JoyApplication *app = joy_application_new();
+#ifdef JOY_HAVE_DBUS
+	JoyDBus *dbus = NULL;
+#endif // JOY_HAVE_DBUS
 	if (!app) {
 		goto error;
 	}
@@ -271,6 +277,17 @@ main(int argc, char *argv[])
 	}
 	g_option_context_free(context);
 	context = NULL;
+#ifdef JOY_HAVE_DBUS
+	const gchar *address = g_getenv("DBUS_SESSION_BUS_ADDRESS");
+	if (address) {
+		dbus = joy_dbus_new(app, address, &error);
+		if (!dbus) {
+			g_message("%s", error->message);
+			g_error_free(error);
+			error = NULL;
+		}
+	}
+#endif // JOY_HAVE_DBUS
 	JoyScreen *screen = joy_application_get_screen(app, 0);
 	if (!screen) {
 		goto error;
@@ -353,6 +370,11 @@ exit:
 	if (down.fade) {
 		g_object_unref(down.fade);
 	}
+#ifdef JOY_HAVE_DBUS
+	if (dbus) {
+		g_object_unref(dbus);
+	}
+#endif // JOY_HAVE_DBUS
 	return status;
 error:
 	if (error) {

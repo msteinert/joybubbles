@@ -57,17 +57,11 @@ dispose(GObject *base)
 		g_object_unref(priv->context);
 		priv->context = NULL;
 	}
-	G_OBJECT_CLASS(joy_theme_parent_class)->dispose(base);
-}
-
-static void
-finalize(GObject *base)
-{
-	struct Private *priv = GET_PRIVATE(base);
 	if (priv->styles) {
 		g_hash_table_destroy(priv->styles);
+		priv->styles = NULL;
 	}
-	G_OBJECT_CLASS(joy_theme_parent_class)->finalize(base);
+	G_OBJECT_CLASS(joy_theme_parent_class)->dispose(base);
 }
 
 enum Properties {
@@ -96,7 +90,6 @@ joy_theme_class_init(JoyThemeClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->dispose = dispose;
-	object_class->finalize = finalize;
 	object_class->set_property = set_property;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoyTheme::context-changed

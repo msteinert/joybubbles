@@ -50,6 +50,8 @@ AC_SUBST([LT_CURRENT])
 AC_SUBST([LT_REVISION])
 AC_SUBST([LT_AGE])
 # Checks for dependencies
+AC_SUBST([joy_requires]) # pkg-config Requires
+AC_SUBST([joy_requires_private]) # pkg-config Requires.private
 joy_glib_minimum_version=2.24
 joy_glib_version="glib-2.0 >= $joy_glib_minimum_version"
 AC_SUBST([joy_glib_version])
@@ -114,8 +116,11 @@ AC_ARG_WITH([dbus],
 AC_CACHE_CHECK([for D-Bus support], [joy_cv_with_dbus],
 	[joy_cv_with_dbus="$withval"])
 AS_IF([test "x$joy_cv_with_dbus" != "xno"],
-	[PKG_CHECK_MODULES([DBUS], [dbus-1 >= 1.2],
-		[joy_dbus=yes],
+	[joy_dbus_version="dbus-1 >= 1.1" # should be 1.2
+	AC_DEFINE([JOY_HAVE_DBUS], [1], [Define to 1 if D-Bus is available.])
+	PKG_CHECK_MODULES([DBUS], [$joy_dbus_version], # should be 1.2
+		[joy_requires+="$joy_dbus_version "
+		joy_dbus=yes],
 		[joy_dbus=no])],
 	[joy_dbus=no])
 AM_CONDITIONAL([JOY_DBUS], [test "x$joy_dbus" = "xyes"])
@@ -153,10 +158,9 @@ AS_IF([test "x$joy_nls" = "xyes"],
 	[AC_DEFINE([ENABLE_NLS], [1], [Define to 1 to enable i18n.])
 	AC_CHECK_FUNCS([bind_textdomain_codeset])])
 # Platform-specific setup
-AC_SUBST([joy_requires])
 AS_CASE([$joy_platform],
 [x11],
-	[joy_requires="x11 cairo-xlib"
+	[joy_requires_private+="x11 "
 	PKG_CHECK_MODULES([X11], [x11])
 	PKG_CHECK_MODULES([CAIRO_XLIB], [cairo-xlib])
 	PKG_CHECK_MODULES([XCOMPOSITE], [xcomposite],
@@ -207,7 +211,6 @@ AH_BOTTOM(
 # Output files
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
-	joybubbles.pc
 	joy/animation/Makefile
 	joy/device/Makefile
 	joy/easing/Makefile
@@ -216,8 +219,12 @@ AC_CONFIG_FILES([
 	joy/platform/Makefile
 	joy/platform/gfx3d/Makefile
 	joy/platform/x11/Makefile
+	joy/source/Makefile
 	joy/style/Makefile
 	joy/Makefile
+	pkgconfig/joybubbles.pc
+	pkgconfig/joybubbles-dbus.pc
+	pkgconfig/Makefile
 	tests/Makefile
 	Makefile
 ])

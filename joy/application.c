@@ -297,6 +297,13 @@ joy_application_add_source(JoyApplication *self,
 }
 
 void
+joy_application_remove_source(JoyApplication *self, JoySource *source)
+{
+	g_return_if_fail(JOY_IS_APPLICATION(self));
+	joy_sink_remove(GET_PRIVATE(self)->sink, source);
+}
+
+void
 joy_application_quit(JoyApplication *self, gint status)
 {
 	g_return_if_fail(JOY_IS_APPLICATION(self));

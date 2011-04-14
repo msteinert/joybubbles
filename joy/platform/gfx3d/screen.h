@@ -26,21 +26,21 @@ G_BEGIN_DECLS
 
 #define JOY_GFX3D_SCREEN(instance) \
 	(G_TYPE_CHECK_INSTANCE_CAST((instance), JOY_TYPE_GFX3D_SCREEN, \
-		JoyGFX3DScreen))
+		JoyGfx3dScreen))
 
 #define JOY_IS_GFX3D_SCREEN(instance) \
 	(G_TYPE_CHECK_INSTANCE_TYPE((instance), JOY_TYPE_GFX3D_SCREEN))
 
 #define JOY_GFX3D_SCREEN_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_CAST((klass), JOY_TYPE_GFX3D_SCREEN, \
-		JoyGFX3DScreenClass))
+		JoyGfx3dScreenClass))
 
 #define JOY_IS_GFX3D_SCREEN_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_TYPE((klass), JOY_TYPE_GFX3D_SCREEN))
 
 #define JOY_GFX3D_SCREEN_GET_CLASS(instance) \
 	(G_TYPE_INSTANCE_GET_CLASS((instance), JOY_TYPE_GFX3D_SCREEN, \
-		JoyGFX3DScreenClass))
+		JoyGfx3dScreenClass))
 
 typedef struct JoyGfx3dScreenClass_ JoyGfx3dScreenClass;
 

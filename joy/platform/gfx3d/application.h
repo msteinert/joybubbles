@@ -24,21 +24,21 @@ G_BEGIN_DECLS
 
 #define JOY_GFX3D_APPLICATION(instance) \
 	(G_TYPE_CHECK_INSTANCE_CAST((instance), JOY_TYPE_GFX3D_APPLICATION, \
-		JoyGFX3DApplication))
+		JoyGfx3dApplication))
 
 #define JOY_IS_GFX3D_APPLICATION(instance) \
 	(G_TYPE_CHECK_INSTANCE_TYPE((instance), JOY_TYPE_GFX3D_APPLICATION))
 
 #define JOY_GFX3D_APPLICATION_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_CAST((klass), JOY_TYPE_GFX3D_APPLICATION, \
-		JoyGFX3DApplicationClass))
+		JoyGfx3dApplicationClass))
 
 #define JOY_IS_GFX3D_APPLICATION_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_TYPE((klass), JOY_TYPE_GFX3D_APPLICATION))
 
 #define JOY_GFX3D_APPLICATION_GET_CLASS(instance) \
 	(G_TYPE_INSTANCE_GET_CLASS((instance), JOY_TYPE_GFX3D_APPLICATION, \
-		JoyGFX3DApplicationClass))
+		JoyGfx3dApplicationClass))
 
 typedef struct JoyGfx3dApplicationClass_ JoyGfx3dApplicationClass;
 

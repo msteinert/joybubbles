@@ -6,7 +6,7 @@ includedir=@includedir@/joybubbles-@joy_series@
 Name: Joybubbles
 Description: A GUI toolkit & platform abstraction layer
 Version: @VERSION@
-Requires: @joy_glib_version@ @joy_gobject_version@ @joy_cairo_version@ @joy_pango_version@ 
-Requires.private: @joy_pangocairo_version@ @joy_gdk_pixbuf_version@ @joy_requires@
+Requires: @joy_glib_version@ @joy_gobject_version@ @joy_cairo_version@ @joy_pango_version@ @joy_requires@
+Requires.private: @joy_pangocairo_version@ @joy_gdk_pixbuf_version@ @joy_requires_private@
 Libs: -L${libdir} -ljoybubbles-@joy_series@
 CFlags: -I${includedir}

@@ -85,7 +85,7 @@ joy_source_get_type(void) G_GNUC_CONST;
 /**
  * \brief Create a new source object.
  *
- * \param descriptor [in] A selectable file descriptor.
+ * \param descriptor [in] A pollable file descriptor.
  *
  * \return A new source object.
  */
@@ -96,8 +96,8 @@ joy_source_new(gint descriptor);
 /**
  * \brief This function is called before polling the file descriptor.
  *
- * If the source can determine that event is waiting without calling poll or
- * select then it should return TRUE.
+ * If the source can determine that event is waiting without calling poll(2)
+ * or select(2) then it should return TRUE.
  *
  * \param self [in] A source object.
  *
@@ -105,6 +105,17 @@ joy_source_new(gint descriptor);
  */
 gboolean
 joy_source_prepare(JoySource *self);
+
+/**
+ * \brief Set the file descriptor for this source.
+ *
+ * \param self [in] A source object.
+ * \param descriptor [in] A pollable file descriptor.
+ *
+ * \return The file descriptor for this source.
+ */
+void
+joy_source_set_descriptor(JoySource *self, gint descriptor);
 
 /**
  * \brief Get the file descriptor for this source.

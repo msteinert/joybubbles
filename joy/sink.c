@@ -82,14 +82,7 @@ joy_sink_new(void)
 static void
 source_destroy(JoySource *source, JoySink *self)
 {
-	struct Private *priv = GET_PRIVATE(self);
-	for (gint i = 0; i < priv->sources->len; ++i) {
-		if (priv->sources->pdata[i] == source) {
-			g_ptr_array_remove_index(priv->sources, i);
-			g_array_remove_index(priv->fds, i);
-			return;
-		}
-	}
+	joy_sink_remove(self, source);
 }
 
 void
@@ -115,12 +108,27 @@ joy_sink_add(JoySink *self, JoySource *source)
 	}
 }
 
+void
+joy_sink_remove(JoySink *self, JoySource *source)
+{
+	g_return_if_fail(JOY_IS_SINK(self));
+	g_return_if_fail(JOY_IS_SOURCE(source));
+	struct Private *priv = GET_PRIVATE(self);
+	for (gint i = 0; i < priv->sources->len; ++i) {
+		if (priv->sources->pdata[i] == source) {
+			g_ptr_array_remove_index(priv->sources, i);
+			g_array_remove_index(priv->fds, i);
+			return;
+		}
+	}
+}
+
 static inline gboolean
 prepare_sources(GPtrArray *sources)
 {
 	for (gint i = 0; i < sources->len; ++i) {
 		if (joy_source_prepare(sources->pdata[i])) {
-			joy_source_input(sources->pdata[i]);
+			joy_source_dispatch(sources->pdata[i], G_IO_IN);
 			return TRUE;
 		}
 	}

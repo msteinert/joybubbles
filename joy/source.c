@@ -58,11 +58,10 @@ static GParamSpec *properties[PROP_MAX];
 static void
 set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 {
-	struct Private *priv = GET_PRIVATE(base);
 	JoySource *self = JOY_SOURCE(base);
 	switch (id) {
 	case PROP_DESCRIPTOR:
-		priv->fd = g_value_get_int(value);
+		joy_source_set_descriptor(self, g_value_get_int(value));
 		break;
 	case PROP_CONDITION:
 		joy_source_set_condition(self, g_value_get_int(value));
@@ -147,7 +146,7 @@ joy_source_class_init(JoySourceClass *klass)
 	g_object_class_install_property(object_class, PROP_DESCRIPTOR,
 		g_param_spec_int("descriptor", Q_("File Descriptor"),
 			Q_("A selectable file descriptor"), 0, G_MAXINT, 0,
-			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+			G_PARAM_WRITABLE));
 	properties[PROP_CONDITION] =
 		g_param_spec_int("condition", Q_("Watch Conditions"),
 			Q_("The poll conditions to watch for"),
@@ -160,7 +159,7 @@ joy_source_class_init(JoySourceClass *klass)
 JoySource *
 joy_source_new(gint descriptor)
 {
-	g_return_val_if_fail(0 > descriptor, NULL);
+	g_return_val_if_fail(0 <= descriptor, NULL);
 	return g_object_new(JOY_TYPE_SOURCE,
 			"descriptor", descriptor,
 			NULL);
@@ -173,6 +172,14 @@ joy_source_prepare(JoySource *self)
 	gboolean ready = FALSE;
 	g_signal_emit(self, signals[SIGNAL_PREPARE], 0, &ready);
 	return ready;
+}
+
+void
+joy_source_set_descriptor(JoySource *self, gint descriptor)
+{
+	g_return_if_fail(JOY_IS_SOURCE(self));
+	g_return_if_fail(0 <= descriptor);
+	GET_PRIVATE(self)->fd = descriptor;
 }
 
 gint
