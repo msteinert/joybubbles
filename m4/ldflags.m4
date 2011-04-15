@@ -10,7 +10,7 @@
 
 # AX_TRY_LDFLAGS(FLAG, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
 # ---------------------------------------------------------
-# Test if one or more linker flags are supported.
+# Test if a linker flag is supported.
 # FLAG: a linker flag to try
 # ACTION-IF-TRUE: commands to execute if FLAG is supported
 # ACTION-IF-FALSE: commands to execute if FLAG is not supported
@@ -31,10 +31,10 @@ AC_TRY_LINK([], [],
 # AX_LDFLAGS(flags)
 # -----------------
 # Enable linker flags.
-# FLAGS: a comma-separated list of linker flags to set
+# FLAGS: a whitespace-separated list of linker flags to set
 AC_DEFUN([AX_LDFLAGS],
 [dnl
-m4_foreach([_ax_flag], [$1],
+m4_foreach_w([_ax_flag], [$1],
 	[AS_CASE([" $LDFLAGS "],
 		[*[[\ \	]]_ax_flag[[\ \	]]*],
 			[],

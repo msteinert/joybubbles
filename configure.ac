@@ -80,7 +80,7 @@ AS_IF([test "x$GLIB_GENMARSHAL" = "x"],
 		[GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal $joy_glib_version`])])
 # Debug option
 AC_ARG_ENABLE([debug],
-	[AC_HELP_STRING([--enable-debug],
+	[AS_HELP_STRING([--enable-debug],
 		[enable runtime debugging features @<:@default=no@:>@])],
 	[AC_DEFINE([JOY_DEBUG], [1], [Define to 1 to enable runtime debugging.])
 	AX_TRY_CFLAGS([-g], [AX_CFLAGS([-g])])
@@ -90,7 +90,7 @@ AC_ARG_ENABLE([debug],
 	joy_debug=no])
 # Tracing option
 AC_ARG_ENABLE([trace],
-	[AC_HELP_STRING([--enable-trace],
+	[AS_HELP_STRING([--enable-trace],
 		[enable runtime tracing features @<:@default=no@:>@])],
 	[AS_IF([test "x$joy_debug" = "xno"],
 		[AC_MSG_ERROR([Debugging must be enabled to enable tracing.])])
@@ -111,7 +111,7 @@ AC_ARG_ENABLE([trace],
 	[joy_trace=no])
 # D-Bus
 AC_ARG_WITH([dbus],
-	[AC_HELP_STRING([--with-dbus],
+	[AS_HELP_STRING([--with-dbus],
 		[enable D-Bus bindings @<:@default=auto@:>@])],,
 	[withval=auto])
 AC_CACHE_CHECK([for D-Bus support], [joy_cv_with_dbus],
@@ -129,7 +129,7 @@ AM_CONDITIONAL([JOY_DBUS], [test "x$joy_dbus" = "xyes"])
 # Platform option
 joy_platform_default=x11
 AC_ARG_WITH([platform],
-	[AC_HELP_STRING([--with-platform],
+	[AS_HELP_STRING([--with-platform],
 		[select the graphics platform @<:@x11|gfx3d@:>@])],
 	[AS_CASE([$withval],
 	[x11|gfx3d],
@@ -143,7 +143,7 @@ AC_DEFINE_UNQUOTED([JOY_PLATFORM], ["$joy_platform"],
 AC_SUBST([joy_platform])
 # Easing support
 AC_ARG_ENABLE([easing],
-	[AC_HELP_STRING([--disable-easing],
+	[AS_HELP_STRING([--disable-easing],
 		[disable easing support for animation tweening])],
 	[joy_easing=$enableval],
 	[joy_easing=yes])
@@ -152,7 +152,7 @@ AS_IF([test "x$joy_easing" = "xyes"],
 	[Define to 1 to enable easing functions.])])
 # Native language support
 AC_ARG_ENABLE([nls],
-	[AC_HELP_STRING([--enable-nls],
+	[AS_HELP_STRING([--enable-nls],
 		[enable native language support @<:@default=no@:>@])],
 	[joy_nls=$enableval],
 	[joy_nls=no])
@@ -173,7 +173,7 @@ AS_CASE([$joy_platform],
 		[Define to 1 if the platform is x11.])],
 [gfx3d],
 	[GFX3D_DIR="/vobs/drivers/linux/broadcom/74xxD"
-	AX_LDFLAGS([-lpthread, -lc]) # Workaround for uClibc bug
+	AX_LDFLAGS([-lc]) # Workaround for uClibc bug
 	AC_ARG_VAR([GFX3D_CFLAGS], [C compiler flags for GFX3D, overriding defaults])
 	AS_IF([test "x$GFX3D_CFLAGS" = "x"],
 		[GFX3D_CFLAGS="-I$GFX3D_DIR/app/lib/gfx3d -I$GFX3D_DIR/pi/vip922/basemodules/std/types/linuxuser"])

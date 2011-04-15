@@ -10,7 +10,7 @@
 
 # AX_TRY_CFLAGS(FLAG, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
 # --------------------------------------------------------
-# Test if one or more compiler flags are supported.
+# Test a compiler flag is supported.
 # FLAG: a compiler flag to try
 # ACTION-IF-TRUE: commands to execute if FLAG is supported
 # ACTION-IF-FALSE: commands to execute if FLAG is not supported
@@ -32,10 +32,10 @@ AC_TRY_COMPILE([], [],
 # AX_CFLAGS(FLAGS)
 # ----------------
 # Enable compiler flags.
-# FLAGS: a comma-separated list of compiler flags to set
+# FLAGS: a whitespace-separated list of compiler flags to set
 AC_DEFUN([AX_CFLAGS],
 [dnl
-m4_foreach([_ax_flag], [$1],
+m4_foreach_w([_ax_flag], [$1],
 	[AS_CASE([" $CFLAGS "],
 		[*[[\ \	]]_ax_flag[[\ \	]]*],
 			[],
