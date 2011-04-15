@@ -17,7 +17,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "joy/easing.h"
+#include "joy/easing/curve.h"
 #include <math.h>
 
 #ifdef JOY_ENABLE_EASING

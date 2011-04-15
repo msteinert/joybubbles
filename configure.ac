@@ -34,6 +34,7 @@ AM_PATH_PYTHON([2.7],,
 # Enable compiler flags
 AX_TRY_CFLAGS([-Wall], [AX_CFLAGS([-Wall])])
 AX_TRY_CFLAGS([-Wstrict-prototypes], [AX_CFLAGS([-Wstrict-prototypes])])
+AX_TRY_CFLAGS([-Wcast-align], [AX_CFLAGS([-Wcast-align])])
 AX_TRY_CFLAGS([-fno-common], [AX_CFLAGS([-fno-common])])
 # Pkg-config versioning
 joy_series_major=joy_major_version
@@ -117,7 +118,7 @@ AC_CACHE_CHECK([for D-Bus support], [joy_cv_with_dbus],
 	[joy_cv_with_dbus="$withval"])
 AS_IF([test "x$joy_cv_with_dbus" != "xno"],
 	[joy_dbus_version="dbus-1 >= 1.1" # should be 1.2
-	PKG_CHECK_MODULES([DBUS], [$joy_dbus_version], # should be 1.2
+	PKG_CHECK_MODULES([DBUS], [$joy_dbus_version],
 		[AC_DEFINE([JOY_HAVE_DBUS], [1],
 			[Define to 1 if D-Bus is available.])
 		joy_requires+="$joy_dbus_version "
@@ -172,6 +173,7 @@ AS_CASE([$joy_platform],
 		[Define to 1 if the platform is x11.])],
 [gfx3d],
 	[GFX3D_DIR="/vobs/drivers/linux/broadcom/74xxD"
+	AX_LDFLAGS([-lpthread, -lc]) # Workaround for uClibc bug
 	AC_ARG_VAR([GFX3D_CFLAGS], [C compiler flags for GFX3D, overriding defaults])
 	AS_IF([test "x$GFX3D_CFLAGS" = "x"],
 		[GFX3D_CFLAGS="-I$GFX3D_DIR/app/lib/gfx3d -I$GFX3D_DIR/pi/vip922/basemodules/std/types/linuxuser"])
