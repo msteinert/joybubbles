@@ -27,14 +27,14 @@ LT_INIT([disable-static])
 m4_ifdef([AC_PROG_CC_C99], [AC_PROG_CC_C99],
 	[AC_MSG_WARN([Attemping c99 workaround due to old version of autoconf])
 	AC_PROG_CC
-	JOY_TRY_CC_FLAGS([-std=c99], [JOY_CFLAGS([-std=c99])])])
+	AX_TRY_CFLAGS([-std=c99], [AX_CFLAGS([-std=c99])])])
 PKG_PROG_PKG_CONFIG([0.17])
 AM_PATH_PYTHON([2.7],,
 	[AC_MSG_WARN([Python 2.7 is required to regenerate key syms])])
 # Enable compiler flags
-JOY_TRY_CC_FLAGS([-Wall], [JOY_CFLAGS([-Wall])])
-JOY_TRY_CC_FLAGS([-Wstrict-prototypes], [JOY_CFLAGS([-Wstrict-prototypes])])
-JOY_TRY_CC_FLAGS([-fno-common], [JOY_CFLAGS([-fno-common])])
+AX_TRY_CFLAGS([-Wall], [AX_CFLAGS([-Wall])])
+AX_TRY_CFLAGS([-Wstrict-prototypes], [AX_CFLAGS([-Wstrict-prototypes])])
+AX_TRY_CFLAGS([-fno-common], [AX_CFLAGS([-fno-common])])
 # Pkg-config versioning
 joy_series_major=joy_major_version
 joy_series_minor=joy_minor_version
@@ -82,7 +82,7 @@ AC_ARG_ENABLE([debug],
 	[AC_HELP_STRING([--enable-debug],
 		[enable runtime debugging features @<:@default=no@:>@])],
 	[AC_DEFINE([JOY_DEBUG], [1], [Define to 1 to enable runtime debugging.])
-	JOY_TRY_CC_FLAGS([-g], [JOY_CFLAGS([-g])])
+	AX_TRY_CFLAGS([-g], [AX_CFLAGS([-g])])
 	joy_debug=yes],
 	[AC_DEFINE([G_DISABLE_CHECKS], [1],
 		[Define to 1 to disable parameter checks.])
@@ -102,8 +102,8 @@ AC_ARG_ENABLE([trace],
 			[Define to 1 to enable GNU extensions.])
 		AC_DEFINE([HAVE_DLADDR], [1],
 			[Define to 1 dladdr is available.])])
-	JOY_TRY_CC_FLAGS([-finstrument-functions],
-		[JOY_CFLAGS([-finstrument-functions])],
+	AX_TRY_CFLAGS([-finstrument-functions],
+		[AX_CFLAGS([-finstrument-functions])],
 		[AC_MSG_ERROR(['-finstrument-functions' is required for tracing.])])
 	AC_DEFINE([JOY_TRACE], [1], [Define to 1 to enable runtime tracing.])
 	joy_trace=yes],
