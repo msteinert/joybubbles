@@ -117,9 +117,10 @@ AC_CACHE_CHECK([for D-Bus support], [joy_cv_with_dbus],
 	[joy_cv_with_dbus="$withval"])
 AS_IF([test "x$joy_cv_with_dbus" != "xno"],
 	[joy_dbus_version="dbus-1 >= 1.1" # should be 1.2
-	AC_DEFINE([JOY_HAVE_DBUS], [1], [Define to 1 if D-Bus is available.])
 	PKG_CHECK_MODULES([DBUS], [$joy_dbus_version], # should be 1.2
-		[joy_requires+="$joy_dbus_version "
+		[AC_DEFINE([JOY_HAVE_DBUS], [1],
+			[Define to 1 if D-Bus is available.])
+		joy_requires+="$joy_dbus_version "
 		joy_dbus=yes],
 		[joy_dbus=no])],
 	[joy_dbus=no])

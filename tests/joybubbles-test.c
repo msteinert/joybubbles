@@ -13,7 +13,7 @@
 #include "joy/bubbles.h"
 #ifdef JOY_HAVE_DBUS
 #include "joy/source/dbus.h"
-#endif
+#endif // JOY_HAVE_DBUS
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
