@@ -29,15 +29,13 @@ G_BEGIN_DECLS
 	(G_TYPE_CHECK_INSTANCE_TYPE((instance), JOY_TYPE_LABEL))
 
 #define JOY_LABEL_CLASS(klass) \
-	(G_TYPE_CHECK_CLASS_CAST((klass), JOY_TYPE_LABEL, \
-		JoyLabelClass))
+	(G_TYPE_CHECK_CLASS_CAST((klass), JOY_TYPE_LABEL, JoyLabelClass))
 
 #define JOY_IS_LABEL_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_TYPE((klass), JOY_TYPE_LABEL))
 
 #define JOY_LABEL_GET_CLASS(instance) \
-	(G_TYPE_INSTANCE_GET_CLASS((instance), JOY_TYPE_LABEL, \
-		JoyLabelClass))
+	(G_TYPE_INSTANCE_GET_CLASS((instance), JOY_TYPE_LABEL, JoyLabelClass))
 
 typedef struct JoyLabelClass_ JoyLabelClass;
 

@@ -75,29 +75,6 @@ joy_bubble_init(JoyBubble *self)
 }
 
 static void
-on_notify(JoyBubble *self)
-{
-	struct Private *priv = GET_PRIVATE(self);
-	cairo_rectangle_int_t rect = {
-		0, 0,
-		joy_bubble_get_width(self),
-		joy_bubble_get_height(self)
-	};
-	cairo_region_subtract(priv->area, priv->area);
-	cairo_region_union_rectangle(priv->area, &rect);
-}
-
-static void
-constructed(GObject *base)
-{
-	on_notify(JOY_BUBBLE(base));
-	g_signal_connect(base, "notify::parent", G_CALLBACK(on_notify), NULL);
-	if (G_OBJECT_CLASS(joy_bubble_parent_class)->constructed) {
-		G_OBJECT_CLASS(joy_bubble_parent_class)->constructed(base);
-	}
-}
-
-static void
 dispose(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
@@ -291,7 +268,6 @@ static void
 joy_bubble_class_init(JoyBubbleClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
-	object_class->constructed = constructed;
 	object_class->dispose = dispose;
 	object_class->finalize = finalize;
 	object_class->set_property = set_property;
@@ -619,6 +595,13 @@ joy_bubble_set_parent(JoyBubble *self, JoyBubble *parent)
 		g_object_unref(priv->parent);
 	}
 	priv->parent = parent ? g_object_ref(parent) : NULL;
+	cairo_rectangle_int_t rect = {
+		0, 0,
+		joy_bubble_get_width(self),
+		joy_bubble_get_height(self)
+	};
+	cairo_region_subtract(priv->area, priv->area);
+	cairo_region_union_rectangle(priv->area, &rect);
 	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_PARENT]);
 }
 

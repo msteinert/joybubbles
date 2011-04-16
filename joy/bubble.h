@@ -42,6 +42,13 @@ G_BEGIN_DECLS
 	(G_TYPE_INSTANCE_GET_CLASS((instance), JOY_TYPE_BUBBLE, \
 		JoyBubbleClass))
 
+typedef enum  {
+	JOY_BUBBLE_STATE_ENABLED,
+	JOY_BUBBLE_STATE_FOCUSED,
+	JOY_BUBBLE_STATE_ACTIVE,
+	JOY_BUBBLE_STATE_DISABLED
+} JoyBubbleState;
+
 typedef struct JoyBubbleClass_ JoyBubbleClass;
 
 struct JoyBubble_ {
