@@ -85,8 +85,8 @@ AC_ARG_ENABLE([debug],
 	[AC_DEFINE([JOY_DEBUG], [1], [Define to 1 to enable runtime debugging.])
 	AX_TRY_CFLAGS([-g], [AX_CFLAGS([-g])])
 	joy_debug=yes],
-	[AC_DEFINE([G_DISABLE_CHECKS], [1],
-		[Define to 1 to disable parameter checks.])
+	[AC_DEFINE([G_DISABLE_CHECKS], [1], [Define to 1 to disable parameter checks.])
+	AX_TRY_CFLAGS([-Werror], [AX_CFLAGS([-Werror])])
 	joy_debug=no])
 # Tracing option
 AC_ARG_ENABLE([trace],

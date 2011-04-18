@@ -75,10 +75,28 @@ joy_bubble_init(JoyBubble *self)
 }
 
 static void
+constructed(GObject *base)
+{
+	struct Private *priv = GET_PRIVATE(base);
+	JoyBubble *self = JOY_BUBBLE(base);
+	gint width = joy_bubble_get_width(self);
+	gint height = joy_bubble_get_height(self);
+	if (width || height) {
+		cairo_rectangle_int_t rect = {
+			0, 0, width, height
+		};
+		cairo_region_union_rectangle(priv->area, &rect);
+	}
+	if (G_OBJECT_CLASS(joy_bubble_parent_class)->constructed) {
+		G_OBJECT_CLASS(joy_bubble_parent_class)->constructed(base);
+	}
+}
+
+static void
 dispose(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
-	JoyBubble *self = (JoyBubble *)base;
+	JoyBubble *self = JOY_BUBBLE(base);
 	if (priv->parent) {
 		joy_container_remove(priv->parent, self);
 		g_object_unref(priv->parent);
@@ -129,6 +147,7 @@ static void
 set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 {
 	struct Private *priv = GET_PRIVATE(base);
+	JoyBubble *self = JOY_BUBBLE(base);
 	switch (id) {
 	case PROP_X_COORDINATE:
 		priv->x = g_value_get_int(value);
@@ -143,22 +162,21 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 		priv->height = g_value_get_int(value);
 		break;
 	case PROP_HORIZONTAL_EXPAND:
-		priv->horizontal_expand = g_value_get_boolean(value);
-		break;
-	case PROP_VERTICAL_EXPAND:
-		priv->vertical_expand = g_value_get_boolean(value);
-		break;
-	case PROP_BUFFERED:
-		joy_bubble_set_buffered(JOY_BUBBLE(base),
+		joy_bubble_set_horizontal_expand(self,
 				g_value_get_boolean(value));
 		break;
+	case PROP_VERTICAL_EXPAND:
+		joy_bubble_set_vertical_expand(self,
+				g_value_get_boolean(value));
+		break;
+	case PROP_BUFFERED:
+		joy_bubble_set_buffered(self, g_value_get_boolean(value));
+		break;
 	case PROP_STYLE:
-		joy_bubble_set_style(JOY_BUBBLE(base),
-				g_value_get_object(value));
+		joy_bubble_set_style(self, g_value_get_object(value));
 		break;
 	case PROP_PARENT:
-		joy_bubble_set_parent(JOY_BUBBLE(base),
-				g_value_get_object(value));
+		joy_bubble_set_parent(self, g_value_get_object(value));
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
 		break;
@@ -268,6 +286,7 @@ static void
 joy_bubble_class_init(JoyBubbleClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
+	object_class->constructed = constructed;
 	object_class->dispose = dispose;
 	object_class->finalize = finalize;
 	object_class->set_property = set_property;
