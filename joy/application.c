@@ -281,6 +281,13 @@ joy_application_get_screen(JoyApplication *self, guint n)
 	return JOY_APPLICATION_GET_CLASS(self)->get_screen(self, n);
 }
 
+JoyScreen *
+joy_application_get_default_screen(JoyApplication *self)
+{
+	g_return_val_if_fail(JOY_IS_APPLICATION(self), NULL);
+	return JOY_APPLICATION_GET_CLASS(self)->get_default_screen(self);
+}
+
 JoyIterator *
 joy_application_begin(JoyApplication *self)
 {

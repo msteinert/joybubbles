@@ -288,7 +288,7 @@ main(int argc, char *argv[])
 		}
 	}
 #endif // JOY_HAVE_DBUS
-	JoyScreen *screen = joy_application_get_screen(app, 0);
+	JoyScreen *screen = joy_application_get_default_screen(app);
 	if (!screen) {
 		goto error;
 	}

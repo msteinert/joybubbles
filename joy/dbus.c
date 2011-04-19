@@ -226,6 +226,7 @@ joy_dbus_new(JoyApplication *app, const gchar *address, GError **error)
 	}
 	return self;
 error:
+	dbus_error_free(&dbus_error);
 	if (connection) {
 		if (dbus_connection_get_is_connected(connection)) {
 			dbus_connection_close(connection);

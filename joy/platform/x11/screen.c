@@ -204,6 +204,24 @@ submit(JoyScreen *self)
 	}
 }
 
+static gboolean
+enable_mirroring(JoyScreen *self, JoyScreen *mirror, GError **error)
+{
+	JOY_UNIMPLEMENTED;
+	g_set_error_literal(error, JOY_ERROR, JOY_ERROR_UNIMPLEMENTED,
+			Q_("x11: mirroring is not implemented"));
+	return FALSE;
+}
+
+static gboolean
+disable_mirroring(JoyScreen *self, JoyScreen *mirror, GError **error)
+{
+	JOY_UNIMPLEMENTED;
+	g_set_error_literal(error, JOY_ERROR, JOY_ERROR_UNIMPLEMENTED,
+			Q_("x11: mirroring is not implemented"));
+	return FALSE;
+}
+
 static void
 joy_x11_screen_class_init(JoyX11ScreenClass *klass)
 {
@@ -217,6 +235,8 @@ joy_x11_screen_class_init(JoyX11ScreenClass *klass)
 	screen_class->cairo_surface_type = cairo_surface_type;
 	screen_class->cairo_surface_create = cairo_surface_create;
 	screen_class->submit = submit;
+	screen_class->enable_mirroring = enable_mirroring;
+	screen_class->disable_mirroring = disable_mirroring;
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 

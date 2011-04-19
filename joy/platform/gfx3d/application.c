@@ -89,6 +89,16 @@ get_screen(JoyApplication *self, guint n)
 	return NULL;
 }
 
+static JoyScreen *
+get_default_screen(JoyApplication *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_LIKELY(priv->screens && priv->screens->len)) {
+		return g_ptr_array_index(priv->screens, 0);
+	}
+	return NULL;
+}
+
 static JoyIterator *
 begin(JoyApplication *self)
 {
@@ -107,6 +117,7 @@ joy_gfx3d_application_class_init(JoyGfx3dApplicationClass *klass)
 	object_class->dispose = dispose;
 	JoyApplicationClass *application_class = JOY_APPLICATION_CLASS(klass);
 	application_class->get_screen = get_screen;
+	application_class->get_default_screen = get_default_screen;
 	application_class->begin = begin;
 	g_type_class_add_private(klass, sizeof(struct Private));
 }

@@ -368,7 +368,7 @@ enable_mirroring(JoyScreen *self, JoyScreen *mirror, GError **error)
 	gint mirror_id = joy_screen_get_id(mirror);
 	if (id != 0 || mirror_id != 1) {
 		g_set_error(error, JOY_ERROR, JOY_ERROR_FAILURE,
-				"gfx3d: mirroring from display %d to %d is "
+				"gfx3d: mirroring from screen %d to %d is "
 				"not supported", id, mirror_id);
 		return FALSE;
 	}
@@ -381,7 +381,7 @@ enable_mirroring(JoyScreen *self, JoyScreen *mirror, GError **error)
 	if (status) {
 		g_set_error(error, JOY_ERROR, JOY_ERROR_FAILURE,
 				"gfx3d: failed to enable mirroring from "
-				"display %d to %d", id, mirror_id);
+				"screen %d to %d", id, mirror_id);
 		return FALSE;
 	}
 	return TRUE;
@@ -405,7 +405,7 @@ disable_mirroring(JoyScreen *self, JoyScreen *mirror, GError **error)
 	if (status) {
 		g_set_error(error, JOY_ERROR, JOY_ERROR_FAILURE,
 				"gfx3d: failed to disable mirroring from "
-				"display %d to %d", id, mirror_id);
+				"screen %d to %d", id, mirror_id);
 		return FALSE;
 	}
 	return TRUE;

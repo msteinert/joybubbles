@@ -62,6 +62,7 @@ struct Private {
 	JoyBuffer *buffer;
 	gdouble alpha;
 	JoyStyle *style;
+	JoyBubbleState state;
 };
 
 static void
@@ -72,6 +73,7 @@ joy_bubble_init(JoyBubble *self)
 	priv->area = cairo_region_create();
 	priv->draw = cairo_region_create();
 	priv->alpha = 1.;
+	priv->state = JOY_BUBBLE_STATE_DEFAULT;
 }
 
 static void
@@ -632,6 +634,78 @@ joy_bubble_get_parent(JoyBubble *self)
 }
 
 void
+joy_bubble_set_default(JoyBubble *self)
+{
+	g_return_if_fail(JOY_IS_BUBBLE(self));
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DEFAULT == priv->state) {
+		return;
+	}
+	priv->state = JOY_BUBBLE_STATE_DEFAULT;
+}
+
+void
+joy_bubble_set_focused(JoyBubble *self)
+{
+	g_return_if_fail(JOY_IS_BUBBLE(self));
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_FOCUSED == priv->state) {
+		return;
+	}
+	priv->state = JOY_BUBBLE_STATE_FOCUSED;
+}
+
+void
+joy_bubble_set_active(JoyBubble *self)
+{
+	g_return_if_fail(JOY_IS_BUBBLE(self));
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_ACTIVE == priv->state) {
+		return;
+	}
+	priv->state = JOY_BUBBLE_STATE_ACTIVE;
+}
+
+void
+joy_bubble_set_disabled(JoyBubble *self)
+{
+	g_return_if_fail(JOY_IS_BUBBLE(self));
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+		return;
+	}
+	priv->state = JOY_BUBBLE_STATE_DISABLED;
+}
+
+void
+joy_bubble_set_state(JoyBubble *self, JoyBubbleState state)
+{
+	switch (state) {
+	case JOY_BUBBLE_STATE_DEFAULT:
+		joy_bubble_set_default(self);
+		break;
+	case JOY_BUBBLE_STATE_FOCUSED:
+		joy_bubble_set_focused(self);
+		break;
+	case JOY_BUBBLE_STATE_ACTIVE:
+		joy_bubble_set_active(self);
+		break;
+	case JOY_BUBBLE_STATE_DISABLED:
+		joy_bubble_set_disabled(self);
+		break;
+	default:
+		g_assert_not_reached();
+	}
+}
+
+JoyBubbleState
+joy_bubble_get_state(JoyBubble *self)
+{
+	g_return_val_if_fail(JOY_IS_BUBBLE(self), JOY_BUBBLE_STATE_DEFAULT);
+	return GET_PRIVATE(self)->state;
+}
+
+void
 joy_bubble_set_expand(JoyBubble *self, gboolean expand)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
@@ -936,7 +1010,11 @@ joy_bubble_key_down(JoyBubble *self, JoyDevice *device,
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
-	if (!GET_PRIVATE(self)->visible) {
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+		return;
+	}
+	if (!priv->visible) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at(self, x, y);
@@ -957,7 +1035,11 @@ joy_bubble_key_up(JoyBubble *self, JoyDevice *device,
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
-	if (!GET_PRIVATE(self)->visible) {
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+		return;
+	}
+	if (!priv->visible) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at(self, x, y);
@@ -1016,7 +1098,11 @@ joy_bubble_motion(JoyBubble *self, JoyDevice *device, gulong timestamp,
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
-	if (!GET_PRIVATE(self)->visible) {
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+		return;
+	}
+	if (!priv->visible) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at(self, x, y);
@@ -1044,7 +1130,11 @@ joy_bubble_button_down(JoyBubble *self, JoyDevice *device,
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
-	if (!GET_PRIVATE(self)->visible) {
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+		return;
+	}
+	if (!priv->visible) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at_device(self, device);
@@ -1065,7 +1155,11 @@ joy_bubble_button_up(JoyBubble *self, JoyDevice *device,
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
-	if (!GET_PRIVATE(self)->visible) {
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+		return;
+	}
+	if (!priv->visible) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at_device(self, device);
@@ -1086,7 +1180,11 @@ joy_bubble_scroll(JoyBubble *self, JoyDevice *device,
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
-	if (!GET_PRIVATE(self)->visible) {
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+		return;
+	}
+	if (!priv->visible) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at_device(self, device);
@@ -1107,7 +1205,11 @@ joy_bubble_enter(JoyBubble *self, JoyDevice *device, gulong timestamp,
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
-	if (!GET_PRIVATE(self)->visible) {
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+		return;
+	}
+	if (!priv->visible) {
 		return;
 	}
 	GQuark detail = 0;
@@ -1129,7 +1231,11 @@ joy_bubble_leave(JoyBubble *self, JoyDevice *device, gulong timestamp,
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
-	if (!GET_PRIVATE(self)->visible) {
+	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+		return;
+	}
+	if (!priv->visible) {
 		return;
 	}
 	GQuark detail = 0;

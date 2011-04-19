@@ -190,6 +190,13 @@ joy_bubble_get_name(JoyBubble *self);
 void
 joy_bubble_set_style(JoyBubble *self, JoyTheme *theme);
 
+/**
+ * \brief Get the style applied a widget.
+ *
+ * \param self [in] A widget object.
+ *
+ * \return The currently applied style for \e self.
+ */
 JoyStyle *
 joy_bubble_get_style(JoyBubble *self);
 
@@ -265,6 +272,24 @@ joy_bubble_set_parent(JoyBubble *self, JoyBubble *parent);
  */
 JoyBubble *
 joy_bubble_get_parent(JoyBubble *self);
+
+void
+joy_bubble_set_default(JoyBubble *self);
+
+void
+joy_bubble_set_focused(JoyBubble *self);
+
+void
+joy_bubble_set_active(JoyBubble *self);
+
+void
+joy_bubble_set_disabled(JoyBubble *self);
+
+void
+joy_bubble_set_state(JoyBubble *self, JoyBubbleState state);
+
+JoyBubbleState
+joy_bubble_get_state(JoyBubble *self);
 
 /**
  * \brief Simultaneously set the horizontal & vertical expand.
