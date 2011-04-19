@@ -78,22 +78,22 @@ prepare(JoySource *self)
 	return FALSE;
 }
 
-static inline JoyButton
+static inline JoyMouseButton
 get_button(gint button)
 {
 	switch (button) {
 	case Button1:
-		return JOY_BUTTON_LEFT;
+		return JOY_MOUSE_BUTTON_LEFT;
 	case Button2:
-		return JOY_BUTTON_MIDDLE;
+		return JOY_MOUSE_BUTTON_MIDDLE;
 	case Button3:
-		return JOY_BUTTON_RIGHT;
+		return JOY_MOUSE_BUTTON_RIGHT;
 	case 8:
-		return JOY_BUTTON_X1;
+		return JOY_MOUSE_BUTTON_X1;
 	case 9:
-		return JOY_BUTTON_X2;
+		return JOY_MOUSE_BUTTON_X2;
 	default:
-		return JOY_BUTTON_NONE;
+		return JOY_MOUSE_BUTTON_NONE;
 	}
 }
 
@@ -161,7 +161,7 @@ handle_event(JoySource *self, JoyBubble *window, XEvent *event)
 						priv->app),
 					event->xbutton.time,
 					event->xbutton.x, event->xbutton.y,
-					JOY_SCROLL_UP);
+					JOY_MOUSE_SCROLL_UP);
 			break;
 		case 5:
 			joy_bubble_scroll(window,
@@ -169,7 +169,7 @@ handle_event(JoySource *self, JoyBubble *window, XEvent *event)
 						priv->app),
 					event->xbutton.time,
 					event->xbutton.x, event->xbutton.y,
-					JOY_SCROLL_DOWN);
+					JOY_MOUSE_SCROLL_DOWN);
 			break;
 		case 6:
 			joy_bubble_scroll(window,
@@ -177,7 +177,7 @@ handle_event(JoySource *self, JoyBubble *window, XEvent *event)
 						priv->app),
 					event->xbutton.time,
 					event->xbutton.x, event->xbutton.y,
-					JOY_SCROLL_LEFT);
+					JOY_MOUSE_SCROLL_LEFT);
 			break;
 		case 7:
 			joy_bubble_scroll(window,
@@ -185,7 +185,7 @@ handle_event(JoySource *self, JoyBubble *window, XEvent *event)
 						priv->app),
 					event->xbutton.time,
 					event->xbutton.x, event->xbutton.y,
-					JOY_SCROLL_RIGHT);
+					JOY_MOUSE_SCROLL_RIGHT);
 			break;
 		default:
 			joy_bubble_button_down(window,

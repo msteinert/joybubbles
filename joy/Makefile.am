@@ -17,6 +17,7 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_SOURCES = \
 	bubble.c \
 	buffer.c \
 	buffer.h \
+	button.c \
 	container.c \
 	cursor.c \
 	device.c \
@@ -73,6 +74,7 @@ pkginclude_HEADERS = \
 	application.h \
 	bubble.h \
 	bubbles.h \
+	button.h \
 	container.h \
 	cursor.h \
 	device.h \

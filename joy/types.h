@@ -24,6 +24,8 @@ typedef struct JoyBubble_ JoyBubble;
 
 typedef struct JoyBuffer_ JoyBuffer;
 
+typedef struct JoyButton_ JoyButton;
+
 typedef struct JoyContainer_ JoyContainer;
 
 typedef struct JoyCursor_ JoyCursor;

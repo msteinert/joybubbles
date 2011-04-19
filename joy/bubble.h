@@ -101,11 +101,11 @@ typedef void
 
 typedef void
 (*JoyBubbleButton)(JoyBubble *self, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyButton button);
+		gint x, gint y, JoyMouseButton button);
 
 typedef void
 (*JoyBubbleScroll)(JoyBubble *self, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyScroll direction);
+		gint x, gint y, JoyMouseScroll direction);
 
 typedef void
 (*JoyBubbleCrossing)(JoyBubble *self, JoyDevice *device, gulong timestamp,
@@ -583,7 +583,7 @@ joy_bubble_motion(JoyBubble *self, JoyDevice *device, gulong timestamp,
  */
 void
 joy_bubble_button_down(JoyBubble *self, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyButton button);
+		gint x, gint y, JoyMouseButton button);
 
 /**
  * \brief Send a mouse button-up event to a widget.
@@ -597,7 +597,7 @@ joy_bubble_button_down(JoyBubble *self, JoyDevice *device, gulong timestamp,
  */
 void
 joy_bubble_button_up(JoyBubble *self, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyButton button);
+		gint x, gint y, JoyMouseButton button);
 
 /**
  * \brief Send a mouse scroll-wheel event to a widget.
@@ -611,7 +611,7 @@ joy_bubble_button_up(JoyBubble *self, JoyDevice *device, gulong timestamp,
  */
 void
 joy_bubble_scroll(JoyBubble *self, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyScroll direction);
+		gint x, gint y, JoyMouseScroll direction);
 
 /**
  * \brief Send an enter crossing event to a widget.

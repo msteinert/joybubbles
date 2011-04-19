@@ -121,7 +121,7 @@ enum Properties {
 static void
 set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 {
-	JoyBubble *self = (JoyBubble *)base;
+	JoyBubble *self = JOY_BUBBLE(base);
 	switch (id) {
 	case PROP_TEXT:
 		joy_label_set_text(self, g_value_get_string(value));

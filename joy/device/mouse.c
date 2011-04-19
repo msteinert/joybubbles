@@ -53,16 +53,16 @@ joy_device_mouse_class_init(JoyDeviceMouseClass *klass)
 }
 
 void
-joy_device_mouse_button_down(JoyDevice *self, JoyButton button)
+joy_device_mouse_button_down(JoyDevice *self, JoyMouseButton button)
 {
 	g_return_if_fail(JOY_IS_DEVICE_MOUSE(self));
 	struct Private *priv = GET_PRIVATE(self);
 	switch (button) {
-	case JOY_BUTTON_LEFT:
-	case JOY_BUTTON_MIDDLE:
-	case JOY_BUTTON_RIGHT:
-	case JOY_BUTTON_X1:
-	case JOY_BUTTON_X2:
+	case JOY_MOUSE_BUTTON_LEFT:
+	case JOY_MOUSE_BUTTON_MIDDLE:
+	case JOY_MOUSE_BUTTON_RIGHT:
+	case JOY_MOUSE_BUTTON_X1:
+	case JOY_MOUSE_BUTTON_X2:
 		priv->button |= button;
 		break;
 	default:
@@ -71,16 +71,16 @@ joy_device_mouse_button_down(JoyDevice *self, JoyButton button)
 }
 
 void
-joy_device_mouse_button_up(JoyDevice *self, JoyButton button)
+joy_device_mouse_button_up(JoyDevice *self, JoyMouseButton button)
 {
 	g_return_if_fail(JOY_IS_DEVICE_MOUSE(self));
 	struct Private *priv = GET_PRIVATE(self);
 	switch (button) {
-	case JOY_BUTTON_LEFT:
-	case JOY_BUTTON_MIDDLE:
-	case JOY_BUTTON_RIGHT:
-	case JOY_BUTTON_X1:
-	case JOY_BUTTON_X2:
+	case JOY_MOUSE_BUTTON_LEFT:
+	case JOY_MOUSE_BUTTON_MIDDLE:
+	case JOY_MOUSE_BUTTON_RIGHT:
+	case JOY_MOUSE_BUTTON_X1:
+	case JOY_MOUSE_BUTTON_X2:
 		priv->button &= ~button;
 		break;
 	default:
@@ -91,7 +91,8 @@ joy_device_mouse_button_up(JoyDevice *self, JoyButton button)
 glong
 joy_device_mouse_button_state(JoyDevice *self)
 {
-	g_return_val_if_fail(JOY_IS_DEVICE_MOUSE(self), JOY_BUTTON_NONE);
+	g_return_val_if_fail(JOY_IS_DEVICE_MOUSE(self),
+			JOY_MOUSE_BUTTON_NONE);
 	return GET_PRIVATE(self)->button;
 }
 

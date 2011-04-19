@@ -1126,7 +1126,7 @@ joy_bubble_motion(JoyBubble *self, JoyDevice *device, gulong timestamp,
 
 void
 joy_bubble_button_down(JoyBubble *self, JoyDevice *device,
-		gulong timestamp, gint x, gint y, JoyButton button)
+		gulong timestamp, gint x, gint y, JoyMouseButton button)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
@@ -1151,7 +1151,7 @@ joy_bubble_button_down(JoyBubble *self, JoyDevice *device,
 
 void
 joy_bubble_button_up(JoyBubble *self, JoyDevice *device,
-		gulong timestamp, gint x, gint y, JoyButton button)
+		gulong timestamp, gint x, gint y, JoyMouseButton button)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
@@ -1176,7 +1176,7 @@ joy_bubble_button_up(JoyBubble *self, JoyDevice *device,
 
 void
 joy_bubble_scroll(JoyBubble *self, JoyDevice *device,
-		gulong timestamp, gint x, gint y, JoyScroll direction)
+		gulong timestamp, gint x, gint y, JoyMouseScroll direction)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));

@@ -44,26 +44,26 @@ G_BEGIN_DECLS
  * \brief Mouse button IDs
  */
 typedef enum {
-	JOY_BUTTON_NONE = 0, /**< Sentinel value */
-	JOY_BUTTON_LEFT = 1 << 1, /**< Left mouse button */
-	JOY_BUTTON_MIDDLE = 1 << 2, /**< Middle mouse button */
-	JOY_BUTTON_RIGHT = 1 << 3, /**< Right mouse button */
-	JOY_BUTTON_X1 = 1 << 4, /**< First extra mouse button */
-	JOY_BUTTON_X2 = 1 << 5, /**< Second extra mouse button */
-	JOY_BUTTON_MAX = G_MAXINT /**< Sentinel value */
-} JoyButton;
+	JOY_MOUSE_BUTTON_NONE = 0, /**< Sentinel value */
+	JOY_MOUSE_BUTTON_LEFT = 1 << 1, /**< Left mouse button */
+	JOY_MOUSE_BUTTON_MIDDLE = 1 << 2, /**< Middle mouse button */
+	JOY_MOUSE_BUTTON_RIGHT = 1 << 3, /**< Right mouse button */
+	JOY_MOUSE_BUTTON_X1 = 1 << 4, /**< First extra mouse button */
+	JOY_MOUSE_BUTTON_X2 = 1 << 5, /**< Second extra mouse button */
+	JOY_MOUSE_BUTTON_MAX = G_MAXINT /**< Sentinel value */
+} JoyMouseButton;
 
 /**
  * \brief Indicates the direction of a scroll-wheel motion.
  */
 typedef enum {
-	JOY_SCROLL_NONE = 0, /**< Sentinel value */
-	JOY_SCROLL_UP, /**< Scroll-wheel up */
-	JOY_SCROLL_DOWN, /**< Scroll-wheel down */
-	JOY_SCROLL_LEFT, /**< Scroll-wheel left */
-	JOY_SCROLL_RIGHT, /*< Scroll-wheel right */
-	JOY_SCROLL_MAX /**< Sentinel value */
-} JoyScroll;
+	JOY_MOUSE_SCROLL_NONE = 0, /**< Sentinel value */
+	JOY_MOUSE_SCROLL_UP, /**< Scroll-wheel up */
+	JOY_MOUSE_SCROLL_DOWN, /**< Scroll-wheel down */
+	JOY_MOUSE_SCROLL_LEFT, /**< Scroll-wheel left */
+	JOY_MOUSE_SCROLL_RIGHT, /*< Scroll-wheel right */
+	JOY_MOUSE_SCROLL_MAX /**< Sentinel value */
+} JoyMouseScroll;
 
 typedef struct JoyDeviceMouseClass_ JoyDeviceMouseClass;
 
@@ -114,7 +114,7 @@ joy_device_mouse_get_type(void) G_GNUC_CONST;
  * \param sym [in] A mouse button.
  */
 void
-joy_device_mouse_button_down(JoyDevice *self, JoyButton button);
+joy_device_mouse_button_down(JoyDevice *self, JoyMouseButton button);
 
 /**
  * \brief Unset the state of a mouse button.
@@ -123,7 +123,7 @@ joy_device_mouse_button_down(JoyDevice *self, JoyButton button);
  * \param sym [in] A mouse button
  */
 void
-joy_device_mouse_button_up(JoyDevice *self, JoyButton button);
+joy_device_mouse_button_up(JoyDevice *self, JoyMouseButton button);
 
 /**
  * \brief Retrieve the state of the buttons for a mouse.

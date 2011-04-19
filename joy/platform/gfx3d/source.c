@@ -304,15 +304,17 @@ non_motion_event(JoySource *self, JoyScreen *screen, const IM_INPUT *event,
 		switch (event->state) {
 		case IM_KEY_DOWN:
 			device = joy_gfx3d_screen_get_mouse(screen);
-			joy_device_mouse_button_down(device, JOY_BUTTON_LEFT);
+			joy_device_mouse_button_down(device,
+					JOY_MOUSE_BUTTON_LEFT);
 			joy_bubble_button_down(window, device, timestamp,
-					x, y, JOY_BUTTON_LEFT);
+					x, y, JOY_MOUSE_BUTTON_LEFT);
 			break;
 		case IM_KEY_UP:
 			device = joy_gfx3d_screen_get_mouse(screen);
-			joy_device_mouse_button_up(device, JOY_BUTTON_LEFT);
+			joy_device_mouse_button_up(device,
+					JOY_MOUSE_BUTTON_LEFT);
 			joy_bubble_button_up(window, device, timestamp,
-					x, y, JOY_BUTTON_LEFT);
+					x, y, JOY_MOUSE_BUTTON_LEFT);
 			break;
 		default:
 			g_message(Q_("gfx3d: unknown button state: %d"),
@@ -324,15 +326,17 @@ non_motion_event(JoySource *self, JoyScreen *screen, const IM_INPUT *event,
 		switch (event->state) {
 		case IM_KEY_DOWN:
 			device = joy_gfx3d_screen_get_mouse(screen);
-			joy_device_mouse_button_down(device, JOY_BUTTON_RIGHT);
+			joy_device_mouse_button_down(device,
+					JOY_MOUSE_BUTTON_RIGHT);
 			joy_bubble_button_down(window, device, timestamp,
-					x, y, JOY_BUTTON_RIGHT);
+					x, y, JOY_MOUSE_BUTTON_RIGHT);
 			break;
 		case IM_KEY_UP:
 			device = joy_gfx3d_screen_get_mouse(screen);
-			joy_device_mouse_button_up(device, JOY_BUTTON_RIGHT);
+			joy_device_mouse_button_up(device,
+					JOY_MOUSE_BUTTON_RIGHT);
 			joy_bubble_button_up(window, device, timestamp,
-					x, y, JOY_BUTTON_RIGHT);
+					x, y, JOY_MOUSE_BUTTON_RIGHT);
 			break;
 		default:
 			g_message(Q_("gfx3d: unknown button state: %d"),
@@ -345,12 +349,12 @@ non_motion_event(JoySource *self, JoyScreen *screen, const IM_INPUT *event,
 		case 255:
 			device = joy_gfx3d_screen_get_mouse(screen);
 			joy_bubble_scroll(window, device, timestamp,
-					x, y, JOY_SCROLL_DOWN);
+					x, y, JOY_MOUSE_SCROLL_DOWN);
 			break;
 		case 1:
 			device = joy_gfx3d_screen_get_mouse(screen);
 			joy_bubble_scroll(window, device, timestamp,
-					x, y, JOY_SCROLL_UP);
+					x, y, JOY_MOUSE_SCROLL_UP);
 			break;
 		default:
 			g_message(Q_("gfx3d: unknown scroll direction: %d"),

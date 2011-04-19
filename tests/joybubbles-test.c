@@ -119,10 +119,10 @@ struct ButtonDown {
 
 static void
 on_button_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyButton button, gpointer data)
+		gint x, gint y, JoyMouseButton button, gpointer data)
 {
 	struct ButtonDown *down = (struct ButtonDown *)data;
-	if (JOY_BUTTON_LEFT == button) {
+	if (JOY_MOUSE_BUTTON_LEFT == button) {
 		JoyAnimation *fade = down->fade;
 		joy_animation_pause(fade);
 		gdouble alpha;
@@ -139,7 +139,7 @@ on_button_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
 		}
 		joy_animation_fade_set_alpha(fade, alpha);
 		joy_animation_start(fade);
-	} else if (JOY_BUTTON_RIGHT == button) {
+	} else if (JOY_MOUSE_BUTTON_RIGHT == button) {
 		JoyAnimation *move = down->move;
 		joy_animation_pause(move);
 		joy_animation_move_set_x(move, x);
@@ -150,9 +150,9 @@ on_button_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
 
 static void
 on_button_up(JoyBubble *image, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyButton button, gpointer data)
+		gint x, gint y, JoyMouseButton button, gpointer data)
 {
-	if (JOY_BUTTON_LEFT == button) {
+	if (JOY_MOUSE_BUTTON_LEFT == button) {
 		JoyApplication *app = joy_bubble_get_application(image);
 		if (app) {
 			joy_application_quit(app, EXIT_SUCCESS);
@@ -214,13 +214,13 @@ on_leave(JoyBubble *window, JoyDevice *device, gulong timestamp,
 
 static void
 on_scroll(JoyBubble *window, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyScroll direction,
+		gint x, gint y, JoyMouseScroll direction,
 		struct Crossing *crossing)
 {
 	gint width, height;
 	JoyBubble *widget = joy_animation_get_widget(crossing->resize);
 	switch (direction) {
-	case JOY_SCROLL_UP:
+	case JOY_MOUSE_SCROLL_UP:
 		width = joy_bubble_get_width(widget);
 		height = joy_bubble_get_height(widget);
 		joy_bubble_resize(widget, width + crossing->dx,
@@ -230,10 +230,10 @@ on_scroll(JoyBubble *window, JoyDevice *device, gulong timestamp,
 		crossing->w2 = crossing->w1 * 1.25;
 		crossing->h2 = crossing->h1 * 1.25;
 		break;
-	case JOY_SCROLL_DOWN:
+	case JOY_MOUSE_SCROLL_DOWN:
 		width = joy_bubble_get_width(widget);
 		height = joy_bubble_get_height(widget);
-		if (width - 8 < 0 || height - 6 < 0) {
+		if (width - crossing->dx < 0 || height - crossing->dy < 0) {
 			break;
 		}
 		joy_bubble_resize(widget, width - crossing->dx,
@@ -320,7 +320,6 @@ main(int argc, char *argv[])
 		joy_bubble_resize(image, 200, 100);
 		g_signal_connect(image, "draw", G_CALLBACK(on_draw), NULL);
 	}
-	joy_bubble_set_expand(image, FALSE);
 	joy_bubble_move(image, joy_bubble_get_width(window) / 2
 			- joy_bubble_get_width(image) / 2,
 			joy_bubble_get_height(window) / 2

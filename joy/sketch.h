@@ -31,8 +31,7 @@ G_BEGIN_DECLS
 	(G_TYPE_CHECK_INSTANCE_TYPE((instance), JOY_TYPE_SKETCH))
 
 #define JOY_SKETCH_CLASS(klass) \
-	(G_TYPE_CHECK_CLASS_CAST((klass), JOY_TYPE_SKETCH, \
-		JoySketchClass))
+	(G_TYPE_CHECK_CLASS_CAST((klass), JOY_TYPE_SKETCH, JoySketchClass))
 
 #define JOY_IS_SKETCH_CLASS(klass) \
 	(G_TYPE_CHECK_CLASS_TYPE((klass), JOY_TYPE_SKETCH))
