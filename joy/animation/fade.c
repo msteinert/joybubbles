@@ -115,6 +115,5 @@ void
 joy_animation_fade_set_alpha(JoyAnimation *self, gdouble alpha)
 {
 	g_return_if_fail(JOY_IS_ANIMATION_FADE(self));
-	g_return_if_fail(alpha >= 0. && 1. >= alpha);
-	GET_PRIVATE(self)->alpha = alpha;
+	GET_PRIVATE(self)->alpha = CLAMP(alpha, 0., 1.);
 }

@@ -53,11 +53,19 @@ struct JoyWindow_ {
 typedef cairo_surface_t *
 (*JoyWindowCairoSurfaceCreate)(JoyBubble *self);
 
+typedef void
+(*JoyWindowRaise)(JoyBubble *self);
+
+typedef void
+(*JoyWindowLower)(JoyBubble *self);
+
 struct JoyWindowClass_ {
 	/*< private >*/
 	JoyContainerClass parent_class;
 	/*< public >*/
 	JoyWindowCairoSurfaceCreate cairo_surface_create;
+	JoyWindowRaise raise;
+	JoyWindowLower lower;
 };
 
 G_GNUC_NO_INSTRUMENT
@@ -86,6 +94,22 @@ joy_window_new(JoyScreen *screen);
 G_GNUC_WARN_UNUSED_RESULT
 cairo_surface_t *
 joy_window_cairo_surface_create(JoyBubble *self);
+
+/**
+ * \brief Raise a window to the top of the stacking order.
+ *
+ * \param self [in] A window object.
+ */
+void
+joy_window_raise(JoyBubble *self);
+
+/**
+ * \brief Lower a window to the bottom of the stacking order.
+ *
+ * \param self [in] A window object.
+ */
+void
+joy_window_lower(JoyBubble *self);
 
 G_END_DECLS
 

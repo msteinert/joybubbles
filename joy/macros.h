@@ -56,6 +56,17 @@ G_STMT_START { \
 #endif // __GNUC__
 #endif // G_DISABLE_CHECKS
 
+#ifdef G_DISABLE_CHECKS
+#define JOY_UNIMPLEMENTED
+#else // G_DISABLE_CHECKS
+#define JOY_UNIMPLEMENTED \
+G_STMT_START { \
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, \
+			"%s(%s:%d): unimplemented", \
+			__func__, __FILE__, __LINE__); \
+} G_STMT_END
+#endif // G_DISABLE_CHECKS
+
 G_END_DECLS
 
 #endif // JOY_MACROS_H

@@ -14,7 +14,7 @@
 #endif // CAIRO_HAS_GFX3D_SURFACE
 #include "joy/cursor.h"
 #include "joy/error.h"
-#include "joy/iterator/ptr-array.h"
+#include "joy/iterator/queue.h"
 #include "joy/macros.h"
 #include "joy/platform/gfx3d/application.h"
 #include "joy/platform/gfx3d/mouse.h"
@@ -36,7 +36,7 @@ struct Private {
 	GFX3D_Display display;
 	cairo_region_t *area;
 	cairo_region_t *expose;
-	GPtrArray *windows;
+	GQueue *windows;
 	GArray *rects;
 	JoyDevice *keyboard;
 	JoyDevice *mouse;
@@ -46,21 +46,11 @@ struct Private {
 };
 
 static void
-destroy(gpointer object)
-{
-	g_object_run_dispose(G_OBJECT(object));
-	g_object_unref(object);
-}
-
-static void
 joy_gfx3d_screen_init(JoyGfx3dScreen *self)
 {
 	self->priv = ASSIGN_PRIVATE(self);
 	struct Private *priv = GET_PRIVATE(self);
-	priv->windows = g_ptr_array_sized_new(1);
-	if (G_LIKELY(priv->windows)) {
-		g_ptr_array_set_free_func(priv->windows, destroy);
-	}
+	priv->windows = g_queue_new();
 	priv->area = cairo_region_create();
 	priv->expose = cairo_region_create();
 	priv->rects = g_array_sized_new(FALSE, FALSE,
@@ -171,7 +161,13 @@ dispose(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
 	if (priv->windows) {
-		g_ptr_array_free(priv->windows, TRUE);
+		for (GList *node = g_queue_peek_head_link(priv->windows);
+				node; node = node->next) {
+			JoyBubble *window = node->data;
+			g_object_run_dispose(G_OBJECT(window));
+			g_object_unref(window);
+		}
+		g_queue_free(priv->windows);
 		priv->windows = NULL;
 	}
 	if (priv->keyboard) {
@@ -226,7 +222,7 @@ begin(JoyScreen *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (G_LIKELY(priv->windows)) {
-		return joy_iterator_ptr_array_begin(priv->windows);
+		return joy_iterator_queue_begin(priv->windows);
 	}
 	return NULL;
 }
@@ -236,7 +232,7 @@ end(JoyScreen *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (G_LIKELY(priv->windows)) {
-		return joy_iterator_ptr_array_end(priv->windows);
+		return joy_iterator_queue_end(priv->windows);
 	}
 	return NULL;
 }
@@ -272,7 +268,7 @@ window_create(JoyScreen *self)
 	if (G_UNLIKELY(!window)) {
 		return NULL;
 	}
-	g_ptr_array_add(priv->windows, window);
+	g_queue_push_head(priv->windows, window);
 	g_signal_connect(window, "expose", G_CALLBACK(on_expose), self);
 	return window;
 }
@@ -345,8 +341,9 @@ submit(JoyScreen *self)
 			GFX3D_Display_FrameBuffer_Get_NATIVE_Surface(
 					priv->display);
 		// copy windows to the frame buffer
-		for (gint i = 0; i < priv->windows->len; ++i) {
-			JoyBubble *window = priv->windows->pdata[i];
+		for (GList *node = g_queue_peek_head_link(priv->windows);
+				node; node = node->next) {
+			JoyBubble *window = node->data;
 			joy_gfx3d_window_submit(window, display, surface,
 					priv->area);
 		}
@@ -683,4 +680,40 @@ joy_gfx3d_screen_cursor_visible(JoyScreen *self)
 		return FALSE;
 	}
 	return enable ? TRUE : FALSE;
+}
+
+void
+joy_gfx3d_screen_raise_window(JoyScreen *self, JoyBubble *window)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(!priv->windows)) {
+		return;
+	}
+	gint n = g_queue_index(priv->windows, window);
+	if (G_UNLIKELY(-1 == n)) {
+		return;
+	}
+	GList *node = g_queue_pop_nth_link(priv->windows, n);
+	if (G_UNLIKELY(!node)) {
+		return;
+	}
+	g_queue_push_head_link(priv->windows, node);
+}
+
+void
+joy_gfx3d_screen_lower_window(JoyScreen *self, JoyBubble *window)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(!priv->windows)) {
+		return;
+	}
+	gint n = g_queue_index(priv->windows, window);
+	if (G_UNLIKELY(-1 == n)) {
+		return;
+	}
+	GList *node = g_queue_pop_nth_link(priv->windows, n);
+	if (G_UNLIKELY(!node)) {
+		return;
+	}
+	g_queue_push_tail_link(priv->windows, node);
 }

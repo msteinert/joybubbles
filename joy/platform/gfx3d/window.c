@@ -148,6 +148,24 @@ error:
 }
 
 static void
+raise_(JoyBubble *self)
+{
+	JoyScreen *screen = joy_bubble_get_screen(self);
+	if (G_LIKELY(screen)) {
+		joy_gfx3d_screen_raise_window(screen, self);
+	}
+}
+
+static void
+lower(JoyBubble *self)
+{
+	JoyScreen *screen = joy_bubble_get_screen(self);
+	if (G_LIKELY(screen)) {
+		joy_gfx3d_screen_lower_window(screen, self);
+	}
+}
+
+static void
 joy_gfx3d_window_class_init(JoyGfx3dWindowClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
@@ -159,6 +177,8 @@ joy_gfx3d_window_class_init(JoyGfx3dWindowClass *klass)
 	bubble_class->show = show;
 	JoyWindowClass *window_class = JOY_WINDOW_CLASS(klass);
 	window_class->cairo_surface_create = cairo_surface_create;
+	window_class->raise = raise_;
+	window_class->lower = lower;
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 

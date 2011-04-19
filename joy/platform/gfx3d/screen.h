@@ -181,6 +181,26 @@ G_GNUC_INTERNAL
 gboolean
 joy_gfx3d_screen_cursor_visible(JoyScreen *self);
 
+/**
+ * \brief Raise a window to the top of the window stack.
+ *
+ * \param self [in] A GFX3D screen object.
+ * \param window [in] A GFX3D window object.
+ */
+G_GNUC_INTERNAL
+void
+joy_gfx3d_screen_raise_window(JoyScreen *self, JoyBubble *window);
+
+/**
+ * \brief Lower a window to the bottom of the window stack.
+ *
+ * \param self [in] A GFX3D screen object.
+ * \param window [in] A GFX3D window object.
+ */
+G_GNUC_INTERNAL
+void
+joy_gfx3d_screen_lower_window(JoyScreen *self, JoyBubble *window);
+
 G_END_DECLS
 
 #endif // JOY_GFX3D_SCREEN_H

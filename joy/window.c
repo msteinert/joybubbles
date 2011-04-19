@@ -139,3 +139,17 @@ joy_window_cairo_surface_create(JoyBubble *self)
 	g_return_val_if_fail(JOY_IS_WINDOW(self), NULL);
 	return JOY_WINDOW_GET_CLASS(self)->cairo_surface_create(self);
 }
+
+void
+joy_window_raise(JoyBubble *self)
+{
+	g_return_if_fail(JOY_IS_WINDOW(self));
+	JOY_WINDOW_GET_CLASS(self)->raise(self);
+}
+
+void
+joy_window_lower(JoyBubble *self)
+{
+	g_return_if_fail(JOY_IS_WINDOW(self));
+	JOY_WINDOW_GET_CLASS(self)->raise(self);
+}
