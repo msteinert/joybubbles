@@ -135,6 +135,7 @@ enum Properties {
 	PROP_Y_COORDINATE,
 	PROP_WIDTH,
 	PROP_HEIGHT,
+	PROP_EXPAND,
 	PROP_HORIZONTAL_EXPAND,
 	PROP_VERTICAL_EXPAND,
 	PROP_BUFFERED,
@@ -162,6 +163,9 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 		break;
 	case PROP_HEIGHT:
 		priv->height = g_value_get_int(value);
+		break;
+	case PROP_EXPAND:
+		joy_bubble_set_expand(self, g_value_get_boolean(value));
 		break;
 	case PROP_HORIZONTAL_EXPAND:
 		joy_bubble_set_horizontal_expand(self,
@@ -434,6 +438,10 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 		g_param_spec_int("height", Q_("Height"),
 			Q_("The height of this widget"), 0, G_MAXINT, 0,
 			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+	g_object_class_install_property(object_class, PROP_EXPAND,
+		g_param_spec_boolean("expand", Q_("Expand"),
+			Q_("Indicates if this widget expands"),
+			TRUE, G_PARAM_WRITABLE));
 	g_object_class_install_property(object_class, PROP_HORIZONTAL_EXPAND,
 		g_param_spec_boolean("horizontal-expand",
 			Q_("Horizontal Expand"),
@@ -637,65 +645,50 @@ void
 joy_bubble_set_default(JoyBubble *self)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
-	struct Private *priv = GET_PRIVATE(self);
-	if (JOY_BUBBLE_STATE_DEFAULT == priv->state) {
-		return;
-	}
-	priv->state = JOY_BUBBLE_STATE_DEFAULT;
+	joy_bubble_set_state(self, JOY_BUBBLE_STATE_DEFAULT);
 }
 
 void
 joy_bubble_set_focused(JoyBubble *self)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
-	struct Private *priv = GET_PRIVATE(self);
-	if (JOY_BUBBLE_STATE_FOCUSED == priv->state) {
-		return;
-	}
-	priv->state = JOY_BUBBLE_STATE_FOCUSED;
+	joy_bubble_set_state(self, JOY_BUBBLE_STATE_FOCUSED);
 }
 
 void
 joy_bubble_set_active(JoyBubble *self)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
-	struct Private *priv = GET_PRIVATE(self);
-	if (JOY_BUBBLE_STATE_ACTIVE == priv->state) {
-		return;
-	}
-	priv->state = JOY_BUBBLE_STATE_ACTIVE;
+	joy_bubble_set_state(self, JOY_BUBBLE_STATE_ACTIVE);
 }
 
 void
 joy_bubble_set_disabled(JoyBubble *self)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
-	struct Private *priv = GET_PRIVATE(self);
-	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
-		return;
-	}
-	priv->state = JOY_BUBBLE_STATE_DISABLED;
+	joy_bubble_set_state(self, JOY_BUBBLE_STATE_DISABLED);
 }
 
 void
 joy_bubble_set_state(JoyBubble *self, JoyBubbleState state)
 {
+	g_return_if_fail(JOY_IS_BUBBLE(self));
+	struct Private *priv = GET_PRIVATE(self);
 	switch (state) {
 	case JOY_BUBBLE_STATE_DEFAULT:
-		joy_bubble_set_default(self);
-		break;
 	case JOY_BUBBLE_STATE_FOCUSED:
-		joy_bubble_set_focused(self);
-		break;
 	case JOY_BUBBLE_STATE_ACTIVE:
-		joy_bubble_set_active(self);
-		break;
 	case JOY_BUBBLE_STATE_DISABLED:
-		joy_bubble_set_disabled(self);
+		if (state == priv->state) {
+			return;
+		}
+		priv->state = state;
 		break;
 	default:
 		g_assert_not_reached();
 	}
+	damage(priv->parent, priv->x, priv->y, joy_bubble_get_width(self),
+			joy_bubble_get_height(self), TRUE);
 }
 
 JoyBubbleState
@@ -853,7 +846,7 @@ exit:
 }
 
 void
-joy_bubble_cairo_set_source_font(JoyBubble *self, cairo_t *cr)
+joy_bubble_cairo_set_font_source(JoyBubble *self, cairo_t *cr)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(cr);
@@ -867,11 +860,11 @@ joy_bubble_cairo_set_source_font(JoyBubble *self, cairo_t *cr)
 		if (G_UNLIKELY(!theme)) {
 			goto exit;
 		}
-		if (joy_theme_cairo_set_source_font(theme, cr)) {
+		if (joy_theme_cairo_set_font_source(theme, cr)) {
 			return;
 		}
 	} else {
-		if (joy_style_cairo_set_source_font(priv->style, cr)) {
+		if (joy_style_cairo_set_font_source(priv->style, cr)) {
 			return;
 		}
 	}
@@ -906,24 +899,24 @@ joy_bubble_move(JoyBubble *self, gint x, gint y)
 	if (priv->horizontal_expand && priv->vertical_expand) {
 		return;
 	}
-	if ((priv->x != x) || (priv->y != y)) {
-		if (priv->horizontal_expand) {
-			x = 0;
-		}
-		if (priv->vertical_expand) {
-			y = 0;
-		}
-		gint width = joy_bubble_get_width(self);
-		gint height = joy_bubble_get_height(self);
-		if (priv->parent) {
-			damage(priv->parent, priv->x, priv->y,
-					width, height, FALSE);
-		}
-		g_signal_emit(self, signals[SIGNAL_MOVE], 0, x, y);
-		priv->x = x;
-		priv->y = y;
-		damage(self, 0, 0, width, height, FALSE);
+	if (G_UNLIKELY(priv->x == x && priv->y == y)) {
+		return;
 	}
+	if (priv->horizontal_expand) {
+		x = 0;
+	}
+	if (priv->vertical_expand) {
+		y = 0;
+	}
+	gint width = joy_bubble_get_width(self);
+	gint height = joy_bubble_get_height(self);
+	if (priv->parent) {
+		damage(priv->parent, priv->x, priv->y, width, height, FALSE);
+	}
+	g_signal_emit(self, signals[SIGNAL_MOVE], 0, x, y);
+	priv->x = x;
+	priv->y = y;
+	damage(self, 0, 0, width, height, FALSE);
 }
 
 void
@@ -953,34 +946,34 @@ joy_bubble_resize(JoyBubble *self, gint width, gint height)
 	}
 	gint my_width = joy_bubble_get_width(self);
 	gint my_height = joy_bubble_get_height(self);
-	if ((my_width != width) || (my_height != height)) {
-		if (priv->horizontal_expand) {
-			width = my_width;
-		}
-		if (priv->vertical_expand) {
-			height = my_height;
-		}
-		if (((width < my_width) || (height < my_height))
-				&& priv->parent) {
-			damage(priv->parent, priv->x, priv->y,
-					my_width, my_height, FALSE);
-		}
-		cairo_rectangle_int_t rect = {
-			0, 0, width, height
-		};
-		cairo_region_subtract(priv->area, priv->area);
-		cairo_region_union_rectangle(priv->area, &rect);
-		cairo_region_intersect(priv->draw, priv->area);
-		g_signal_emit(self, signals[SIGNAL_RESIZE], 0, width, height);
-		if (!priv->horizontal_expand) {
-			priv->width = width;
-		}
-		if (!priv->vertical_expand) {
-			priv->height = height;
-		}
-		damage(self, 0, 0, joy_bubble_get_width(self),
-				joy_bubble_get_height(self), FALSE);
+	if ((my_width == width) && (my_height == height)) {
+		return;
 	}
+	if (priv->horizontal_expand) {
+		width = my_width;
+	}
+	if (priv->vertical_expand) {
+		height = my_height;
+	}
+	if ((width < my_width || height < my_height) && priv->parent) {
+		damage(priv->parent, priv->x, priv->y, my_width, my_height,
+				FALSE);
+	}
+	cairo_rectangle_int_t rect = {
+		0, 0, width, height
+	};
+	cairo_region_subtract(priv->area, priv->area);
+	cairo_region_union_rectangle(priv->area, &rect);
+	cairo_region_intersect(priv->draw, priv->area);
+	g_signal_emit(self, signals[SIGNAL_RESIZE], 0, width, height);
+	if (!priv->horizontal_expand) {
+		priv->width = width;
+	}
+	if (!priv->vertical_expand) {
+		priv->height = height;
+	}
+	damage(self, 0, 0, joy_bubble_get_width(self),
+			joy_bubble_get_height(self), FALSE);
 }
 
 void
@@ -989,19 +982,20 @@ joy_bubble_expose(JoyBubble *self, const cairo_rectangle_int_t *rect)
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(rect);
 	struct Private *priv = GET_PRIVATE(self);
-	if (priv->visible) {
-		if (cairo_region_contains_rectangle(priv->area, rect)
-				== CAIRO_REGION_OVERLAP_OUT) {
-			return;
-		}
-		if (cairo_region_contains_rectangle(priv->draw, rect)
-				== CAIRO_REGION_OVERLAP_IN) {
-			return;
-		}
-		cairo_region_union_rectangle(priv->draw, rect);
-		cairo_region_intersect(priv->draw, priv->area);
-		g_signal_emit(self, signals[SIGNAL_EXPOSE], 0, rect);
+	if (G_UNLIKELY(!priv->visible)) {
+		return;
 	}
+	if (cairo_region_contains_rectangle(priv->area, rect)
+			== CAIRO_REGION_OVERLAP_OUT) {
+		return;
+	}
+	if (cairo_region_contains_rectangle(priv->draw, rect)
+			== CAIRO_REGION_OVERLAP_IN) {
+		return;
+	}
+	cairo_region_union_rectangle(priv->draw, rect);
+	cairo_region_intersect(priv->draw, priv->area);
+	g_signal_emit(self, signals[SIGNAL_EXPOSE], 0, rect);
 }
 
 void
@@ -1011,22 +1005,23 @@ joy_bubble_key_down(JoyBubble *self, JoyDevice *device,
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
 	struct Private *priv = GET_PRIVATE(self);
-	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+	if (G_UNLIKELY(JOY_BUBBLE_STATE_DISABLED == priv->state)) {
 		return;
 	}
-	if (!priv->visible) {
+	if (G_UNLIKELY(!priv->visible)) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at(self, x, y);
-	if (current) {
-		GQuark detail = 0;
-		const gchar *name = joy_device_get_name(device);
-		if (name) {
-			detail = g_quark_from_string(name);
-		}
-		g_signal_emit(current, signals[SIGNAL_KEY_DOWN], detail,
-				device, timestamp, x, y, sym);
+	if (G_UNLIKELY(!current)) {
+		return;
 	}
+	GQuark detail = 0;
+	const gchar *name = joy_device_get_name(device);
+	if (name) {
+		detail = g_quark_from_string(name);
+	}
+	g_signal_emit(current, signals[SIGNAL_KEY_DOWN], detail,
+			device, timestamp, x, y, sym);
 }
 
 void
@@ -1036,22 +1031,23 @@ joy_bubble_key_up(JoyBubble *self, JoyDevice *device,
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
 	struct Private *priv = GET_PRIVATE(self);
-	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+	if (G_UNLIKELY(JOY_BUBBLE_STATE_DISABLED == priv->state)) {
 		return;
 	}
 	if (!priv->visible) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at(self, x, y);
-	if (current) {
-		GQuark detail = 0;
-		const gchar *name = joy_device_get_name(device);
-		if (name) {
-			detail = g_quark_from_string(name);
-		}
-		g_signal_emit(current, signals[SIGNAL_KEY_UP], detail,
-				device, timestamp, x, y, sym);
+	if (G_UNLIKELY(!current)) {
+		return;
 	}
+	GQuark detail = 0;
+	const gchar *name = joy_device_get_name(device);
+	if (name) {
+		detail = g_quark_from_string(name);
+	}
+	g_signal_emit(current, signals[SIGNAL_KEY_UP], detail,
+			device, timestamp, x, y, sym);
 }
 
 void
@@ -1059,18 +1055,19 @@ joy_bubble_show(JoyBubble *self)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	struct Private *priv = GET_PRIVATE(self);
-	if (!priv->visible) {
-		priv->visible = TRUE;
-		if (0. == priv->alpha) {
-			priv->alpha = 1.;
-		}
-		g_signal_emit(self, signals[SIGNAL_SHOW], 0);
-		if (priv->parent) {
-			damage(priv->parent, priv->x, priv->y,
-					joy_bubble_get_width(self),
-					joy_bubble_get_height(self),
-					FALSE);
-		}
+	if (priv->visible) {
+		return;
+	}
+	priv->visible = TRUE;
+	if (0. == priv->alpha) {
+		priv->alpha = 1.;
+	}
+	g_signal_emit(self, signals[SIGNAL_SHOW], 0);
+	if (priv->parent) {
+		damage(priv->parent, priv->x, priv->y,
+				joy_bubble_get_width(self),
+				joy_bubble_get_height(self),
+				FALSE);
 	}
 }
 
@@ -1079,16 +1076,17 @@ joy_bubble_hide(JoyBubble *self)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	struct Private *priv = GET_PRIVATE(self);
-	if (priv->visible) {
-		priv->visible = FALSE;
-		priv->alpha = 0.;
-		g_signal_emit(self, signals[SIGNAL_HIDE], 0);
-		if (priv->parent) {
-			damage(priv->parent, priv->x, priv->y,
-					joy_bubble_get_width(self),
-					joy_bubble_get_height(self),
-					FALSE);
-		}
+	if (!priv->visible) {
+		return;
+	}
+	priv->visible = FALSE;
+	priv->alpha = 0.;
+	g_signal_emit(self, signals[SIGNAL_HIDE], 0);
+	if (priv->parent) {
+		damage(priv->parent, priv->x, priv->y,
+				joy_bubble_get_width(self),
+				joy_bubble_get_height(self),
+				FALSE);
 	}
 }
 
@@ -1099,7 +1097,7 @@ joy_bubble_motion(JoyBubble *self, JoyDevice *device, gulong timestamp,
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
 	struct Private *priv = GET_PRIVATE(self);
-	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+	if (G_UNLIKELY(JOY_BUBBLE_STATE_DISABLED == priv->state)) {
 		return;
 	}
 	if (!priv->visible) {
@@ -1107,20 +1105,21 @@ joy_bubble_motion(JoyBubble *self, JoyDevice *device, gulong timestamp,
 	}
 	JoyBubble *current = joy_bubble_at(self, x, y);
 	JoyBubble *previous = joy_bubble_at_device(self, device);
-	if (previous != current) {
-		if (previous) {
-			joy_bubble_leave(previous, device, timestamp, x, y);
+	if (previous == current) {
+		return;
+	}
+	if (previous) {
+		joy_bubble_leave(previous, device, timestamp, x, y);
+	}
+	if (current) {
+		joy_bubble_enter(current, device, timestamp, x, y);
+		GQuark detail = 0;
+		const gchar *name = joy_device_get_name(device);
+		if (name) {
+			detail = g_quark_from_string(name);
 		}
-		if (current) {
-			joy_bubble_enter(current, device, timestamp, x, y);
-			GQuark detail = 0;
-			const gchar *name = joy_device_get_name(device);
-			if (name) {
-				detail = g_quark_from_string(name);
-			}
-			g_signal_emit(current, signals[SIGNAL_MOTION], detail,
-					device, timestamp, x, y);
-		}
+		g_signal_emit(current, signals[SIGNAL_MOTION], detail,
+				device, timestamp, x, y);
 	}
 }
 
@@ -1131,22 +1130,23 @@ joy_bubble_button_down(JoyBubble *self, JoyDevice *device,
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
 	struct Private *priv = GET_PRIVATE(self);
-	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+	if (G_UNLIKELY(JOY_BUBBLE_STATE_DISABLED == priv->state)) {
 		return;
 	}
 	if (!priv->visible) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at_device(self, device);
-	if (current) {
-		GQuark detail = 0;
-		const gchar *name = joy_device_get_name(device);
-		if (name) {
-			detail = g_quark_from_string(name);
-		}
-		g_signal_emit(current, signals[SIGNAL_BUTTON_DOWN], detail,
-				current, timestamp, x, y, button);
+	if (G_UNLIKELY(!current)) {
+		return;
 	}
+	GQuark detail = 0;
+	const gchar *name = joy_device_get_name(device);
+	if (name) {
+		detail = g_quark_from_string(name);
+	}
+	g_signal_emit(current, signals[SIGNAL_BUTTON_DOWN], detail,
+			current, timestamp, x, y, button);
 }
 
 void
@@ -1156,22 +1156,23 @@ joy_bubble_button_up(JoyBubble *self, JoyDevice *device,
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_DEVICE(device));
 	struct Private *priv = GET_PRIVATE(self);
-	if (JOY_BUBBLE_STATE_DISABLED == priv->state) {
+	if (G_UNLIKELY(JOY_BUBBLE_STATE_DISABLED == priv->state)) {
 		return;
 	}
 	if (!priv->visible) {
 		return;
 	}
 	JoyBubble *current = joy_bubble_at_device(self, device);
-	if (current) {
-		GQuark detail = 0;
-		const gchar *name = joy_device_get_name(device);
-		if (name) {
-			detail = g_quark_from_string(name);
-		}
-		g_signal_emit(current, signals[SIGNAL_BUTTON_UP], detail,
-				device, timestamp, x, y, button);
+	if (G_UNLIKELY(!current)) {
+		return;
 	}
+	GQuark detail = 0;
+	const gchar *name = joy_device_get_name(device);
+	if (name) {
+		detail = g_quark_from_string(name);
+	}
+	g_signal_emit(current, signals[SIGNAL_BUTTON_UP], detail,
+			device, timestamp, x, y, button);
 }
 
 void

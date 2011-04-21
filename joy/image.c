@@ -88,122 +88,6 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 	}
 }
 
-static inline gint
-premultiply(gint alpha, gint color)
-{
-	gint tmp = color * alpha + 0x80;
-	return ((tmp >> 8) + tmp) >> 8;
-}
-
-static void
-get_image_surface(JoyBubble *self)
-{
-	struct Private *priv = GET_PRIVATE(self);
-	if (priv->image) {
-		cairo_surface_destroy(priv->image);
-		priv->image = NULL;
-	}
-	if (!priv->filename) {
-		return;
-	}
-	GError *error = NULL;
-	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(priv->filename, &error);
-	if (G_UNLIKELY(!pixbuf)) {
-		g_message("%s: %s", priv->filename, error->message);
-		g_free(priv->filename);
-		priv->filename = NULL;
-		g_error_free(error);
-		return;
-	}
-	cairo_format_t format;
-	gint n = gdk_pixbuf_get_n_channels(pixbuf);
-	switch (n) {
-	case 3:
-		format = CAIRO_FORMAT_RGB24;
-		break;
-	case 4:
-		format = CAIRO_FORMAT_ARGB32;
-		break;
-	default:
-		goto error;
-	}
-	priv->width = gdk_pixbuf_get_width(pixbuf);
-	priv->height = gdk_pixbuf_get_height(pixbuf);
-	gint gdk_stride = gdk_pixbuf_get_rowstride(pixbuf);
-	guchar *gdk_pixels = gdk_pixbuf_get_pixels(pixbuf);
-	priv->image = cairo_image_surface_create(format, priv->width,
-			priv->height);
-	cairo_status_t status = cairo_surface_status(priv->image);
-	if (G_UNLIKELY(CAIRO_STATUS_SUCCESS != status)) {
-		goto error;
-	}
-	gint cairo_stride = cairo_image_surface_get_stride(priv->image);
-	guchar *cairo_pixels = cairo_image_surface_get_data(priv->image);
-	cairo_surface_flush(priv->image);
-#if G_BYTE_ORDER == G_LITTLE_ENDIAN
-#define A (3)
-#define R (2)
-#define G (1)
-#define B (0)
-#else
-#define A (0)
-#define R (1)
-#define G (2)
-#define B (3)
-#endif
-	guchar *in, *out;
-	for (gint i = 0; i < priv->height; ++i) {
-		in = gdk_pixels + i * gdk_stride;
-		out = cairo_pixels + i * cairo_stride;
-		for (gint j = 0; j < priv->width; ++j) {
-			switch (n) {
-			case 4:
-				out[A] = in[3];
-				switch (out[A]) {
-				case 0x0:
-					out[R] = out[G] = out[B] = 0;
-					break;
-				case 0xff:
-					out[R] = in[0];
-					out[G] = in[1];
-					out[B] = in[2];
-					break;
-				default:
-					out[R] = premultiply(out[A], in[0]);
-					out[G] = premultiply(out[A], in[1]);
-					out[B] = premultiply(out[A], in[2]);
-					break;
-				}
-				in += 4;
-				break;
-			default: // 3
-				out[R] = in[0];
-				out[G] = in[1];
-				out[B] = in[2];
-				in += 3;
-				break;
-			}
-			out += 4;
-		}
-	}
-#undef A
-#undef R
-#undef G
-#undef B
-	cairo_surface_mark_dirty(priv->image);
-exit:
-	if (pixbuf) {
-		g_object_unref(pixbuf);
-	}
-	return;
-error:
-	if (priv->image) {
-		cairo_surface_destroy(priv->image);
-		priv->image = NULL;
-	}
-	goto exit;
-}
-
 static void
 resize(JoyBubble *self, gint width, gint height)
 {
@@ -326,6 +210,121 @@ error:
 	}
 }
 
+static inline gint
+premultiply(gint alpha, gint color)
+{
+	gint tmp = color * alpha + 0x80;
+	return ((tmp >> 8) + tmp) >> 8;
+}
+
+static void
+get_image_surface(JoyBubble *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->image) {
+		return;
+	}
+	if (!priv->filename) {
+		return;
+	}
+	GError *error = NULL;
+	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(priv->filename, &error);
+	if (G_UNLIKELY(!pixbuf)) {
+		g_message("%s: %s", priv->filename, error->message);
+		g_free(priv->filename);
+		priv->filename = NULL;
+		g_error_free(error);
+		return;
+	}
+	cairo_format_t format;
+	gint n = gdk_pixbuf_get_n_channels(pixbuf);
+	switch (n) {
+	case 3:
+		format = CAIRO_FORMAT_RGB24;
+		break;
+	case 4:
+		format = CAIRO_FORMAT_ARGB32;
+		break;
+	default:
+		goto error;
+	}
+	priv->width = gdk_pixbuf_get_width(pixbuf);
+	priv->height = gdk_pixbuf_get_height(pixbuf);
+	gint gdk_stride = gdk_pixbuf_get_rowstride(pixbuf);
+	guchar *gdk_pixels = gdk_pixbuf_get_pixels(pixbuf);
+	priv->image = cairo_image_surface_create(format, priv->width,
+			priv->height);
+	cairo_status_t status = cairo_surface_status(priv->image);
+	if (G_UNLIKELY(CAIRO_STATUS_SUCCESS != status)) {
+		goto error;
+	}
+	gint cairo_stride = cairo_image_surface_get_stride(priv->image);
+	guchar *cairo_pixels = cairo_image_surface_get_data(priv->image);
+	cairo_surface_flush(priv->image);
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+#define A (3)
+#define R (2)
+#define G (1)
+#define B (0)
+#else
+#define A (0)
+#define R (1)
+#define G (2)
+#define B (3)
+#endif
+	guchar *in, *out;
+	for (gint i = 0; i < priv->height; ++i) {
+		in = gdk_pixels + i * gdk_stride;
+		out = cairo_pixels + i * cairo_stride;
+		for (gint j = 0; j < priv->width; ++j) {
+			switch (n) {
+			case 4:
+				out[A] = in[3];
+				switch (out[A]) {
+				case 0x0:
+					out[R] = out[G] = out[B] = 0;
+					break;
+				case 0xff:
+					out[R] = in[0];
+					out[G] = in[1];
+					out[B] = in[2];
+					break;
+				default:
+					out[R] = premultiply(out[A], in[0]);
+					out[G] = premultiply(out[A], in[1]);
+					out[B] = premultiply(out[A], in[2]);
+					break;
+				}
+				in += 4;
+				break;
+			default: // 3
+				out[R] = in[0];
+				out[G] = in[1];
+				out[B] = in[2];
+				in += 3;
+				break;
+			}
+			out += 4;
+		}
+	}
+#undef A
+#undef R
+#undef G
+#undef B
+	cairo_surface_mark_dirty(priv->image);
+exit:
+	if (pixbuf) {
+		g_object_unref(pixbuf);
+	}
+	return;
+error:
+	if (priv->image) {
+		cairo_surface_destroy(priv->image);
+		priv->image = NULL;
+	}
+	goto exit;
+}
+
 cairo_surface_t *
 joy_image_get_surface(JoyBubble *self)
 {
@@ -367,12 +366,20 @@ gint
 joy_image_get_width(JoyBubble *self)
 {
 	g_return_val_if_fail(JOY_IS_IMAGE(self), 0);
-	return GET_PRIVATE(self)->width;
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(!priv->surface)) {
+		joy_image_get_surface(self);
+	}
+	return priv->width;
 }
 
 gint
 joy_image_get_height(JoyBubble *self)
 {
 	g_return_val_if_fail(JOY_IS_IMAGE(self), 0);
-	return GET_PRIVATE(self)->height;
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(!priv->surface)) {
+		joy_image_get_surface(self);
+	}
+	return priv->height;
 }

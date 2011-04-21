@@ -61,7 +61,7 @@ enum Properties {
 	PROP_0 = 0,
 	PROP_THEME,
 	PROP_FONT_DESCRIPTION,
-	PROP_FONT_PATTERN,
+	PROP_FONT_SOURCE,
 	PROP_MAX
 };
 
@@ -79,8 +79,8 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 		joy_style_set_font_description(JOY_STYLE(base),
 				g_value_get_pointer(value));
 		break;
-	case PROP_FONT_PATTERN:
-		joy_style_set_font_pattern(JOY_STYLE(base),
+	case PROP_FONT_SOURCE:
+		joy_style_set_font_source(JOY_STYLE(base),
 				g_value_get_pointer(value));
 		break;
 	default:
@@ -103,6 +103,12 @@ get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 	}
 }
 
+static JoyTheme *
+get_theme(JoyStyle *self)
+{
+	return GET_PRIVATE(self)->theme;
+}
+
 static void
 joy_style_class_init(JoyStyleClass *klass)
 {
@@ -111,6 +117,7 @@ joy_style_class_init(JoyStyleClass *klass)
 	object_class->finalize = finalize;
 	object_class->set_property = set_property;
 	object_class->get_property = get_property;
+	klass->get_theme = get_theme;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	g_object_class_install_property(object_class, PROP_THEME,
 		g_param_spec_object("theme", Q_("Theme"),
@@ -123,9 +130,9 @@ joy_style_class_init(JoyStyleClass *klass)
 			G_PARAM_READABLE | G_PARAM_WRITABLE);
 	g_object_class_install_property(object_class, PROP_FONT_DESCRIPTION,
 			properties[PROP_FONT_DESCRIPTION]);
-	g_object_class_install_property(object_class, PROP_FONT_PATTERN,
-		g_param_spec_pointer("font-pattern", Q_("Font Pattern"),
-			Q_("The font pattern for this style"),
+	g_object_class_install_property(object_class, PROP_FONT_SOURCE,
+		g_param_spec_pointer("font-source", Q_("Font Source"),
+			Q_("The font source for this style"),
 			G_PARAM_WRITABLE));
 }
 
@@ -142,14 +149,7 @@ JoyTheme *
 joy_style_get_theme(JoyStyle *self)
 {
 	g_return_val_if_fail(JOY_IS_THEME(self), NULL);
-	return GET_PRIVATE(self)->theme;
-}
-
-PangoFontDescription *
-joy_style_get_font_description(JoyStyle *self)
-{
-	g_return_val_if_fail(JOY_IS_STYLE(self), NULL);
-	return GET_PRIVATE(self)->desc;
+	return JOY_STYLE_GET_CLASS(self)->get_theme(self);
 }
 
 void
@@ -161,35 +161,74 @@ joy_style_set_font_description(JoyStyle *self,
 	if (priv->desc) {
 		pango_font_description_free(priv->desc);
 	}
-	if (desc) {
-		priv->desc = pango_font_description_copy(desc);
-	} else {
-		priv->desc = NULL;
-	}
+	priv->desc = desc ? pango_font_description_copy(desc) : NULL;
 	g_object_notify_by_pspec(G_OBJECT(self),
 			properties[PROP_FONT_DESCRIPTION]);
 }
 
-cairo_pattern_t *
-joy_style_get_font_pattern(JoyStyle *self)
+PangoFontDescription *
+joy_style_get_font_description(JoyStyle *self)
 {
 	g_return_val_if_fail(JOY_IS_STYLE(self), NULL);
-	return GET_PRIVATE(self)->font;
+	return GET_PRIVATE(self)->desc;
 }
 
 void
-joy_style_set_font_pattern(JoyStyle *self, cairo_pattern_t *font)
+joy_style_set_font_source(JoyStyle *self, cairo_pattern_t *font)
 {
 	g_return_if_fail(JOY_IS_STYLE(self));
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->font) {
 		cairo_pattern_destroy(priv->font);
 	}
-	if (font) {
-		priv->font = cairo_pattern_reference(font);
-	} else {
-		priv->font = NULL;
+	priv->font = font ? cairo_pattern_reference(font) : NULL;
+}
+
+void
+joy_style_set_font_source_rgb(JoyStyle *self, double red, double green,
+		double blue)
+{
+	g_return_if_fail(JOY_IS_STYLE(self));
+	cairo_pattern_t *source = cairo_pattern_create_rgb(red, green, blue);
+	if (G_UNLIKELY(!source)) {
+		return;
 	}
+	joy_style_set_font_source(self, source);
+	cairo_pattern_destroy(source);
+}
+
+void
+joy_style_set_font_source_rgba(JoyStyle *self, double red, double green,
+		double blue, double alpha)
+{
+	g_return_if_fail(JOY_IS_STYLE(self));
+	cairo_pattern_t *source =
+		cairo_pattern_create_rgba(red, green, blue, alpha);
+	if (G_UNLIKELY(!source)) {
+		return;
+	}
+	joy_style_set_font_source(self, source);
+	cairo_pattern_destroy(source);
+}
+
+void
+joy_style_set_font_source_surface(JoyStyle *self, cairo_surface_t *surface)
+{
+	g_return_if_fail(JOY_IS_STYLE(self));
+	g_return_if_fail(surface);
+	cairo_pattern_t *source = cairo_pattern_create_for_surface(surface);
+	if (G_UNLIKELY(!source)) {
+		return;
+	}
+	joy_style_set_font_source(self, source);
+	cairo_pattern_destroy(source);
+}
+
+cairo_pattern_t *
+joy_style_get_font_source(JoyStyle *self)
+{
+	g_return_val_if_fail(JOY_IS_STYLE(self), NULL);
+	return GET_PRIVATE(self)->font;
 }
 
 static void
@@ -208,10 +247,11 @@ joy_style_pango_layout_create(JoyStyle *self)
 {
 	g_return_val_if_fail(JOY_IS_STYLE(self), NULL);
 	struct Private *priv = GET_PRIVATE(self);
-	if (G_UNLIKELY(!priv->theme)) {
+	JoyTheme *theme = joy_style_get_theme(self);
+	if (G_UNLIKELY(!theme)) {
 		return NULL;
 	}
-	PangoLayout *layout = joy_theme_pango_layout_create(priv->theme);
+	PangoLayout *layout = joy_theme_pango_layout_create(theme);
 	if (G_UNLIKELY(!layout)) {
 		return NULL;
 	}
@@ -224,7 +264,7 @@ joy_style_pango_layout_create(JoyStyle *self)
 }
 
 gboolean
-joy_style_cairo_set_source_font(JoyStyle *self, cairo_t *cr)
+joy_style_cairo_set_font_source(JoyStyle *self, cairo_t *cr)
 {
 	g_return_val_if_fail(JOY_IS_STYLE(self), FALSE);
 	g_return_val_if_fail(cr, FALSE);
@@ -232,10 +272,11 @@ joy_style_cairo_set_source_font(JoyStyle *self, cairo_t *cr)
 	if (priv->font) {
 		cairo_set_source(cr, priv->font);
 	} else {
-		if (G_UNLIKELY(!priv->theme)) {
+		JoyTheme *theme = joy_style_get_theme(self);
+		if (G_UNLIKELY(!theme)) {
 			return FALSE;
 		}
-		return joy_theme_cairo_set_source_font(priv->theme, cr);
+		return joy_theme_cairo_set_font_source(theme, cr);
 	}
 	return TRUE;
 }

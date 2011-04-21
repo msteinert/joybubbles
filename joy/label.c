@@ -47,18 +47,17 @@ static void
 on_notify(JoyBubble *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
-	if (G_LIKELY(priv->layout)) {
-		g_object_unref(priv->layout);
-		priv->layout = NULL;
-	}
 	if (G_UNLIKELY(!priv->text)) {
 		return;
 	}
-	priv->layout = joy_bubble_pango_layout_create(self);
 	if (G_UNLIKELY(!priv->layout)) {
-		return;
+		priv->layout = joy_bubble_pango_layout_create(self);
+		if (G_UNLIKELY(!priv->layout)) {
+			return;
+		}
 	}
 	if (priv->markup) {
+		pango_layout_set_attributes(priv->layout, NULL);
 		pango_layout_set_markup(priv->layout, priv->text, -1);
 	} else {
 		pango_layout_set_text(priv->layout, priv->text, -1);
@@ -155,7 +154,7 @@ draw(JoyBubble *self, cairo_t *cr)
 	if (G_UNLIKELY(!priv->layout)) {
 		return FALSE;
 	}
-	joy_bubble_cairo_set_source_font(self, cr);
+	joy_bubble_cairo_set_font_source(self, cr);
 	pango_cairo_update_layout(cr, priv->layout);
 	pango_cairo_show_layout(cr, priv->layout);
 	return TRUE;

@@ -63,6 +63,19 @@ GType
 joy_theme_get_type(void) G_GNUC_CONST;
 
 /**
+ * \brief Set the default font description for this theme.
+ *
+ * The default font description will affect layouts created with
+ * joy_theme_pango_layout_create().
+ *
+ * \param self [in] A theme object.
+ * \param desc [in] The new default font description for \e self.
+ */
+void
+joy_theme_set_font_description(JoyTheme *self,
+		const PangoFontDescription *desc);
+
+/**
  * \brief Get a style object for a given widget.
  *
  * \param self [in] A theme object.
@@ -73,16 +86,29 @@ joy_theme_get_type(void) G_GNUC_CONST;
 JoyStyle *
 joy_theme_get_style(JoyTheme *self, JoyBubble *widget);
 
-void
-joy_theme_set_font_description(JoyTheme *self,
-		const PangoFontDescription *desc);
-
+/**
+ * \brief Create a Pango layout using the theme defaults.
+ *
+ * \param self [in] A theme object.
+ *
+ * \return A new Pango layout object.
+ */
 G_GNUC_WARN_UNUSED_RESULT
 PangoLayout *
 joy_theme_pango_layout_create(JoyTheme *self);
 
+/**
+ * \brief Set the default Cairo source for this theme.
+ *
+ * Style objects should call this function if they have no style set.
+ *
+ * \param self [in] A theme object.
+ * \param cr [in] A Cairo handle.
+ *
+ * \return TRUE if the source was set for \e cr, FALSE otherwise.
+ */
 gboolean
-joy_theme_cairo_set_source_font(JoyTheme *self, cairo_t *cr);
+joy_theme_cairo_set_font_source(JoyTheme *self, cairo_t *cr);
 
 G_END_DECLS
 

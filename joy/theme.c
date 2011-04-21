@@ -164,7 +164,7 @@ joy_theme_pango_layout_create(JoyTheme *self)
 }
 
 gboolean
-joy_theme_cairo_set_source_font(JoyTheme *self, cairo_t *cr)
+joy_theme_cairo_set_font_source(JoyTheme *self, cairo_t *cr)
 {
 	g_return_val_if_fail(JOY_IS_THEME(self), FALSE);
 	g_return_val_if_fail(cr, FALSE);

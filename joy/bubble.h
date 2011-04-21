@@ -111,9 +111,6 @@ typedef void
 (*JoyBubbleCrossing)(JoyBubble *self, JoyDevice *device, gulong timestamp,
 		gint x, gint y);
 
-typedef void
-(*JoyBubbleFocus)(JoyBubble *self, JoyDevice *device);
-
 typedef gboolean
 (*JoyBubbleDraw)(JoyBubble *self, cairo_t *cr);
 
@@ -141,8 +138,6 @@ struct JoyBubbleClass_ {
 	JoyBubbleScroll scroll;
 	JoyBubbleCrossing enter;
 	JoyBubbleCrossing leave;
-	JoyBubbleFocus focus;
-	JoyBubbleFocus unfocus;
 	JoyBubbleDraw draw;
 };
 
@@ -449,7 +444,7 @@ joy_bubble_pango_layout_create(JoyBubble *self);
  * \param cr [in] A Cairo context.
  */
 void
-joy_bubble_cairo_set_source_font(JoyBubble *self, cairo_t *cr);
+joy_bubble_cairo_set_font_source(JoyBubble *self, cairo_t *cr);
 
 /**
  * \brief Get the widget at the given coordinates.
