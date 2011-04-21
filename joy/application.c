@@ -30,7 +30,7 @@ G_DEFINE_ABSTRACT_TYPE(JoyApplication, joy_application, G_TYPE_OBJECT)
 
 struct Private {
 	JoySink *sink;
-	JoyTheme *theme;
+	JoyStyle *theme;
 	gboolean initialized;
 	gboolean quit;
 	gchar *name;
@@ -131,7 +131,7 @@ joy_application_get_name(JoyApplication *self)
 }
 
 void
-joy_application_set_theme(JoyApplication *self, JoyTheme *theme)
+joy_application_set_theme(JoyApplication *self, JoyStyle *theme)
 {
 	g_return_if_fail(JOY_IS_APPLICATION(self));
 	g_return_if_fail(JOY_IS_THEME(theme));
@@ -149,7 +149,7 @@ joy_application_set_theme(JoyApplication *self, JoyTheme *theme)
 	}
 }
 
-JoyTheme *
+JoyStyle *
 joy_application_get_theme(JoyApplication *self)
 {
 	g_return_val_if_fail(JOY_IS_APPLICATION(self), NULL);

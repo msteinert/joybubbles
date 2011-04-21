@@ -15,7 +15,7 @@
 #define JOY_THEME_H
 
 #include <cairo.h>
-#include <glib-object.h>
+#include <joy/style.h>
 #include <joy/types.h>
 #include <pango/pango.h>
 
@@ -44,18 +44,18 @@ typedef struct JoyThemeClass_ JoyThemeClass;
 
 struct JoyTheme_ {
 	/*< private >*/
-	GObject parent_instance;
+	JoyStyle parent_instance;
 	gpointer priv;
 };
 
 typedef JoyStyle *
-(*JoyThemeGetStyle)(JoyTheme *self, JoyBubble *widget);
+(*JoyThemeStyleCreate)(JoyStyle *self, JoyBubble *widget);
 
 struct JoyThemeClass_ {
 	/*< private >*/
-	GObjectClass parent_class;
+	JoyStyleClass parent_class;
 	/*< public >*/
-	JoyThemeGetStyle get_style;
+	JoyThemeStyleCreate style_create;
 };
 
 G_GNUC_NO_INSTRUMENT
@@ -63,52 +63,29 @@ GType
 joy_theme_get_type(void) G_GNUC_CONST;
 
 /**
- * \brief Set the default font description for this theme.
- *
- * The default font description will affect layouts created with
- * joy_theme_pango_layout_create().
- *
- * \param self [in] A theme object.
- * \param desc [in] The new default font description for \e self.
- */
-void
-joy_theme_set_font_description(JoyTheme *self,
-		const PangoFontDescription *desc);
-
-/**
  * \brief Get a style object for a given widget.
  *
  * \param self [in] A theme object.
  * \param widget [in] A widget to get the style for.
  *
- * \return A style object for \e widget or NULL if none is available.
+ * \return A style object for drawing \e widget, or NULL.
  */
 JoyStyle *
-joy_theme_get_style(JoyTheme *self, JoyBubble *widget);
+joy_theme_get_style(JoyStyle *self, JoyBubble *widget);
 
 /**
- * \brief Create a Pango layout using the theme defaults.
+ * \brief Create a new style object for the specified widget.
+ *
+ * Sub-classes must implement this function.
  *
  * \param self [in] A theme object.
+ * \param widget [in] A widget object.
  *
- * \return A new Pango layout object.
+ * \return A new style object for drawing \e widget, or NULL.
  */
 G_GNUC_WARN_UNUSED_RESULT
-PangoLayout *
-joy_theme_pango_layout_create(JoyTheme *self);
-
-/**
- * \brief Set the default Cairo source for this theme.
- *
- * Style objects should call this function if they have no style set.
- *
- * \param self [in] A theme object.
- * \param cr [in] A Cairo handle.
- *
- * \return TRUE if the source was set for \e cr, FALSE otherwise.
- */
-gboolean
-joy_theme_cairo_set_font_source(JoyTheme *self, cairo_t *cr);
+JoyStyle *
+joy_theme_style_create(JoyStyle *self, JoyBubble *widget);
 
 G_END_DECLS
 

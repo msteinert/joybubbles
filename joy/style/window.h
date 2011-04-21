@@ -49,7 +49,6 @@ struct JoyStyleWindow_ {
 struct JoyStyleWindowClass_ {
 	/*< private >*/
 	JoyStyleClass parent_class;
-	JoyStyleDraw draw_background;
 };
 
 G_GNUC_NO_INSTRUMENT

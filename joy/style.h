@@ -48,18 +48,18 @@ struct JoyStyle_ {
 	gpointer priv;
 };
 
-typedef JoyTheme *
-(*JoyStyleGetTheme)(JoyStyle *self);
+typedef PangoLayout *
+(*JoyStylePangoLayoutCreate)(JoyStyle *self);
 
 typedef gboolean
-(*JoyStyleDraw)(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
+(*JoyStyleOnDraw)(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
 
 struct JoyStyleClass_ {
 	/*< private >*/
 	GObjectClass parent_class;
 	/*< public >*/
-	JoyStyleGetTheme get_theme;
-	JoyStyleDraw draw;
+	JoyStylePangoLayoutCreate pango_layout_create;
+	JoyStyleOnDraw on_draw;
 };
 
 G_GNUC_NO_INSTRUMENT
@@ -69,24 +69,26 @@ joy_style_get_type(void) G_GNUC_CONST;
 /**
  * \brief Draw a widget using the specified style.
  *
- * \param self [in] A style object.
+ * This function is meant to be connected to the JoyBubble::draw signal.
+ *
  * \param widget [in] The widget to draw.
  * \param cr [in] The cairo context to draw to.
+ * \param self [in] A style object.
  *
  * \return TRUE if \e widget was drawn, FALSE otherwise.
  */
 gboolean
-joy_style_draw(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
+joy_style_on_draw(JoyBubble *widget, cairo_t *cr, JoyStyle *self);
 
 /**
- * \brief Get the theme this style is associated with.
+ * \brief Get the parent, i.e., the theme, of this style.
  *
  * \param self [in] A style object.
  *
- * \return The theme \e self is associated with.
+ * \return The parent style of \e self or NULL.
  */
-JoyTheme *
-joy_style_get_theme(JoyStyle *self);
+JoyStyle *
+joy_style_get_parent(JoyStyle *self);
 
 /**
  * \brief Set the font description for the specified style.
@@ -111,24 +113,54 @@ PangoFontDescription *
 joy_style_get_font_description(JoyStyle *self);
 
 /**
- * \brief 
+ * \brief Set the Cairo source this style will use to paint fonts.
+ *
+ * \param self [in] A style object.
+ * \param font [in] A Cairo pattern to use a source for fonts.
  */
 void
-joy_style_set_font_source(JoyStyle *self, cairo_pattern_t *font);
+joy_style_set_font_source(JoyStyle *self, cairo_pattern_t *source);
 
+/**
+ * \brief Set an RGB Cairo source this style will use to paint fonts.
+ *
+ * \param self [in] A style object.
+ * \param red [in] The red component.
+ * \param green [in] The green component.
+ * \param blue [in] The blue component.
+ */
 void
 joy_style_set_font_source_rgb(JoyStyle *self, double red, double green,
 		double blue);
 
+/**
+ * \brief Set an RGBA Cairo source this style will use to paint fonts.
+ *
+ * \param self [in] A style object.
+ * \param red [in] The red component.
+ * \param green [in] The green component.
+ * \param blue [in] The blue component.
+ * \param alpha [in] The alpha component.
+ */
 void
 joy_style_set_font_source_rgba(JoyStyle *self, double red, double green,
 		double blue, double alpha);
 
+/**
+ * \brief Set a Cairo surface as the source this style will use to paint fonts.
+ *
+ * \param self [in] A style object.
+ * \param surface [in] The surface to use as a source for fonts.
+ */
 void
 joy_style_set_font_source_surface(JoyStyle *self, cairo_surface_t *surface);
 
 /**
- * \brief TODO
+ * \brief Get the Cairo source a style is using to paint fonts.
+ *
+ * \param self [in] A style object.
+ *
+ * \return The current Cairo source \e self is using to paint fonts.
  */
 cairo_pattern_t *
 joy_style_get_font_source(JoyStyle *self);

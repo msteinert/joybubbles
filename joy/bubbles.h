@@ -21,6 +21,7 @@
 #include <joy/animation/series.h>
 #include <joy/application.h>
 #include <joy/bubble.h>
+#include <joy/button.h>
 #include <joy/container.h>
 #include <joy/easing.h>
 #include <joy/filter/gaussian.h>

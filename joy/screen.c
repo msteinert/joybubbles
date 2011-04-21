@@ -136,14 +136,14 @@ joy_screen_get_application(JoyScreen *self)
 }
 
 void
-joy_screen_set_theme(JoyScreen *self, JoyTheme *theme)
+joy_screen_set_theme(JoyScreen *self, JoyStyle *theme)
 {
 	g_return_if_fail(JOY_IS_SCREEN(self));
 	g_return_if_fail(JOY_IS_THEME(theme));
 	for (JoyIterator *iter = joy_screen_begin(self); iter;
 			iter = joy_iterator_next(iter)) {
 		JoyBubble *window = joy_iterator_item(iter);
-		joy_bubble_set_style(window, theme);
+		joy_bubble_set_theme(window, theme);
 	}
 }
 

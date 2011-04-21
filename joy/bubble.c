@@ -139,7 +139,7 @@ enum Properties {
 	PROP_HORIZONTAL_EXPAND,
 	PROP_VERTICAL_EXPAND,
 	PROP_BUFFERED,
-	PROP_STYLE,
+	PROP_THEME,
 	PROP_PARENT,
 	PROP_MAX
 };
@@ -178,8 +178,8 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 	case PROP_BUFFERED:
 		joy_bubble_set_buffered(self, g_value_get_boolean(value));
 		break;
-	case PROP_STYLE:
-		joy_bubble_set_style(self, g_value_get_object(value));
+	case PROP_THEME:
+		joy_bubble_set_theme(self, g_value_get_object(value));
 		break;
 	case PROP_PARENT:
 		joy_bubble_set_parent(self, g_value_get_object(value));
@@ -192,13 +192,13 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 static void
 get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 {
-	struct Private *priv = GET_PRIVATE(base);
+	JoyBubble *self = JOY_BUBBLE(base);
 	switch (id) {
-	case PROP_STYLE:
-		g_value_set_object(value, priv->style);
+	case PROP_THEME:
+		g_value_set_object(value, joy_bubble_get_theme(self));
 		break;
 	case PROP_PARENT:
-		g_value_set_object(value, priv->parent);
+		g_value_set_object(value, joy_bubble_get_parent(self));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
@@ -207,14 +207,24 @@ get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 }
 
 static void
-set_style(JoyBubble *self, JoyTheme *theme)
+set_theme(JoyBubble *self, JoyStyle *theme)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->style) {
+		g_signal_handlers_disconnect_by_func(self, joy_style_on_draw,
+				priv->style);
 		g_object_unref(priv->style);
 	}
-	priv->style = joy_theme_get_style(theme, self);
-	joy_bubble_damage(self, 0, 0, priv->width, priv->height);
+	JoyStyle *style = joy_theme_get_style(theme, self);
+	if (style) {
+		priv->style = g_object_ref(style);
+		g_signal_connect(self, "draw", G_CALLBACK(joy_style_on_draw),
+				priv->style);
+	} else {
+		priv->style = g_object_ref(theme);
+		g_signal_connect(self, "draw", G_CALLBACK(joy_style_on_draw),
+				priv->style);
+	}
 }
 
 static JoyApplication *
@@ -281,11 +291,32 @@ at(JoyBubble *self, gint x, gint y)
 static gboolean
 draw(JoyBubble *self, cairo_t *cr)
 {
-	struct Private *priv = GET_PRIVATE(self);
-	if (G_LIKELY(priv->style)) {
-		return joy_style_draw(priv->style, self, cr);
+	gdouble width = joy_bubble_get_width(self);
+	gdouble height = joy_bubble_get_height(self);
+	cairo_set_line_width(cr, 2.);
+	cairo_rectangle(cr, 1., 1., width - 2., height - 2.);
+	cairo_set_source_rgb(cr, 1., 1., 0.);
+	cairo_fill_preserve(cr);
+	cairo_move_to(cr, 0., 0.);
+	cairo_line_to(cr, width, height);
+	cairo_move_to(cr, 0., height);
+	cairo_line_to(cr, width, 0.);
+	switch (joy_bubble_get_state(self)) {
+	case JOY_BUBBLE_STATE_DEFAULT:
+		cairo_set_source_rgb(cr, 1., 0., 0.);
+		break;
+	case JOY_BUBBLE_STATE_FOCUSED:
+		cairo_set_source_rgb(cr, 0., 1., 0.);
+		break;
+	case JOY_BUBBLE_STATE_ACTIVE:
+		cairo_set_source_rgb(cr, 0., 0., 1.);
+		break;
+	case JOY_BUBBLE_STATE_DISABLED:
+	default:
+		cairo_set_source_rgb(cr, 0., 0., 0.);
 	}
-	return FALSE;
+	cairo_stroke(cr);
+	return TRUE;
 }
 
 static void
@@ -297,7 +328,7 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	object_class->finalize = finalize;
 	object_class->set_property = set_property;
 	object_class->get_property = get_property;
-	klass->set_style = set_style;
+	klass->set_theme = set_theme;
 	klass->get_application = get_application;
 	klass->get_screen = get_screen;
 	klass->get_window = get_window;
@@ -455,12 +486,12 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 		g_param_spec_boolean("buffered", Q_("Buffered"),
 			Q_("Indicates if this widget is double buffered"),
 			FALSE, G_PARAM_WRITABLE));
-	properties[PROP_STYLE] =
+	properties[PROP_THEME] =
 		g_param_spec_object("style", Q_("Style"),
 			Q_("The style for this widget"), JOY_TYPE_THEME,
 			G_PARAM_READABLE | G_PARAM_WRITABLE);
-	g_object_class_install_property(object_class, PROP_STYLE,
-			properties[PROP_STYLE]);
+	g_object_class_install_property(object_class, PROP_THEME,
+			properties[PROP_THEME]);
 	properties[PROP_PARENT] =
 		g_param_spec_object("parent", Q_("Parent"),
 			Q_("The parent of this widget"), JOY_TYPE_BUBBLE,
@@ -516,12 +547,9 @@ joy_bubble_set_name(JoyBubble *self, const gchar *name)
 	struct Private *priv = GET_PRIVATE(self);
 	g_free(priv->name);
 	priv->name = g_strdup(name);
-	JoyApplication *app = joy_bubble_get_application(self);
-	if (G_LIKELY(app)) {
-		JoyTheme *theme = joy_application_get_theme(app);
-		if (G_LIKELY(theme)) {
-			joy_bubble_set_style(self, theme);
-		}
+	JoyStyle *theme = joy_bubble_get_theme(self);
+	if (G_LIKELY(theme)) {
+		joy_bubble_set_theme(self, theme);
 	}
 }
 
@@ -529,40 +557,27 @@ const gchar *
 joy_bubble_get_name(JoyBubble *self)
 {
 	g_return_val_if_fail(JOY_IS_BUBBLE(self), NULL);
-	struct Private *priv = GET_PRIVATE(self);
-	if (G_UNLIKELY(priv->name)) {
-		return priv->name;
-	} else {
-		return G_OBJECT_TYPE_NAME(self);
-	}
+	return GET_PRIVATE(self)->name;
 }
 
 void
-joy_bubble_set_style(JoyBubble *self, JoyTheme *theme)
+joy_bubble_set_theme(JoyBubble *self, JoyStyle *theme)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(JOY_IS_THEME(theme));
-	JOY_BUBBLE_CLASS(self)->set_style(self, theme);
-	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_STYLE]);
+	JOY_BUBBLE_CLASS(self)->set_theme(self, theme);
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_THEME]);
 }
 
 JoyStyle *
-joy_bubble_get_style(JoyBubble *self)
+joy_bubble_get_theme(JoyBubble *self)
 {
 	g_return_val_if_fail(JOY_IS_BUBBLE(self), NULL);
-	struct Private *priv = GET_PRIVATE(self);
-	if (G_UNLIKELY(!priv->style)) {
-		JoyApplication *app = joy_bubble_get_application(self);
-		if (G_UNLIKELY(!app)) {
-			return NULL;
-		}
-		JoyTheme *theme = joy_application_get_theme(app);
-		if (G_UNLIKELY(!theme)) {
-			return NULL;
-		}
-		joy_bubble_set_style(self, theme);
+	JoyApplication *app = joy_bubble_get_application(self);
+	if (G_UNLIKELY(!app)) {
+		return NULL;
 	}
-	return priv->style;
+	return joy_application_get_theme(app);
 }
 
 void
@@ -816,19 +831,18 @@ joy_bubble_pango_layout_create(JoyBubble *self)
 	g_return_val_if_fail(JOY_IS_BUBBLE(self), NULL);
 	struct Private *priv = GET_PRIVATE(self);
 	PangoLayout *layout = NULL;
-	if (G_UNLIKELY(!priv->style)) {
+	JoyStyle *style = priv->style;
+	if (G_UNLIKELY(!style)) {
 		JoyApplication *app = joy_bubble_get_application(self);
 		if (G_UNLIKELY(!app)) {
 			goto exit;
 		}
-		JoyTheme *theme = joy_application_get_theme(app);
-		if (G_UNLIKELY(!theme)) {
+		style = joy_application_get_theme(app);
+		if (G_UNLIKELY(!style)) {
 			goto exit;
 		}
-		layout = joy_theme_pango_layout_create(theme);
-	} else {
-		layout = joy_style_pango_layout_create(priv->style);
 	}
+	layout = joy_style_pango_layout_create(priv->style);
 exit:
 	if (G_UNLIKELY(!layout)) {
 		PangoFontMap *map = pango_cairo_font_map_get_default();
@@ -851,22 +865,19 @@ joy_bubble_cairo_set_font_source(JoyBubble *self, cairo_t *cr)
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(cr);
 	struct Private *priv = GET_PRIVATE(self);
-	if (G_UNLIKELY(!priv->style)) {
+	JoyStyle *style = priv->style;
+	if (G_UNLIKELY(!style)) {
 		JoyApplication *app = joy_bubble_get_application(self);
 		if (G_UNLIKELY(!app)) {
 			goto exit;
 		}
-		JoyTheme *theme = joy_application_get_theme(app);
-		if (G_UNLIKELY(!theme)) {
+		style = joy_application_get_theme(app);
+		if (G_UNLIKELY(!style)) {
 			goto exit;
 		}
-		if (joy_theme_cairo_set_font_source(theme, cr)) {
-			return;
-		}
-	} else {
-		if (joy_style_cairo_set_font_source(priv->style, cr)) {
-			return;
-		}
+	}
+	if (joy_style_cairo_set_font_source(priv->style, cr)) {
+		return;
 	}
 exit:
 	cairo_set_source_rgb(cr, 1., 1., 1.);

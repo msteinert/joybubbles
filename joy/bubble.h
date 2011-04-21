@@ -59,7 +59,7 @@ struct JoyBubble_ {
 
 /* virtual functions */
 typedef void
-(*JoyBubbleSetStyle)(JoyBubble *self, JoyTheme *theme);
+(*JoyBubbleSetTheme)(JoyBubble *self, JoyStyle *theme);
 
 typedef JoyApplication *
 (*JoyBubbleGetApplication)(JoyBubble *self);
@@ -118,7 +118,7 @@ struct JoyBubbleClass_ {
 	/*< private >*/
 	GInitiallyUnownedClass parent_class;
 	/*< public >*/
-	JoyBubbleSetStyle set_style;
+	JoyBubbleSetTheme set_theme;
 	JoyBubbleGetApplication get_application;
 	JoyBubbleGetScreen get_screen;
 	JoyBubbleGetWindow get_window;
@@ -183,7 +183,7 @@ joy_bubble_get_name(JoyBubble *self);
  * \param theme [in] A theme containing the new style for \e self.
  */
 void
-joy_bubble_set_style(JoyBubble *self, JoyTheme *theme);
+joy_bubble_set_theme(JoyBubble *self, JoyStyle *theme);
 
 /**
  * \brief Get the style applied a widget.
@@ -193,7 +193,7 @@ joy_bubble_set_style(JoyBubble *self, JoyTheme *theme);
  * \return The currently applied style for \e self.
  */
 JoyStyle *
-joy_bubble_get_style(JoyBubble *self);
+joy_bubble_get_theme(JoyBubble *self);
 
 /**
  * \brief Set back-buffering for a widget.

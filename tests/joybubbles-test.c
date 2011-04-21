@@ -357,6 +357,10 @@ main(int argc, char *argv[])
 	JoyBubble *label = joy_label_new("Hello, World!");
 	joy_container_add(window, label);
 	joy_bubble_move(label, 100, 100);
+	JoyBubble *button = joy_button_new(NULL);
+	joy_container_add(window, button);
+	joy_bubble_resize(button, 100, 50);
+	joy_bubble_move(button, 100, 400);
 	joy_bubble_show(window);
 	gint status = joy_application_run(app, screen);
 exit:

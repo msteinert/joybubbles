@@ -60,13 +60,17 @@ dispose(GObject *base)
 }
 
 static void
-set_style(JoyBubble *self, JoyTheme *theme)
+set_theme(JoyBubble *self, JoyStyle *theme)
 {
 	struct Private *priv = GET_PRIVATE(self);
+	if (JOY_BUBBLE_CLASS(joy_container_parent_class)->set_theme) {
+		JOY_BUBBLE_CLASS(joy_container_parent_class)->
+			set_theme(self, theme);
+	}
 	for (GList *node = g_queue_peek_head_link(priv->children); node;
 			node = node->next) {
 		JoyBubble *child = node->data;
-		joy_bubble_set_style(child, theme);
+		joy_bubble_set_theme(child, theme);
 	}
 }
 
@@ -75,8 +79,8 @@ at(JoyBubble *self, gint x, gint y)
 {
 	if (JOY_BUBBLE_CLASS(joy_container_parent_class)->at(self, x, y)) {
 		struct Private *priv = GET_PRIVATE(self);
-		for (GList *node = g_queue_peek_head_link(priv->children);
-				node; node = node->next) {
+		for (GList *node = g_queue_peek_tail_link(priv->children);
+				node; node = node->prev) {
 			JoyBubble *child = node->data;
 			JoyBubble *at = joy_bubble_at(child,
 					x - joy_bubble_get_x(child),
@@ -183,12 +187,9 @@ add(JoyBubble *self, JoyBubble *child)
 		return;
 	}
 	joy_bubble_set_parent(child, self);
-	JoyApplication *app = joy_bubble_get_application(self);
-	if (app) {
-		JoyTheme *theme = joy_application_get_theme(app);
-		if (theme) {
-			joy_bubble_set_style(child, theme);
-		}
+	JoyStyle *theme = joy_bubble_get_theme(self);
+	if (theme) {
+		joy_bubble_set_theme(child, theme);
 	}
 	g_queue_push_tail(priv->children, g_object_ref_sink(child));
 }
@@ -215,7 +216,7 @@ joy_container_class_init(JoyContainerClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->dispose = dispose;
 	JoyBubbleClass *bubble_class = JOY_BUBBLE_CLASS(klass);
-	bubble_class->set_style = set_style;
+	bubble_class->set_theme = set_theme;
 	bubble_class->at = at;
 	bubble_class->resize = resize;
 	bubble_class->show = show;

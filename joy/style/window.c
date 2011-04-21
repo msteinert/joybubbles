@@ -19,19 +19,14 @@ joy_style_window_init(JoyStyleWindow *self)
 }
 
 static gboolean
-draw(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
+on_draw(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
 {
-	g_return_val_if_fail(JOY_IS_WINDOW(widget), FALSE);
-	JoyStyleWindowClass *klass = JOY_STYLE_WINDOW_GET_CLASS(self);
-	if (klass->draw_background) {
-		klass->draw_background(self, widget, cr);
-	}
-	return TRUE;
+	return FALSE;
 }
 
 static void
 joy_style_window_class_init(JoyStyleWindowClass *klass)
 {
 	JoyStyleClass *style_class = JOY_STYLE_CLASS(klass);
-	style_class->draw = draw;
+	style_class->on_draw = on_draw;
 }

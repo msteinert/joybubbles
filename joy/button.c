@@ -186,6 +186,7 @@ joy_button_class_init(JoyButtonClass *klass)
 	bubble_class->button_up = button_up;
 	bubble_class->enter = enter;
 	bubble_class->leave = leave;
+	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoyButton::clicked
 	signals[SIGNAL_CLICKED] =
 		g_signal_new(g_intern_static_string("clicked"),

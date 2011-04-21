@@ -10,11 +10,10 @@
 #endif
 #include "joy/bubble.h"
 #include "joy/marshal.h"
-#include "joy/style.h"
 #include "joy/theme.h"
 #include <pango/pangocairo.h>
 
-G_DEFINE_ABSTRACT_TYPE(JoyTheme, joy_theme, G_TYPE_OBJECT)
+G_DEFINE_ABSTRACT_TYPE(JoyTheme, joy_theme, JOY_TYPE_STYLE)
 
 #define ASSIGN_PRIVATE(instance) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(instance, JOY_TYPE_THEME, \
@@ -64,25 +63,46 @@ dispose(GObject *base)
 	G_OBJECT_CLASS(joy_theme_parent_class)->dispose(base);
 }
 
-enum Properties {
-	PROP_0 = 0,
-	PROP_FONT_DESCRIPTION,
-	PROP_FONT_PATTERN,
-	PROP_MAX
-};
-
 static void
-set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
+on_context_changed(JoyStyle *theme, PangoLayout *layout)
 {
-	switch (id) {
-	case PROP_FONT_DESCRIPTION:
-		joy_theme_set_font_description((JoyTheme *)base,
-				g_value_get_pointer(value));
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
-		break;
+	pango_layout_context_changed(layout);
+}
+
+static PangoLayout *
+pango_layout_create(JoyStyle *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (G_UNLIKELY(!priv->context)) {
+		goto error;
 	}
+	PangoLayout *layout = pango_layout_new(priv->context);
+	if (G_UNLIKELY(!layout)) {
+		goto error;
+	}
+	g_signal_connect(self, "context-changed",
+			G_CALLBACK(on_context_changed), layout);
+	return layout;
+error:
+	{
+		JoyStyle *parent = joy_style_get_parent(self);
+		if (parent) {
+			return joy_style_pango_layout_create(parent);
+		}
+		return NULL;
+	}
+}
+
+static gboolean
+on_draw(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
+{
+	JoyStyle *style = joy_theme_get_style(self, widget);
+	if (!style) {
+		cairo_set_source_rgb(cr, 1., 1., 0.);
+		cairo_paint(cr);
+		return TRUE;
+	}
+	return joy_style_on_draw(widget, cr, style);
 }
 
 static void
@@ -90,35 +110,35 @@ joy_theme_class_init(JoyThemeClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->dispose = dispose;
-	object_class->set_property = set_property;
+	JoyStyleClass *style_class = JOY_STYLE_CLASS(klass);
+	style_class->pango_layout_create = pango_layout_create;
+	style_class->on_draw = on_draw;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoyTheme::context-changed
 	signals[SIGNAL_CONTEXT_CHANGED] =
 		g_signal_new(g_intern_static_string("context-changed"),
 			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_FIRST, 0,
 			NULL, NULL, joy_marshal_VOID__VOID, G_TYPE_NONE, 0);
-	g_object_class_install_property(object_class, PROP_FONT_DESCRIPTION,
-		g_param_spec_pointer("font-description",
-		Q_("Font Description"),
-		Q_("The default font description for this theme"),
-		G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 }
 
 JoyStyle *
-joy_theme_get_style(JoyTheme *self, JoyBubble *widget)
+joy_theme_get_style(JoyStyle *self, JoyBubble *widget)
 {
 	g_return_val_if_fail(JOY_IS_THEME(self), NULL);
 	g_return_val_if_fail(JOY_IS_BUBBLE(widget), NULL);
 	struct Private *priv = GET_PRIVATE(self);
 	const gchar *name = joy_bubble_get_name(widget);
-	if (G_UNLIKELY(!name)) {
-		return NULL;
+	if (G_LIKELY(!name)) {
+		name = G_OBJECT_TYPE_NAME(widget);
+		if (G_UNLIKELY(!name)) {
+			return NULL;
+		}
 	}
 	JoyStyle *style = g_hash_table_lookup(priv->styles, name);
 	if (G_LIKELY(style)) {
 		return style;
 	}
-	style = JOY_THEME_GET_CLASS(self)->get_style(self, widget);
+	style = joy_theme_style_create(self, widget);
 	if (G_UNLIKELY(!style)) {
 		return NULL;
 	}
@@ -126,52 +146,10 @@ joy_theme_get_style(JoyTheme *self, JoyBubble *widget)
 	return style;
 }
 
-void
-joy_theme_set_font_description(JoyTheme *self,
-		const PangoFontDescription *desc)
-{
-	g_return_if_fail(JOY_IS_THEME(self));
-	g_return_if_fail(desc);
-	struct Private *priv = GET_PRIVATE(self);
-	if (G_UNLIKELY(!priv->context)) {
-		return;
-	}
-	pango_context_set_font_description(priv->context, desc);
-	g_signal_emit(self, signals[SIGNAL_CONTEXT_CHANGED], 0);
-}
-
-static void
-on_context_changed(JoyTheme *theme, PangoLayout *layout)
-{
-	pango_layout_context_changed(layout);
-}
-
-PangoLayout *
-joy_theme_pango_layout_create(JoyTheme *self)
+JoyStyle *
+joy_theme_style_create(JoyStyle *self, JoyBubble *widget)
 {
 	g_return_val_if_fail(JOY_IS_THEME(self), NULL);
-	struct Private *priv = GET_PRIVATE(self);
-	if (G_UNLIKELY(!priv->context)) {
-		return NULL;
-	}
-	PangoLayout *layout = pango_layout_new(priv->context);
-	if (G_UNLIKELY(!layout)) {
-		return NULL;
-	}
-	g_signal_connect(self, "context-changed",
-			G_CALLBACK(on_context_changed), layout);
-	return layout;
-}
-
-gboolean
-joy_theme_cairo_set_font_source(JoyTheme *self, cairo_t *cr)
-{
-	g_return_val_if_fail(JOY_IS_THEME(self), FALSE);
-	g_return_val_if_fail(cr, FALSE);
-	struct Private *priv = GET_PRIVATE(self);
-	if (priv->font) {
-		cairo_set_source(cr, priv->font);
-		return TRUE;
-	}
-	return FALSE;
+	g_return_val_if_fail(JOY_IS_BUBBLE(widget), NULL);
+	return JOY_THEME_GET_CLASS(self)->style_create(self, widget);
 }

@@ -103,7 +103,7 @@ joy_screen_get_application(JoyScreen *self);
  * \param theme [in] The new theme for \e self.
  */
 void
-joy_screen_set_theme(JoyScreen *self, JoyTheme *theme);
+joy_screen_set_theme(JoyScreen *self, JoyStyle *theme);
 
 /**
  * \brief Get the screen ID.
