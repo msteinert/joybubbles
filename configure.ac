@@ -110,21 +110,21 @@ AC_ARG_ENABLE([trace],
 	joy_trace=yes],
 	[joy_trace=no])
 # Default refresh rate
-AC_ARG_WITH([refresh],
+AC_ARG_ENABLE([refresh],
 	[AS_HELP_STRING([--enable-refresh],
 		[set the screen refresh rate @<:@default=60.0@:>@])],,
-	[withval=60.0])
+	[enableval=60.0])
 AC_CACHE_CHECK([for screen refresh rate], [joy_cv_enable_refresh],
-	[joy_cv_enable_refresh=$withval])
+	[joy_cv_enable_refresh=$enableval])
 AC_DEFINE_UNQUOTED([JOY_REFRESH], [$joy_cv_enable_refresh],
 	[Set to the default refresh rate.])
 # D-Bus
-AC_ARG_WITH([dbus],
-	[AS_HELP_STRING([--with-dbus],
+AC_ARG_ENABLE([dbus],
+	[AS_HELP_STRING([--enable-dbus],
 		[enable D-Bus bindings @<:@default=auto@:>@])],,
-	[withval=auto])
+	[enableval=auto])
 AC_CACHE_CHECK([for D-Bus support], [joy_cv_with_dbus],
-	[joy_cv_with_dbus="$withval"])
+	[joy_cv_with_dbus="$enableval"])
 AS_IF([test "x$joy_cv_with_dbus" != "xno"],
 	[joy_dbus_version="dbus-1 >= 1.1" # should be 1.2
 	PKG_CHECK_MODULES([DBUS], [$joy_dbus_version],
