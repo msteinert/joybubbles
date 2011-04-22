@@ -46,7 +46,7 @@ joy_application_init(JoyApplication *self)
 	struct Private *priv = GET_PRIVATE(self);
 	priv->sink = joy_sink_new();
 	priv->status = EXIT_SUCCESS;
-	priv->frame = 1. / 60.;
+	priv->frame = 1. / JOY_REFRESH;
 	priv->min = priv->frame / 3.;
 }
 
@@ -181,7 +181,7 @@ arg_refresh_cb(const gchar *key, const gchar *value, gpointer self)
 static const GOptionEntry const joy_arguments[] = {
 	{ "joybubbles-refresh", '\0', 0,
 		G_OPTION_ARG_CALLBACK, arg_refresh_cb,
-		N_("The refresh rate [60.0 Hz]"),
+		N_("The refresh rate [" G_STRINGIFY(JOY_REFRESH) " Hz]"),
 		N_("RATE") },
 	{ NULL }
 };

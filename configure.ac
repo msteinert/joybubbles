@@ -109,6 +109,15 @@ AC_ARG_ENABLE([trace],
 	AC_DEFINE([JOY_TRACE], [1], [Define to 1 to enable runtime tracing.])
 	joy_trace=yes],
 	[joy_trace=no])
+# Default refresh rate
+AC_ARG_WITH([refresh],
+	[AS_HELP_STRING([--enable-refresh],
+		[set the screen refresh rate @<:@default=60.0@:>@])],,
+	[withval=60.0])
+AC_CACHE_CHECK([for screen refresh rate], [joy_cv_enable_refresh],
+	[joy_cv_enable_refresh=$withval])
+AC_DEFINE_UNQUOTED([JOY_REFRESH], [$joy_cv_enable_refresh],
+	[Set to the default refresh rate.])
 # D-Bus
 AC_ARG_WITH([dbus],
 	[AS_HELP_STRING([--with-dbus],
