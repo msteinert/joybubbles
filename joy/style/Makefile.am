@@ -4,6 +4,7 @@
 # library definition
 noinst_LTLIBRARIES = libjoybubbles-style.la
 libjoybubbles_style_la_SOURCES = \
+	button.c \
 	window.c
 # include directories & compiler switches
 libjoybubbles_style_la_CFLAGS = \
@@ -15,5 +16,6 @@ libjoybubbles_style_la_CFLAGS = \
 # install development headers
 pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/style
 pkginclude_HEADERS = \
+	button.h \
 	window.h \
 	types.h

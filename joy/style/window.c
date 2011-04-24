@@ -18,15 +18,7 @@ joy_style_window_init(JoyStyleWindow *self)
 {
 }
 
-static gboolean
-on_draw(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
-{
-	return FALSE;
-}
-
 static void
 joy_style_window_class_init(JoyStyleWindowClass *klass)
 {
-	JoyStyleClass *style_class = JOY_STYLE_CLASS(klass);
-	style_class->on_draw = on_draw;
 }

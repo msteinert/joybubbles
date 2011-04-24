@@ -63,7 +63,25 @@ GType
 joy_theme_get_type(void) G_GNUC_CONST;
 
 /**
- * \brief Get a style object for a given widget.
+ * \brief Specify a style for a widget type or name.
+ *
+ * The specified style will be returned for calls to joy_theme_get_style()
+ * for widgets with a name or type that matches \e name.
+ *
+ * \param self [in] A theme object. 
+ * \param name [in] A widget type or name.
+ * \param style [in] The style to specify for \e name.
+ */
+void
+joy_theme_set_style(JoyStyle *self, const gchar *name, JoyStyle *style);
+
+/**
+ * \brief Get the specified style for a widget.
+ *
+ * If no style is specified for \e widget and \e self has a parent style
+ * then the parent theme will be queried. If the parent theme has a style
+ * specified for \e widget then this theme will cache the specified style
+ * for performance reasons.
  *
  * \param self [in] A theme object.
  * \param widget [in] A widget to get the style for.
@@ -76,7 +94,8 @@ joy_theme_get_style(JoyStyle *self, JoyBubble *widget);
 /**
  * \brief Create a new style object for the specified widget.
  *
- * Sub-classes must implement this function.
+ * Sub-classes must implement this function. This function should return
+ * the style for \e widget or NULL if one is not implemented.
  *
  * \param self [in] A theme object.
  * \param widget [in] A widget object.

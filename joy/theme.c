@@ -36,12 +36,19 @@ struct Private {
 };
 
 static void
+destroy(gpointer object)
+{
+	g_object_run_dispose(object);
+	g_object_unref(object);
+}
+
+static void
 joy_theme_init(JoyTheme *self)
 {
 	self->priv = ASSIGN_PRIVATE(self);
 	struct Private *priv = GET_PRIVATE(self);
 	priv->styles = g_hash_table_new_full(g_str_hash, g_str_equal,
-			NULL, g_object_unref);
+			NULL, destroy);
 	PangoFontMap *map = pango_cairo_font_map_get_default();
 	if (G_LIKELY(map)) {
 		priv->context = pango_font_map_create_context(map);
@@ -86,23 +93,11 @@ pango_layout_create(JoyStyle *self)
 error:
 	{
 		JoyStyle *parent = joy_style_get_parent(self);
-		if (parent) {
-			return joy_style_pango_layout_create(parent);
+		if (!parent) {
+			return NULL;
 		}
-		return NULL;
+		return joy_style_pango_layout_create(parent);
 	}
-}
-
-static gboolean
-on_draw(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
-{
-	JoyStyle *style = joy_theme_get_style(self, widget);
-	if (!style) {
-		cairo_set_source_rgb(cr, 1., 1., 0.);
-		cairo_paint(cr);
-		return TRUE;
-	}
-	return joy_style_on_draw(widget, cr, style);
 }
 
 static void
@@ -112,13 +107,22 @@ joy_theme_class_init(JoyThemeClass *klass)
 	object_class->dispose = dispose;
 	JoyStyleClass *style_class = JOY_STYLE_CLASS(klass);
 	style_class->pango_layout_create = pango_layout_create;
-	style_class->on_draw = on_draw;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoyTheme::context-changed
 	signals[SIGNAL_CONTEXT_CHANGED] =
 		g_signal_new(g_intern_static_string("context-changed"),
 			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_FIRST, 0,
 			NULL, NULL, joy_marshal_VOID__VOID, G_TYPE_NONE, 0);
+}
+
+void
+joy_theme_set_style(JoyStyle *self, const gchar *name, JoyStyle *style)
+{
+	g_return_if_fail(JOY_IS_THEME(self));
+	g_return_if_fail(name);
+	g_return_if_fail(JOY_IS_STYLE(style));
+	joy_style_set_parent(style, self);
+	g_hash_table_insert(GET_PRIVATE(self)->styles, (gpointer)name, style);
 }
 
 JoyStyle *
@@ -140,7 +144,14 @@ joy_theme_get_style(JoyStyle *self, JoyBubble *widget)
 	}
 	style = joy_theme_style_create(self, widget);
 	if (G_UNLIKELY(!style)) {
-		return NULL;
+		JoyStyle *parent = joy_style_get_parent(self);
+		if (!parent || G_UNLIKELY(!JOY_IS_THEME(parent))) {
+			return NULL;
+		}
+		style = joy_theme_get_style(parent, widget);
+		if (G_UNLIKELY(!style)) {
+			return NULL;
+		}
 	}
 	g_hash_table_insert(priv->styles, (gpointer)name, style);
 	return style;

@@ -18,6 +18,8 @@
 
 G_BEGIN_DECLS
 
+typedef struct JoyStyleButton_ JoyStyleButton;
+
 typedef struct JoyStyleWindow_ JoyStyleWindow;
 
 G_END_DECLS

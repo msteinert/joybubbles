@@ -10,7 +10,6 @@
 #endif
 #include "joy/bubble.h"
 #include "joy/style.h"
-#include "joy/theme.h"
 
 G_DEFINE_ABSTRACT_TYPE(JoyStyle, joy_style, G_TYPE_OBJECT)
 
@@ -22,7 +21,6 @@ G_DEFINE_ABSTRACT_TYPE(JoyStyle, joy_style, G_TYPE_OBJECT)
 	((struct Private *)((JoyStyle *)instance)->priv)
 
 struct Private {
-	JoyTheme *theme;
 	JoyStyle *parent;
 	PangoFontDescription *desc;
 	cairo_pattern_t *font;
@@ -38,10 +36,6 @@ static void
 dispose(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
-	if (priv->theme) {
-		g_object_unref(priv->theme);
-		priv->theme = NULL;
-	}
 	if (priv->parent) {
 		g_object_unref(priv->parent);
 		priv->parent = NULL;
@@ -64,7 +58,6 @@ finalize(GObject *base)
 
 enum Properties {
 	PROP_0 = 0,
-	PROP_THEME,
 	PROP_PARENT,
 	PROP_FONT_DESCRIPTION,
 	PROP_FONT_SOURCE,
@@ -76,21 +69,17 @@ static GParamSpec *properties[PROP_MAX];
 static void
 set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 {
-	struct Private *priv = GET_PRIVATE(base);
+	JoyStyle *self = JOY_STYLE(base);
 	switch (id) {
-	case PROP_THEME:
-		priv->theme = g_value_dup_object(value);
-		break;
 	case PROP_PARENT:
-		priv->parent = g_value_dup_object(value);
+		joy_style_set_parent(self, g_value_dup_object(value));
 		break;
 	case PROP_FONT_DESCRIPTION:
-		joy_style_set_font_description(JOY_STYLE(base),
+		joy_style_set_font_description(self,
 				g_value_get_pointer(value));
 		break;
 	case PROP_FONT_SOURCE:
-		joy_style_set_font_source(JOY_STYLE(base),
-				g_value_get_pointer(value));
+		joy_style_set_font_source(self, g_value_get_pointer(value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
@@ -101,10 +90,11 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 static void
 get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 {
-	struct Private *priv = GET_PRIVATE(base);
+	JoyStyle *self = JOY_STYLE(base);
 	switch (id) {
 	case PROP_FONT_DESCRIPTION:
-		g_value_set_pointer(value, priv->desc);
+		g_value_set_pointer(value,
+				joy_style_get_font_description(self));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
@@ -152,10 +142,6 @@ joy_style_class_init(JoyStyleClass *klass)
 	object_class->get_property = get_property;
 	klass->pango_layout_create = pango_layout_create;
 	g_type_class_add_private(klass, sizeof(struct Private));
-	g_object_class_install_property(object_class, PROP_THEME,
-		g_param_spec_object("theme", Q_("Theme"),
-			Q_("The theme this style belongs to"), JOY_TYPE_THEME,
-			G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property(object_class, PROP_PARENT,
 		g_param_spec_object("parent", Q_("Parent"),
 			Q_("The parent style, i.e., the theme"),
@@ -174,19 +160,22 @@ joy_style_class_init(JoyStyleClass *klass)
 			G_PARAM_WRITABLE));
 }
 
-gboolean
-joy_style_on_draw(JoyBubble *widget, cairo_t *cr, JoyStyle *self)
+void
+joy_style_set_parent(JoyStyle *self, JoyStyle *parent)
 {
-	g_return_val_if_fail(JOY_IS_STYLE(self), FALSE);
-	g_return_val_if_fail(JOY_IS_BUBBLE(widget), FALSE);
-	g_return_val_if_fail(cr, FALSE);
-	return JOY_STYLE_GET_CLASS(self)->on_draw(self, widget, cr);
+	g_return_if_fail(JOY_IS_STYLE(self));
+	g_return_if_fail(!parent || JOY_IS_STYLE(parent));
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->parent) {
+		g_object_unref(priv->parent);
+	}
+	priv->parent = parent ? g_object_ref(parent) : NULL;
 }
 
 JoyStyle *
 joy_style_get_parent(JoyStyle *self)
 {
-	g_return_val_if_fail(JOY_IS_THEME(self), NULL);
+	g_return_val_if_fail(JOY_IS_STYLE(self), NULL);
 	return GET_PRIVATE(self)->parent;
 }
 
@@ -306,4 +295,28 @@ joy_style_cairo_set_font_source(JoyStyle *self, cairo_t *cr)
 		return joy_style_cairo_set_font_source(priv->parent, cr);
 	}
 	return FALSE;
+}
+
+void
+joy_style_draw_background(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
+{
+	g_return_if_fail(JOY_IS_STYLE(self));
+	g_return_if_fail(JOY_IS_BUBBLE(widget));
+	g_return_if_fail(cr);
+	JoyStyleClass *klass = JOY_STYLE_GET_CLASS(self);
+	if (klass->draw_background) {
+		klass->draw_background(self, widget, cr);
+	}
+}
+
+void
+joy_style_draw_foreground(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
+{
+	g_return_if_fail(JOY_IS_STYLE(self));
+	g_return_if_fail(JOY_IS_BUBBLE(widget));
+	g_return_if_fail(cr);
+	JoyStyleClass *klass = JOY_STYLE_GET_CLASS(self);
+	if (klass->draw_foreground) {
+		klass->draw_foreground(self, widget, cr);
+	}
 }

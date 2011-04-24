@@ -52,14 +52,15 @@ typedef PangoLayout *
 (*JoyStylePangoLayoutCreate)(JoyStyle *self);
 
 typedef gboolean
-(*JoyStyleOnDraw)(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
+(*JoyStyleDraw)(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
 
 struct JoyStyleClass_ {
 	/*< private >*/
 	GObjectClass parent_class;
 	/*< public >*/
 	JoyStylePangoLayoutCreate pango_layout_create;
-	JoyStyleOnDraw on_draw;
+	JoyStyleDraw draw_background;
+	JoyStyleDraw draw_foreground;
 };
 
 G_GNUC_NO_INSTRUMENT
@@ -67,25 +68,20 @@ GType
 joy_style_get_type(void) G_GNUC_CONST;
 
 /**
- * \brief Draw a widget using the specified style.
+ * \brief Set the parent, i.e., the them, of this style.
  *
- * This function is meant to be connected to the JoyBubble::draw signal.
- *
- * \param widget [in] The widget to draw.
- * \param cr [in] The cairo context to draw to.
  * \param self [in] A style object.
- *
- * \return TRUE if \e widget was drawn, FALSE otherwise.
+ * \param parent [in] The theme to set for \e self.
  */
-gboolean
-joy_style_on_draw(JoyBubble *widget, cairo_t *cr, JoyStyle *self);
+void
+joy_style_set_parent(JoyStyle *self, JoyStyle *parent);
 
 /**
  * \brief Get the parent, i.e., the theme, of this style.
  *
  * \param self [in] A style object.
  *
- * \return The parent style of \e self or NULL.
+ * \return The theme of \e self or NULL.
  */
 JoyStyle *
 joy_style_get_parent(JoyStyle *self);
@@ -192,6 +188,12 @@ joy_style_pango_layout_create(JoyStyle *self);
  */
 gboolean
 joy_style_cairo_set_font_source(JoyStyle *self, cairo_t *cr);
+
+void
+joy_style_draw_background(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
+
+void
+joy_style_draw_foreground(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
 
 G_END_DECLS
 

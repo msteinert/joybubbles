@@ -5,10 +5,10 @@
 AC_PREREQ([2.59])
 # Library versioning
 # Making releases:
-#   joy_micro_version += 1
-#   joy_interface_age += 1
+#	joy_micro_version += 1
+#	joy_interface_age += 1
 # If functions have been added or backward-compatibility has been broken:
-#   joy_interface_age = 0
+#	joy_interface_age = 0
 m4_define([joy_major_version], [0])
 m4_define([joy_minor_version], [2])
 m4_define([joy_micro_version], [0])

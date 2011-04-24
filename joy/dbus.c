@@ -98,10 +98,10 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 static void
 get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 {
-	struct Private *priv = GET_PRIVATE(base);
+	JoyDBus *self = JOY_DBUS(base);
 	switch (id) {
 	case PROP_CONNECTION:
-		g_value_set_pointer(value, priv->connection);
+		g_value_set_pointer(value, joy_dbus_get_connection(self));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);

@@ -140,6 +140,7 @@ enum Properties {
 	PROP_VERTICAL_EXPAND,
 	PROP_BUFFERED,
 	PROP_THEME,
+	PROP_STYLE,
 	PROP_PARENT,
 	PROP_MAX
 };
@@ -181,8 +182,12 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 	case PROP_THEME:
 		joy_bubble_set_theme(self, g_value_get_object(value));
 		break;
+	case PROP_STYLE:
+		joy_bubble_set_style(self, g_value_get_object(value));
+		break;
 	case PROP_PARENT:
 		joy_bubble_set_parent(self, g_value_get_object(value));
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
 		break;
@@ -197,6 +202,9 @@ get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 	case PROP_THEME:
 		g_value_set_object(value, joy_bubble_get_theme(self));
 		break;
+	case PROP_STYLE:
+		g_value_set_object(value, joy_bubble_get_style(self));
+		break;
 	case PROP_PARENT:
 		g_value_set_object(value, joy_bubble_get_parent(self));
 		break;
@@ -209,22 +217,7 @@ get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 static void
 set_theme(JoyBubble *self, JoyStyle *theme)
 {
-	struct Private *priv = GET_PRIVATE(self);
-	if (priv->style) {
-		g_signal_handlers_disconnect_by_func(self, joy_style_on_draw,
-				priv->style);
-		g_object_unref(priv->style);
-	}
-	JoyStyle *style = joy_theme_get_style(theme, self);
-	if (style) {
-		priv->style = g_object_ref(style);
-		g_signal_connect(self, "draw", G_CALLBACK(joy_style_on_draw),
-				priv->style);
-	} else {
-		priv->style = g_object_ref(theme);
-		g_signal_connect(self, "draw", G_CALLBACK(joy_style_on_draw),
-				priv->style);
-	}
+	joy_bubble_set_style(self, joy_theme_get_style(theme, self));
 }
 
 static JoyApplication *
@@ -487,11 +480,17 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 			Q_("Indicates if this widget is double buffered"),
 			FALSE, G_PARAM_WRITABLE));
 	properties[PROP_THEME] =
-		g_param_spec_object("style", Q_("Style"),
-			Q_("The style for this widget"), JOY_TYPE_THEME,
+		g_param_spec_object("theme", Q_("Theme"),
+			Q_("The theme for this widget"), JOY_TYPE_THEME,
 			G_PARAM_READABLE | G_PARAM_WRITABLE);
 	g_object_class_install_property(object_class, PROP_THEME,
 			properties[PROP_THEME]);
+	properties[PROP_STYLE] =
+		g_param_spec_object("style", Q_("Style"),
+			Q_("The style for this widget"), JOY_TYPE_STYLE,
+			G_PARAM_READABLE | G_PARAM_WRITABLE);
+	g_object_class_install_property(object_class, PROP_STYLE,
+			properties[PROP_STYLE]);
 	properties[PROP_PARENT] =
 		g_param_spec_object("parent", Q_("Parent"),
 			Q_("The parent of this widget"), JOY_TYPE_BUBBLE,
@@ -578,6 +577,26 @@ joy_bubble_get_theme(JoyBubble *self)
 		return NULL;
 	}
 	return joy_application_get_theme(app);
+}
+
+void
+joy_bubble_set_style(JoyBubble *self, JoyStyle *style)
+{
+	g_return_if_fail(JOY_IS_BUBBLE(self));
+	g_return_if_fail(!style || JOY_IS_STYLE(self));
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->style) {
+		g_object_unref(priv->style);
+	}
+	priv->style = style ? g_object_ref(style) : NULL;
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_STYLE]);
+}
+
+JoyStyle *
+joy_bubble_get_style(JoyBubble *self)
+{
+	g_return_val_if_fail(JOY_IS_BUBBLE(self), NULL);
+	return GET_PRIVATE(self)->style;
 }
 
 void

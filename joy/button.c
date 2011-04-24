@@ -12,6 +12,7 @@
 #include "joy/image.h"
 #include "joy/label.h"
 #include "joy/marshal.h"
+#include "joy/style/button.h"
 
 G_DEFINE_TYPE(JoyButton, joy_button, JOY_TYPE_BUBBLE)
 
@@ -64,6 +65,8 @@ enum Properties {
 	PROP_MAX
 };
 
+static GParamSpec *properties[PROP_MAX];
+
 static void
 set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 {
@@ -80,6 +83,23 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 		break;
 	case PROP_IMAGE:
 		joy_button_set_image(self, g_value_get_object(value));
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
+		break;
+	}
+}
+
+static void
+get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
+{
+	JoyBubble *self = JOY_BUBBLE(base);
+	switch (id) {
+	case PROP_LABEL:
+		g_value_set_object(value, joy_button_get_label(self));
+		break;
+	case PROP_IMAGE:
+		g_value_set_object(value, joy_button_get_image(self));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
@@ -173,12 +193,37 @@ leave(JoyBubble *self, JoyDevice *device, gulong timestamp, gint x, gint y)
 	joy_bubble_set_default(self);
 }
 
+static gboolean
+draw(JoyBubble *self, cairo_t *cr)
+{
+	JoyStyle *style = joy_bubble_get_style(self);
+	if (G_UNLIKELY(!style)) {
+		return JOY_BUBBLE_CLASS(joy_button_parent_class)->
+			draw(self, cr);
+	}
+	joy_style_draw_background(style, self, cr);
+	if (G_LIKELY(JOY_IS_STYLE_BUTTON(style))) {
+		struct Private *priv = GET_PRIVATE(self);
+		if (priv->image) {
+			joy_style_button_draw_image(style, self, cr,
+					priv->image);
+		}
+		if (priv->label) {
+			joy_style_button_draw_label(style, self, cr,
+					priv->label);
+		}
+	}
+	joy_style_draw_foreground(style, self, cr);
+	return TRUE;
+}
+
 static void
 joy_button_class_init(JoyButtonClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->dispose = dispose;
 	object_class->set_property = set_property;
+	object_class->get_property = get_property;
 	JoyBubbleClass *bubble_class = JOY_BUBBLE_CLASS(klass);
 	bubble_class->key_down = key_down;
 	bubble_class->key_up = key_up;
@@ -186,6 +231,7 @@ joy_button_class_init(JoyButtonClass *klass)
 	bubble_class->button_up = button_up;
 	bubble_class->enter = enter;
 	bubble_class->leave = leave;
+	bubble_class->draw = draw;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoyButton::clicked
 	signals[SIGNAL_CLICKED] =
@@ -203,14 +249,18 @@ joy_button_class_init(JoyButtonClass *klass)
 		g_param_spec_string("markup", Q_("Markup"),
 			Q_("The button markup"), NULL,
 			G_PARAM_WRITABLE));
-	g_object_class_install_property(object_class, PROP_LABEL,
+	properties[PROP_LABEL] =
 		g_param_spec_object("label", Q_("Label"),
 			Q_("The button label"), JOY_TYPE_LABEL,
-			G_PARAM_WRITABLE));
-	g_object_class_install_property(object_class, PROP_IMAGE,
+			G_PARAM_READWRITE);
+	g_object_class_install_property(object_class, PROP_LABEL,
+			properties[PROP_LABEL]);
+	properties[PROP_IMAGE] =
 		g_param_spec_object("image", Q_("Image"),
 			Q_("The image icon"), JOY_TYPE_IMAGE,
-			G_PARAM_WRITABLE));
+			G_PARAM_READWRITE);
+	g_object_class_install_property(object_class, PROP_IMAGE,
+			properties[PROP_IMAGE]);
 }
 
 JoyBubble *
@@ -246,7 +296,20 @@ joy_button_set_label(JoyBubble *self, JoyBubble *label)
 	if (priv->label) {
 		g_object_unref(priv->label);
 	}
-	priv->label = label ? g_object_ref(label) : NULL;
+	if (label) {
+		JoyStyle *style = joy_bubble_get_style(self);
+		if (style && JOY_IS_STYLE_BUTTON(style)) {
+			joy_style_button_configure_label(style, self, label);
+			if (priv->image) {
+				joy_style_button_configure_image(style, self,
+						priv->image);
+			}
+		}
+		priv->label = g_object_ref(label);
+	} else {
+		priv->label = NULL;
+	}
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_LABEL]);
 }
 
 JoyBubble *
@@ -273,6 +336,7 @@ joy_button_set_text(JoyBubble *self, const gchar *text)
 			priv->label = NULL;
 		}
 	}
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_LABEL]);
 }
 
 const gchar *
@@ -306,6 +370,7 @@ joy_button_set_markup(JoyBubble *self, const gchar *markup)
 			priv->label = NULL;
 		}
 	}
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_LABEL]);
 }
 
 void
@@ -317,7 +382,20 @@ joy_button_set_image(JoyBubble *self, JoyBubble *image)
 	if (priv->image) {
 		g_object_unref(priv->image);
 	}
-	priv->image = image ? g_object_ref(image) : NULL;
+	if (image) {
+		JoyStyle *style = joy_bubble_get_style(self);
+		if (style && JOY_IS_STYLE_BUTTON(style)) {
+			joy_style_button_configure_image(style, self, image);
+			if (priv->label) {
+				joy_style_button_configure_label(style, self,
+						priv->label);
+			}
+		}
+		priv->image = g_object_ref(image);
+	} else {
+		priv->image = NULL;
+	}
+	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_IMAGE]);
 }
 
 JoyBubble *

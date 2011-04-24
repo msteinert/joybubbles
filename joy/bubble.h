@@ -173,27 +173,46 @@ const gchar *
 joy_bubble_get_name(JoyBubble *self);
 
 /**
- * \brief Set the widget style.
+ * \brief Set the widget theme.
  *
  * The function is generally only useful for screen & container
  * implementations. Calling this function from application code may have
  * undesirable results.
  *
  * \param self [in] A widget object.
- * \param theme [in] A theme containing the new style for \e self.
+ * \param theme [in] A new theme theme for \e self.
  */
 void
 joy_bubble_set_theme(JoyBubble *self, JoyStyle *theme);
 
 /**
- * \brief Get the style applied a widget.
+ * \brief Get the theme applied a widget.
  *
  * \param self [in] A widget object.
  *
- * \return The currently applied style for \e self.
+ * \return The theme currently applied to \e self.
  */
 JoyStyle *
 joy_bubble_get_theme(JoyBubble *self);
+
+/**
+ * \brief Set the widget style.
+ *
+ * \param self [in] A widget object.
+ * \param style [in] A new style for \e self.
+ */
+void
+joy_bubble_set_style(JoyBubble *self, JoyStyle *style);
+
+/**
+ * \brief Get the style applied to a widget.
+ *
+ * \param self [in] A widget object.
+ *
+ * \return The style currently applied to \e self.
+ */
+JoyStyle *
+joy_bubble_get_style(JoyBubble *self);
 
 /**
  * \brief Set back-buffering for a widget.
