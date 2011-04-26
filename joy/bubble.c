@@ -215,6 +215,46 @@ get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 }
 
 static void
+damage(JoyBubble *self, gint x, gint y, gint width, gint height,
+		gboolean buffer)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	cairo_region_t *region = NULL;
+	if (!priv->visible) {
+		goto exit;
+	}
+	cairo_rectangle_int_t rect = {
+		x, y, width, height
+	};
+	region = cairo_region_create_rectangle(&rect);
+	if (G_UNLIKELY(!region)) {
+		goto exit;
+	}
+	cairo_region_intersect(region, priv->area);
+	if (cairo_region_is_empty(region)) {
+		goto exit;
+	}
+	if (buffer && priv->buffer) {
+		joy_buffer_damage(priv->buffer, region);
+	}
+	JoyBubble *window = self;
+	while (priv->parent) {
+		cairo_region_translate(region, priv->x, priv->y);
+		window = priv->parent;
+		priv = GET_PRIVATE(priv->parent);
+	}
+	for (gint i = 0; i < cairo_region_num_rectangles(region); ++i) {
+		cairo_rectangle_int_t rect;
+		cairo_region_get_rectangle(region, i, &rect);
+		joy_bubble_expose(window, &rect);
+	}
+exit:
+	if (region) {
+		cairo_region_destroy(region);
+	}
+}
+
+static void
 set_theme(JoyBubble *self, JoyStyle *theme)
 {
 	joy_bubble_set_style(self, joy_theme_get_style(theme, self));
@@ -281,6 +321,20 @@ at(JoyBubble *self, gint x, gint y)
 	return NULL;
 }
 
+static void
+resize(JoyBubble *self, gint width, gint height)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (!priv->horizontal_expand) {
+		priv->width = width;
+	}
+	if (!priv->vertical_expand) {
+		priv->height = height;
+	}
+	damage(self, 0, 0, joy_bubble_get_width(self),
+			joy_bubble_get_height(self), FALSE);
+}
+
 static gboolean
 draw(JoyBubble *self, cairo_t *cr)
 {
@@ -328,6 +382,7 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	klass->set_buffered = set_buffered;
 	klass->get_buffered = get_buffered;
 	klass->at = at;
+	klass->resize = resize;
 	klass->draw = draw;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoyBubble::move
@@ -499,46 +554,6 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 			properties[PROP_PARENT]);
 }
 
-static void
-damage(JoyBubble *self, gint x, gint y, gint width, gint height,
-		gboolean buffer)
-{
-	struct Private *priv = GET_PRIVATE(self);
-	cairo_region_t *region = NULL;
-	if (!priv->visible) {
-		goto exit;
-	}
-	cairo_rectangle_int_t rect = {
-		x, y, width, height
-	};
-	region = cairo_region_create_rectangle(&rect);
-	if (G_UNLIKELY(!region)) {
-		goto exit;
-	}
-	cairo_region_intersect(region, priv->area);
-	if (cairo_region_is_empty(region)) {
-		goto exit;
-	}
-	if (buffer && priv->buffer) {
-		joy_buffer_damage(priv->buffer, region);
-	}
-	JoyBubble *window = self;
-	while (priv->parent) {
-		cairo_region_translate(region, priv->x, priv->y);
-		window = priv->parent;
-		priv = GET_PRIVATE(priv->parent);
-	}
-	for (gint i = 0; i < cairo_region_num_rectangles(region); ++i) {
-		cairo_rectangle_int_t rect;
-		cairo_region_get_rectangle(region, i, &rect);
-		joy_bubble_expose(window, &rect);
-	}
-exit:
-	if (region) {
-		cairo_region_destroy(region);
-	}
-}
-
 void
 joy_bubble_set_name(JoyBubble *self, const gchar *name)
 {
@@ -563,8 +578,8 @@ void
 joy_bubble_set_theme(JoyBubble *self, JoyStyle *theme)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
-	g_return_if_fail(JOY_IS_THEME(theme));
-	JOY_BUBBLE_CLASS(self)->set_theme(self, theme);
+	g_return_if_fail(!theme || JOY_IS_THEME(theme));
+	JOY_BUBBLE_GET_CLASS(self)->set_theme(self, theme);
 	g_object_notify_by_pspec(G_OBJECT(self), properties[PROP_THEME]);
 }
 
@@ -583,7 +598,7 @@ void
 joy_bubble_set_style(JoyBubble *self, JoyStyle *style)
 {
 	g_return_if_fail(JOY_IS_BUBBLE(self));
-	g_return_if_fail(!style || JOY_IS_STYLE(self));
+	g_return_if_fail(!style || JOY_IS_STYLE(style));
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->style) {
 		g_object_unref(priv->style);
@@ -861,7 +876,7 @@ joy_bubble_pango_layout_create(JoyBubble *self)
 			goto exit;
 		}
 	}
-	layout = joy_style_pango_layout_create(priv->style);
+	layout = joy_style_pango_layout_create(style);
 exit:
 	if (G_UNLIKELY(!layout)) {
 		PangoFontMap *map = pango_cairo_font_map_get_default();
@@ -895,7 +910,7 @@ joy_bubble_cairo_set_font_source(JoyBubble *self, cairo_t *cr)
 			goto exit;
 		}
 	}
-	if (joy_style_cairo_set_font_source(priv->style, cr)) {
+	if (joy_style_cairo_set_font_source(style, cr)) {
 		return;
 	}
 exit:
@@ -996,14 +1011,6 @@ joy_bubble_resize(JoyBubble *self, gint width, gint height)
 	cairo_region_union_rectangle(priv->area, &rect);
 	cairo_region_intersect(priv->draw, priv->area);
 	g_signal_emit(self, signals[SIGNAL_RESIZE], 0, width, height);
-	if (!priv->horizontal_expand) {
-		priv->width = width;
-	}
-	if (!priv->vertical_expand) {
-		priv->height = height;
-	}
-	damage(self, 0, 0, joy_bubble_get_width(self),
-			joy_bubble_get_height(self), FALSE);
 }
 
 void

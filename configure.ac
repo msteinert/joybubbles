@@ -233,6 +233,8 @@ AC_CONFIG_FILES([
 	joy/platform/x11/Makefile
 	joy/source/Makefile
 	joy/style/Makefile
+	joy/theme/Makefile
+	joy/theme/default/Makefile
 	joy/Makefile
 	pkgconfig/joybubbles.pc
 	pkgconfig/joybubbles-dbus.pc

@@ -92,6 +92,7 @@ static void
 resize(JoyBubble *self, gint width, gint height)
 {
 	struct Private *priv = GET_PRIVATE(self);
+	JOY_BUBBLE_CLASS(joy_image_parent_class)->resize(self, width, height);
 	if (G_LIKELY(width != priv->width)) {
 		priv->dx = (gdouble)width / priv->width;
 	} else {

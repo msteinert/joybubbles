@@ -52,6 +52,9 @@ typedef PangoLayout *
 (*JoyStylePangoLayoutCreate)(JoyStyle *self);
 
 typedef gboolean
+(*JoyStyleSetFontSource)(JoyStyle *self, cairo_t *cr);
+
+typedef void
 (*JoyStyleDraw)(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
 
 struct JoyStyleClass_ {
@@ -59,6 +62,7 @@ struct JoyStyleClass_ {
 	GObjectClass parent_class;
 	/*< public >*/
 	JoyStylePangoLayoutCreate pango_layout_create;
+	JoyStyleSetFontSource set_font_source;
 	JoyStyleDraw draw_background;
 	JoyStyleDraw draw_foreground;
 };

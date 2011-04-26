@@ -16,6 +16,7 @@
 #include "joy/screen.h"
 #include "joy/source.h"
 #include "joy/theme.h"
+#include "joy/theme/default/default.h"
 #include <locale.h>
 #include <stdlib.h>
 
@@ -102,7 +103,14 @@ JoyApplication *
 joy_application_new(void)
 {
 	g_type_init();
-	return joy_platform_application_new();
+	JoyApplication *self = joy_platform_application_new();
+	if (self) {
+		JoyStyle *theme = joy_theme_default_new();
+		if (theme) {
+			joy_application_set_theme(self, theme);
+		}
+	}
+	return self;
 }
 
 void

@@ -132,6 +132,20 @@ pango_layout_create(JoyStyle *self)
 	return layout;
 }
 
+static gboolean
+set_font_source(JoyStyle *self, cairo_t *cr)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->font) {
+		cairo_set_source(cr, priv->font);
+		return TRUE;
+	}
+	if (priv->parent) {
+		return joy_style_cairo_set_font_source(priv->parent, cr);
+	}
+	return FALSE;
+}
+
 static void
 joy_style_class_init(JoyStyleClass *klass)
 {
@@ -141,6 +155,7 @@ joy_style_class_init(JoyStyleClass *klass)
 	object_class->set_property = set_property;
 	object_class->get_property = get_property;
 	klass->pango_layout_create = pango_layout_create;
+	klass->set_font_source = set_font_source;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	g_object_class_install_property(object_class, PROP_PARENT,
 		g_param_spec_object("parent", Q_("Parent"),
@@ -286,15 +301,7 @@ joy_style_cairo_set_font_source(JoyStyle *self, cairo_t *cr)
 {
 	g_return_val_if_fail(JOY_IS_STYLE(self), FALSE);
 	g_return_val_if_fail(cr, FALSE);
-	struct Private *priv = GET_PRIVATE(self);
-	if (priv->font) {
-		cairo_set_source(cr, priv->font);
-		return TRUE;
-	}
-	if (priv->parent) {
-		return joy_style_cairo_set_font_source(priv->parent, cr);
-	}
-	return FALSE;
+	return JOY_STYLE_GET_CLASS(self)->set_font_source(self, cr);
 }
 
 void

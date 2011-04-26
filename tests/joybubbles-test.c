@@ -119,33 +119,35 @@ struct ButtonDown {
 
 static void
 on_button_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyMouseButton button, gpointer data)
+		gint x, gint y, JoyMouseButton button,
+		struct ButtonDown *down)
 {
-	struct ButtonDown *down = (struct ButtonDown *)data;
-	if (JOY_MOUSE_BUTTON_LEFT == button) {
-		JoyAnimation *fade = down->fade;
-		joy_animation_pause(fade);
-		gdouble alpha;
-		if (down->in) {
-			joy_animation_set_easing(fade, joy_easing_out_cubic,
-					NULL);
-			down->in = FALSE;
-			alpha = 0.;
-		} else {
-			joy_animation_set_easing(fade, joy_easing_in_cubic,
-					NULL);
-			down->in = TRUE;
-			alpha = 1.;
-		}
-		joy_animation_fade_set_alpha(fade, alpha);
-		joy_animation_start(fade);
-	} else if (JOY_MOUSE_BUTTON_RIGHT == button) {
-		JoyAnimation *move = down->move;
-		joy_animation_pause(move);
-		joy_animation_move_set_x(move, x);
-		joy_animation_move_set_y(move, y);
-		joy_animation_start(move);
+	if (JOY_MOUSE_BUTTON_RIGHT == button) {
+		joy_animation_pause(down->move);
+		joy_animation_move_set_x(down->move, x);
+		joy_animation_move_set_y(down->move, y);
+		joy_animation_start(down->move);
 	}
+}
+
+static void
+on_clicked(JoyBubble *button, struct ButtonDown *down)
+{
+	joy_animation_pause(down->fade);
+	gdouble alpha;
+	if (down->in) {
+		joy_animation_set_easing(down->fade, joy_easing_out_cubic,
+				NULL);
+		down->in = FALSE;
+		alpha = 0.;
+	} else {
+		joy_animation_set_easing(down->fade, joy_easing_in_cubic,
+				NULL);
+		down->in = TRUE;
+		alpha = 1.;
+	}
+	joy_animation_fade_set_alpha(down->fade, alpha);
+	joy_animation_start(down->fade);
 }
 
 static void
@@ -357,10 +359,11 @@ main(int argc, char *argv[])
 	JoyBubble *label = joy_label_new("Hello, World!");
 	joy_container_add(window, label);
 	joy_bubble_move(label, 100, 100);
-	JoyBubble *button = joy_button_new(NULL);
+	JoyBubble *button = joy_button_new("Click Me");
 	joy_container_add(window, button);
-	joy_bubble_resize(button, 100, 50);
+	joy_bubble_resize(button, 100, 40);
 	joy_bubble_move(button, 100, 400);
+	g_signal_connect(button, "clicked", G_CALLBACK(on_clicked), &down);
 	joy_bubble_show(window);
 	gint status = joy_application_run(app, screen);
 exit:

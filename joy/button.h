@@ -70,9 +70,22 @@ G_GNUC_WARN_UNUSED_RESULT
 JoyBubble *
 joy_button_new(const gchar *text);
 
+/**
+ * \brief Set a new label to use as button text.
+ *
+ * \param self [in] A button object.
+ * \param label [in] The new label to use as text for \e self.
+ */
 void
 joy_button_set_label(JoyBubble *self, JoyBubble *label);
 
+/**
+ * \brief Get the label object for a button.
+ *
+ * \param self [in] A button object.
+ *
+ * \return The label object for \e self or NULL if no text is set.
+ */
 JoyBubble *
 joy_button_get_label(const JoyBubble *self);
 
@@ -95,6 +108,12 @@ joy_button_set_text(JoyBubble *self, const gchar *text);
 const gchar *
 joy_button_get_text(const JoyBubble *self);
 
+/**
+ * \brief Set Pango markup as text for a button.
+ *
+ * \param self [in] A button object.
+ * \param markup [in] The new Pango markup text for \e self.
+ */
 void
 joy_button_set_markup(JoyBubble *self, const gchar *markup);
 

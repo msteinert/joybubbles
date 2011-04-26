@@ -56,6 +56,7 @@ typedef void
 struct JoyStyleButtonClass_ {
 	/*< private >*/
 	JoyStyleClass parent_class;
+	/*< public >*/
 	JoyStyleConfigure configure_image;
 	JoyStyleButtonDraw draw_image;
 	JoyStyleConfigure configure_label;

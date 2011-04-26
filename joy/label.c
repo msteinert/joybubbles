@@ -138,6 +138,7 @@ static void
 resize(JoyBubble *self, gint width, gint height)
 {
 	struct Private *priv = GET_PRIVATE(self);
+	JOY_BUBBLE_CLASS(joy_label_parent_class)->resize(self, width, height);
 	if (G_UNLIKELY(!priv->layout)) {
 		return;
 	}

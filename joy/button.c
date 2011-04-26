@@ -42,14 +42,47 @@ joy_button_init(JoyButton *self)
 }
 
 static void
+on_notify(JoyBubble *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	JoyStyle *style = joy_bubble_get_style(self);
+	if (priv->image) {
+		joy_bubble_set_style(priv->image, style);
+		if (style && G_LIKELY(JOY_IS_STYLE_BUTTON(style))) {
+			joy_style_button_configure_image(style, self,
+					priv->image);
+		}
+	}
+	if (priv->label) {
+		joy_bubble_set_style(priv->label, style);
+		if (style && G_LIKELY(JOY_IS_STYLE_BUTTON(style))) {
+			joy_style_button_configure_label(style, self,
+					priv->label);
+		}
+	}
+}
+
+static void
+constructed(GObject *base)
+{
+	g_signal_connect(base, "notify::style", G_CALLBACK(on_notify), NULL);
+	g_signal_connect_after(base, "resize", G_CALLBACK(on_notify), NULL);
+	if (G_OBJECT_CLASS(joy_button_parent_class)->constructed) {
+		G_OBJECT_CLASS(joy_button_parent_class)->constructed(base);
+	}
+}
+
+static void
 dispose(GObject *base)
 {
 	struct Private *priv = GET_PRIVATE(base);
 	if (priv->label) {
+		g_object_run_dispose(G_OBJECT(priv->label));
 		g_object_unref(priv->label);
 		priv->label = NULL;
 	}
 	if (priv->image) {
+		g_object_run_dispose(G_OBJECT(priv->image));
 		g_object_unref(priv->image);
 		priv->image = NULL;
 	}
@@ -104,6 +137,42 @@ get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
 		break;
+	}
+}
+
+static void
+expose(JoyBubble *self, const cairo_rectangle_int_t *rect)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->label) {
+		joy_bubble_expose(priv->label, rect);
+	}
+	if (priv->image) {
+		joy_bubble_expose(priv->image, rect);
+	}
+}
+
+static void
+show(JoyBubble *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->label) {
+		joy_bubble_show(priv->label);
+	}
+	if (priv->image) {
+		joy_bubble_show(priv->image);
+	}
+}
+
+static void
+hide(JoyBubble *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->label) {
+		joy_bubble_hide(priv->label);
+	}
+	if (priv->image) {
+		joy_bubble_hide(priv->image);
 	}
 }
 
@@ -221,10 +290,14 @@ static void
 joy_button_class_init(JoyButtonClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
+	object_class->constructed = constructed;
 	object_class->dispose = dispose;
 	object_class->set_property = set_property;
 	object_class->get_property = get_property;
 	JoyBubbleClass *bubble_class = JOY_BUBBLE_CLASS(klass);
+	bubble_class->expose = expose;
+	bubble_class->show = show;
+	bubble_class->hide = hide;
 	bubble_class->key_down = key_down;
 	bubble_class->key_up = key_up;
 	bubble_class->button_down = button_down;
@@ -287,6 +360,31 @@ joy_button_new(const gchar *text)
 	return self;
 }
 
+/**
+ * \brief Set a new label for this button.
+ *
+ * \param self [in] A button object.
+ * \param label [in] The new label to set for \e self.
+ */
+static void
+set_label(JoyBubble *self, JoyBubble *label)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	joy_bubble_set_parent(label, self);
+	JoyStyle *style = joy_bubble_get_style(self);
+	if (style) {
+		joy_bubble_set_style(label, style);
+		if (JOY_IS_STYLE_BUTTON(style)) {
+			joy_style_button_configure_label(style, self, label);
+			if (priv->image) {
+				joy_style_button_configure_image(style, self,
+						priv->image);
+			}
+		}
+	}
+	priv->label = label;
+}
+
 void
 joy_button_set_label(JoyBubble *self, JoyBubble *label)
 {
@@ -297,15 +395,7 @@ joy_button_set_label(JoyBubble *self, JoyBubble *label)
 		g_object_unref(priv->label);
 	}
 	if (label) {
-		JoyStyle *style = joy_bubble_get_style(self);
-		if (style && JOY_IS_STYLE_BUTTON(style)) {
-			joy_style_button_configure_label(style, self, label);
-			if (priv->image) {
-				joy_style_button_configure_image(style, self,
-						priv->image);
-			}
-		}
-		priv->label = g_object_ref(label);
+		set_label(self, g_object_ref(label));
 	} else {
 		priv->label = NULL;
 	}
@@ -328,7 +418,11 @@ joy_button_set_text(JoyBubble *self, const gchar *text)
 		if (priv->label) {
 			joy_label_set_text(priv->label, text);
 		} else {
-			priv->label = joy_label_new(text);
+			JoyBubble *label = joy_label_new(text);
+			if (G_UNLIKELY(!label)) {
+				return;
+			}
+			set_label(self, label);
 		}
 	} else {
 		if (priv->label) {
@@ -358,10 +452,11 @@ joy_button_set_markup(JoyBubble *self, const gchar *markup)
 	struct Private *priv = GET_PRIVATE(self);
 	if (markup) {
 		if (!priv->label) {
-			priv->label = joy_label_new(NULL);
-			if (G_UNLIKELY(!priv->label)) {
+			JoyBubble *label = joy_label_new(NULL);
+			if (G_UNLIKELY(!label)) {
 				return;
 			}
+			set_label(self, label);
 		}
 		joy_label_set_markup(priv->label, markup);
 	} else {

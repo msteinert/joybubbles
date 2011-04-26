@@ -1,7 +1,7 @@
 #                                        -*- Automake -*-
 # Process this file with automake to produce Makefile.in.
 
-SUBDIRS = animation device easing filter iterator platform source style
+SUBDIRS = animation device easing filter iterator platform source style theme
 # generate marshalling routines
 $(srcdir)/marshal.h: marshal.list
 	$(AM_V_GEN)$(GLIB_GENMARSHAL) --prefix=joy_marshal --header $< > $@
@@ -66,7 +66,8 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_LIBADD = \
 	iterator/libjoybubbles-iterator.la \
 	platform/$(joy_platform)/libjoybubbles-platform.la \
 	source/libjoybubbles-source.la \
-	style/libjoybubbles-style.la
+	style/libjoybubbles-style.la \
+	theme/default/libdefault.la
 # install development headers
 pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy
 pkginclude_HEADERS = \

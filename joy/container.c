@@ -98,6 +98,8 @@ static void
 resize(JoyBubble *self, gint width, gint height)
 {
 	struct Private *priv = GET_PRIVATE(self);
+	JOY_BUBBLE_CLASS(joy_container_parent_class)->
+		resize(self, width, height);
 	for (GList *node = g_queue_peek_head_link(priv->children); node;
 			node = node->next) {
 		JoyBubble *child = node->data;
