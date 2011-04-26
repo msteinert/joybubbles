@@ -12,6 +12,7 @@
 #include "joy/container.h"
 #include "joy/iterator/queue.h"
 #include "joy/marshal.h"
+#include "joy/style.h"
 
 G_DEFINE_TYPE(JoyContainer, joy_container, JOY_TYPE_BUBBLE)
 
@@ -150,10 +151,17 @@ static gboolean
 draw(JoyBubble *self, cairo_t *cr)
 {
 	struct Private *priv = GET_PRIVATE(self);
+	JoyStyle *style = joy_bubble_get_style(self);
+	if (style) {
+		joy_style_draw_background(style, self, cr);
+	}
 	for (GList *node = g_queue_peek_head_link(priv->children); node;
 			node = node->next) {
 		JoyBubble *child = node->data;
 		joy_bubble_draw(child, cr);
+	}
+	if (style) {
+		joy_style_draw_foreground(style, self, cr);
 	}
 	return TRUE;
 }
@@ -207,7 +215,6 @@ remove_(JoyBubble *self, JoyBubble *child)
 		return;
 	}
 	joy_bubble_set_parent(child, NULL);
-	g_object_run_dispose(G_OBJECT(child));
 	g_object_unref(child);
 	g_queue_remove(priv->children, child);
 }

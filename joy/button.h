@@ -14,7 +14,7 @@
 #ifndef JOY_BUTTON_H
 #define JOY_BUTTON_H
 
-#include <joy/bubble.h>
+#include <joy/container.h>
 
 G_BEGIN_DECLS
 
@@ -41,7 +41,7 @@ typedef struct JoyButtonClass_ JoyButtonClass;
 
 struct JoyButton_ {
 	/*< private >*/
-	JoyBubble parent_instance;
+	JoyContainer parent_instance;
 	gpointer priv;
 };
 
@@ -50,7 +50,7 @@ typedef void
 
 struct JoyButtonClass_ {
 	/*< private >*/
-	JoyBubbleClass parent_class;
+	JoyContainerClass parent_class;
 	/*< public >*/
 	JoyButtonClicked clicked;
 };
@@ -71,25 +71,6 @@ JoyBubble *
 joy_button_new(const gchar *text);
 
 /**
- * \brief Set a new label to use as button text.
- *
- * \param self [in] A button object.
- * \param label [in] The new label to use as text for \e self.
- */
-void
-joy_button_set_label(JoyBubble *self, JoyBubble *label);
-
-/**
- * \brief Get the label object for a button.
- *
- * \param self [in] A button object.
- *
- * \return The label object for \e self or NULL if no text is set.
- */
-JoyBubble *
-joy_button_get_label(const JoyBubble *self);
-
-/**
  * \brief Set the text for a button.
  *
  * \param self [in] A button object.
@@ -107,42 +88,6 @@ joy_button_set_text(JoyBubble *self, const gchar *text);
  */
 const gchar *
 joy_button_get_text(const JoyBubble *self);
-
-/**
- * \brief Set Pango markup as text for a button.
- *
- * \param self [in] A button object.
- * \param markup [in] The new Pango markup text for \e self.
- */
-void
-joy_button_set_markup(JoyBubble *self, const gchar *markup);
-
-/**
- * \brief Set an image icon for a button.
- *
- * Image icons are rendered according to the current button style.
- *
- * \param self [in] A button object.
- * \param image [in] The JoyImage object to use as an icon for \e self.
- *
- * \note The \e image object should not be shared with any other widget as
- *       the associated style will most likely scale the image. The
- *       underlying Cairo surface may however be shared among multiple
- *       image widgets.
- */
-void
-joy_button_set_image(JoyBubble *self, JoyBubble *image);
-
-/**
- * \brief Get the image icon for a button.
- *
- * \param self [in] A button object.
- *
- * \return The JoyImage object in use as an icon for \e self or NULL if no
- *         image icon is set.
- */
-JoyBubble *
-joy_button_get_image(const JoyBubble *self);
 
 G_END_DECLS
 

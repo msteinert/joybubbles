@@ -1,7 +1,7 @@
 #                                        -*- Automake -*-
 # Process this file with automake to produce Makefile.in.
 
-SUBDIRS = animation device easing filter iterator platform source style theme
+SUBDIRS = animation device easing filter iterator platform source theme
 # generate marshalling routines
 $(srcdir)/marshal.h: marshal.list
 	$(AM_V_GEN)$(GLIB_GENMARSHAL) --prefix=joy_marshal --header $< > $@

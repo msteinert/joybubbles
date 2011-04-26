@@ -14,7 +14,7 @@
 #ifndef JOY_STYLE_DEFAULT_BUTTON_H
 #define JOY_STYLE_DEFAULT_BUTTON_H
 
-#include <joy/style/button.h>
+#include <joy/style.h>
 
 G_BEGIN_DECLS
 
@@ -45,12 +45,12 @@ typedef struct JoyStyleDefaultButtonClass_ JoyStyleDefaultButtonClass;
 
 struct JoyStyleDefaultButton_ {
 	/*< private >*/
-	JoyStyleButton parent_instance;
+	JoyStyle parent_instance;
 };
 
 struct JoyStyleDefaultButtonClass_ {
 	/*< private >*/
-	JoyStyleButtonClass parent_class;
+	JoyStyleClass parent_class;
 };
 
 G_GNUC_NO_INSTRUMENT
@@ -58,7 +58,7 @@ GType
 joy_style_default_button_get_type(void) G_GNUC_CONST;
 
 JoyStyle *
-joy_style_default_button_new(void);
+joy_style_default_button_new(JoyBubble *button);
 
 G_END_DECLS
 

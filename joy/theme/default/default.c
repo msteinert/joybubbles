@@ -19,6 +19,23 @@ joy_theme_default_init(JoyThemeDefault *self)
 {
 }
 
+static void
+constructed(GObject *base)
+{
+	JoyStyle *self = JOY_STYLE(base);
+	PangoFontDescription *desc = pango_font_description_new();
+	if (G_LIKELY(desc)) {
+		pango_font_description_set_family(desc, "Droid Sans");
+		pango_font_description_set_size(desc, 12 * PANGO_SCALE);
+		joy_style_set_font_description(self, desc);
+		pango_font_description_free(desc);
+	}
+	if (G_OBJECT_CLASS(joy_theme_default_parent_class)->constructed) {
+		G_OBJECT_CLASS(joy_theme_default_parent_class)->
+			constructed(base);
+	}
+}
+
 static JoyStyle *
 style_create(JoyStyle *self, JoyBubble *widget)
 {
@@ -30,7 +47,7 @@ style_create(JoyStyle *self, JoyBubble *widget)
 		}
 	}
 	if (!g_strcmp0("JoyButton", name)) {
-		return joy_style_default_button_new();
+		return joy_style_default_button_new(widget);
 	}
 	return NULL;
 }
@@ -38,6 +55,8 @@ style_create(JoyStyle *self, JoyBubble *widget)
 static void
 joy_theme_default_class_init(JoyThemeDefaultClass *klass)
 {
+	GObjectClass *object_class = G_OBJECT_CLASS(klass);
+	object_class->constructed = constructed;
 	JoyThemeClass *theme_class = JOY_THEME_CLASS(klass);
 	theme_class->style_create = style_create;
 }

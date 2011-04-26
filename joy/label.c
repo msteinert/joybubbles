@@ -50,11 +50,12 @@ on_notify(JoyBubble *self)
 	if (G_UNLIKELY(!priv->text)) {
 		return;
 	}
+	if (G_LIKELY(priv->layout)) {
+		g_object_unref(priv->layout);
+	}
+	priv->layout = joy_bubble_pango_layout_create(self);
 	if (G_UNLIKELY(!priv->layout)) {
-		priv->layout = joy_bubble_pango_layout_create(self);
-		if (G_UNLIKELY(!priv->layout)) {
-			return;
-		}
+		return;
 	}
 	if (priv->markup) {
 		pango_layout_set_attributes(priv->layout, NULL);

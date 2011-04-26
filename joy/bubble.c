@@ -142,6 +142,7 @@ enum Properties {
 	PROP_THEME,
 	PROP_STYLE,
 	PROP_PARENT,
+	PROP_STATE,
 	PROP_MAX
 };
 
@@ -188,6 +189,9 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 	case PROP_PARENT:
 		joy_bubble_set_parent(self, g_value_get_object(value));
 		break;
+	case PROP_STATE:
+		joy_bubble_set_state(self, g_value_get_int(value));
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
 		break;
@@ -207,6 +211,9 @@ get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 		break;
 	case PROP_PARENT:
 		g_value_set_object(value, joy_bubble_get_parent(self));
+		break;
+	case PROP_STATE:
+		g_value_set_int(value, joy_bubble_get_state(self));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(base, id, pspec);
@@ -338,31 +345,37 @@ resize(JoyBubble *self, gint width, gint height)
 static gboolean
 draw(JoyBubble *self, cairo_t *cr)
 {
-	gdouble width = joy_bubble_get_width(self);
-	gdouble height = joy_bubble_get_height(self);
-	cairo_set_line_width(cr, 2.);
-	cairo_rectangle(cr, 1., 1., width - 2., height - 2.);
-	cairo_set_source_rgb(cr, 1., 1., 0.);
-	cairo_fill_preserve(cr);
-	cairo_move_to(cr, 0., 0.);
-	cairo_line_to(cr, width, height);
-	cairo_move_to(cr, 0., height);
-	cairo_line_to(cr, width, 0.);
-	switch (joy_bubble_get_state(self)) {
-	case JOY_BUBBLE_STATE_DEFAULT:
-		cairo_set_source_rgb(cr, 1., 0., 0.);
-		break;
-	case JOY_BUBBLE_STATE_FOCUSED:
-		cairo_set_source_rgb(cr, 0., 1., 0.);
-		break;
-	case JOY_BUBBLE_STATE_ACTIVE:
-		cairo_set_source_rgb(cr, 0., 0., 1.);
-		break;
-	case JOY_BUBBLE_STATE_DISABLED:
-	default:
-		cairo_set_source_rgb(cr, 0., 0., 0.);
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->style) {
+		joy_style_draw_background(priv->style, self, cr);
+		joy_style_draw_foreground(priv->style, self, cr);
+	} else {
+		gdouble width = joy_bubble_get_width(self);
+		gdouble height = joy_bubble_get_height(self);
+		cairo_set_line_width(cr, 2.);
+		cairo_rectangle(cr, 1., 1., width - 2., height - 2.);
+		cairo_set_source_rgb(cr, 1., 1., 0.);
+		cairo_fill_preserve(cr);
+		cairo_move_to(cr, 0., 0.);
+		cairo_line_to(cr, width, height);
+		cairo_move_to(cr, 0., height);
+		cairo_line_to(cr, width, 0.);
+		switch (joy_bubble_get_state(self)) {
+		case JOY_BUBBLE_STATE_DEFAULT:
+			cairo_set_source_rgb(cr, 1., 0., 0.);
+			break;
+		case JOY_BUBBLE_STATE_FOCUSED:
+			cairo_set_source_rgb(cr, 0., 1., 0.);
+			break;
+		case JOY_BUBBLE_STATE_ACTIVE:
+			cairo_set_source_rgb(cr, 0., 0., 1.);
+			break;
+		case JOY_BUBBLE_STATE_DISABLED:
+		default:
+			cairo_set_source_rgb(cr, 0., 0., 0.);
+		}
+		cairo_stroke(cr);
 	}
-	cairo_stroke(cr);
 	return TRUE;
 }
 
@@ -537,19 +550,19 @@ joy_bubble_class_init(JoyBubbleClass *klass)
 	properties[PROP_THEME] =
 		g_param_spec_object("theme", Q_("Theme"),
 			Q_("The theme for this widget"), JOY_TYPE_THEME,
-			G_PARAM_READABLE | G_PARAM_WRITABLE);
+			G_PARAM_READWRITE);
 	g_object_class_install_property(object_class, PROP_THEME,
 			properties[PROP_THEME]);
 	properties[PROP_STYLE] =
 		g_param_spec_object("style", Q_("Style"),
 			Q_("The style for this widget"), JOY_TYPE_STYLE,
-			G_PARAM_READABLE | G_PARAM_WRITABLE);
+			G_PARAM_READWRITE);
 	g_object_class_install_property(object_class, PROP_STYLE,
 			properties[PROP_STYLE]);
 	properties[PROP_PARENT] =
 		g_param_spec_object("parent", Q_("Parent"),
 			Q_("The parent of this widget"), JOY_TYPE_BUBBLE,
-			G_PARAM_READABLE | G_PARAM_WRITABLE);
+			G_PARAM_READWRITE);
 	g_object_class_install_property(object_class, PROP_PARENT,
 			properties[PROP_PARENT]);
 }
@@ -865,31 +878,41 @@ joy_bubble_pango_layout_create(JoyBubble *self)
 	g_return_val_if_fail(JOY_IS_BUBBLE(self), NULL);
 	struct Private *priv = GET_PRIVATE(self);
 	PangoLayout *layout = NULL;
-	JoyStyle *style = priv->style;
-	if (G_UNLIKELY(!style)) {
-		JoyApplication *app = joy_bubble_get_application(self);
-		if (G_UNLIKELY(!app)) {
-			goto exit;
-		}
-		style = joy_application_get_theme(app);
-		if (G_UNLIKELY(!style)) {
-			goto exit;
+	if (priv->style) {
+		layout = joy_style_pango_layout_create(priv->style);
+		if (layout) {
+			return layout;
 		}
 	}
-	layout = joy_style_pango_layout_create(style);
-exit:
-	if (G_UNLIKELY(!layout)) {
-		PangoFontMap *map = pango_cairo_font_map_get_default();
-		if (G_UNLIKELY(!map)) {
-			return NULL;
+	if (G_LIKELY(priv->parent)) {
+		JoyStyle *style = joy_bubble_get_style(priv->parent);
+		if (style) {
+			layout = joy_style_pango_layout_create(style);
+			if (layout) {
+				return layout;
+			}
 		}
-		PangoContext *context = pango_font_map_create_context(map);
-		if (G_UNLIKELY(!context)) {
-			return NULL;
-		}
-		layout = pango_layout_new(context);
-		g_object_unref(context);
 	}
+	JoyApplication *app = joy_bubble_get_application(self);
+	if (G_LIKELY(app)) {
+		JoyStyle *style = joy_application_get_theme(app);
+		if (style) {
+			layout = joy_style_pango_layout_create(style);
+			if (layout) {
+				return layout;
+			}
+		}
+	}
+	PangoFontMap *map = pango_cairo_font_map_get_default();
+	if (G_UNLIKELY(!map)) {
+		return NULL;
+	}
+	PangoContext *context = pango_font_map_create_context(map);
+	if (G_UNLIKELY(!context)) {
+		return NULL;
+	}
+	layout = pango_layout_new(context);
+	g_object_unref(context);
 	return layout;
 }
 
@@ -899,21 +922,28 @@ joy_bubble_cairo_set_font_source(JoyBubble *self, cairo_t *cr)
 	g_return_if_fail(JOY_IS_BUBBLE(self));
 	g_return_if_fail(cr);
 	struct Private *priv = GET_PRIVATE(self);
-	JoyStyle *style = priv->style;
-	if (G_UNLIKELY(!style)) {
-		JoyApplication *app = joy_bubble_get_application(self);
-		if (G_UNLIKELY(!app)) {
-			goto exit;
-		}
-		style = joy_application_get_theme(app);
-		if (G_UNLIKELY(!style)) {
-			goto exit;
+	if (priv->style) {
+		if (joy_style_cairo_set_font_source(priv->style, cr)) {
+			return;
 		}
 	}
-	if (joy_style_cairo_set_font_source(style, cr)) {
-		return;
+	if (G_LIKELY(priv->parent)) {
+		JoyStyle *style = joy_bubble_get_style(priv->parent);
+		if (style) {
+			if (joy_style_cairo_set_font_source(style, cr)) {
+				return;
+			}
+		}
 	}
-exit:
+	JoyApplication *app = joy_bubble_get_application(self);
+	if (G_LIKELY(app)) {
+		JoyStyle *style = joy_application_get_theme(app);
+		if (style) {
+			if (joy_style_cairo_set_font_source(style, cr)) {
+				return;
+			}
+		}
+	}
 	cairo_set_source_rgb(cr, 1., 1., 1.);
 }
 

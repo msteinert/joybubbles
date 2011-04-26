@@ -89,14 +89,23 @@ pango_layout_create(JoyStyle *self)
 	}
 	g_signal_connect(self, "context-changed",
 			G_CALLBACK(on_context_changed), layout);
-	return layout;
+exit:
+	{
+		PangoFontDescription *desc =
+			joy_style_get_font_description(self);
+		if (desc) {
+			pango_layout_set_font_description(layout, desc);
+		}
+		return layout;
+	}
 error:
 	{
 		JoyStyle *parent = joy_style_get_parent(self);
 		if (!parent) {
 			return NULL;
 		}
-		return joy_style_pango_layout_create(parent);
+		layout = joy_style_pango_layout_create(parent);
+		goto exit;
 	}
 }
 

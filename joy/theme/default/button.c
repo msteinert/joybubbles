@@ -12,8 +12,7 @@
 #include "joy/label.h"
 #include "joy/theme/default/button.h"
 
-G_DEFINE_TYPE(JoyStyleDefaultButton, joy_style_default_button,
-		JOY_TYPE_STYLE_BUTTON)
+G_DEFINE_TYPE(JoyStyleDefaultButton, joy_style_default_button, JOY_TYPE_STYLE)
 
 static void
 joy_style_default_button_init(JoyStyleDefaultButton *self)
@@ -67,33 +66,15 @@ draw_background(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
 }
 
 static void
-configure_label(JoyStyle *self, JoyBubble *widget, JoyBubble *label)
-{
-	gint width = joy_bubble_get_width(widget);
-	gint height = joy_bubble_get_height(label);
-	joy_label_set_alignment(label, PANGO_ALIGN_CENTER);
-	joy_bubble_resize(label, width, height);
-}
-
-static void
-draw_label(JoyStyle *self, JoyBubble *widget, cairo_t *cr, JoyBubble *label)
-{
-	joy_bubble_draw(label, cr);
-}
-
-static void
 joy_style_default_button_class_init(JoyStyleDefaultButtonClass *klass)
 {
 	JoyStyleClass *style_class = JOY_STYLE_CLASS(klass);
 	style_class->set_font_source = set_font_source;
 	style_class->draw_background = draw_background;
-	JoyStyleButtonClass *button_class = JOY_STYLE_BUTTON_CLASS(klass);
-	button_class->configure_label = configure_label;
-	button_class->draw_label = draw_label;
 }
 
 JoyStyle *
-joy_style_default_button_new(void)
+joy_style_default_button_new(JoyBubble *button)
 {
 	return g_object_new(JOY_TYPE_STYLE_DEFAULT_BUTTON,
 			NULL);
