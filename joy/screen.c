@@ -229,8 +229,15 @@ joy_screen_cairo_surface_create(JoyScreen *self,
 		gint width, gint height)
 {
 	g_return_val_if_fail(JOY_IS_SCREEN(self), NULL);
-	return JOY_SCREEN_GET_CLASS(self)->
+	cairo_surface_t *surface = JOY_SCREEN_GET_CLASS(self)->
 		cairo_surface_create(self, width, height);
+	if (surface) {
+		cairo_t *cr = cairo_create(surface);
+		cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+		cairo_paint(cr);
+		cairo_destroy(cr);
+	}
+	return surface;
 }
 
 void

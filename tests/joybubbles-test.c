@@ -356,12 +356,12 @@ main(int argc, char *argv[])
 	joy_animation_set_duration(down.fade, 1.);
 	g_signal_connect(window, "button-down", G_CALLBACK(on_button_down),
 			&down);
-	JoyBubble *label = joy_label_new("Hello, World!");
+	JoyBubble *label = joy_label_new(Q_("Hello, World!"));
 	joy_container_add(window, label);
 	joy_bubble_move(label, 100, 100);
-	JoyBubble *button = joy_button_new("Click Me");
+	JoyBubble *button = joy_button_new(Q_("Click Me"));
 	joy_container_add(window, button);
-	joy_bubble_resize(button, 100, 40);
+	joy_bubble_resize(button, 150, 60);
 	joy_bubble_move(button, 100, 400);
 	g_signal_connect(button, "clicked", G_CALLBACK(on_clicked), &down);
 	joy_bubble_show(window);

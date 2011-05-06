@@ -221,6 +221,33 @@ joy_gfx3d_window_submit(JoyBubble *self, GFX3D_NATIVE_Display display,
 	gdouble alpha = joy_bubble_get_alpha(self);
 	gint n = cairo_region_num_rectangles(priv->expose);
 	if (1. == alpha) {
+		GFX3D_NATIVE_Blit_Blend_Generic_Parms_t parameters = {
+			{
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eOne,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eSourceColor,
+				0,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eDestinationColor,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eInverseSourceAlpha,
+				0,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eZero
+			},
+			{
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eOne,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eSourceAlpha,
+				0,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eDestinationAlpha,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eInverseSourceAlpha,
+				0,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eZero,
+			},
+			0,
+			0,
+			0,
+			GFX3D_NATIVE_BLIT_FilterCoeffs_eNone,
+			GFX3D_NATIVE_BLIT_FilterCoeffs_eNone,
+			0,
+			0
+		};
 		for (gint i = 0; i < n; ++i) {
 			cairo_rectangle_int_t rect;
 			cairo_region_get_rectangle(priv->expose, i, &rect);
@@ -230,8 +257,11 @@ joy_gfx3d_window_submit(JoyBubble *self, GFX3D_NATIVE_Display display,
 				rect.width,
 				rect.height
 			};
-			GFX3D_NATIVE_Blit_Blend_PixelAlpha(display, fb, &dst,
-					surface, (gpointer)&rect);
+			GFX3D_NATIVE_Blit_Blend_Generic(display,
+					fb, &dst,
+					surface, (gpointer)&rect,
+					fb, &dst,
+					&parameters);
 		}
 	} else {
 		for (gint i = 0; i < n; ++i) {
