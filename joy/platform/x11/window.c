@@ -242,34 +242,33 @@ static cairo_surface_t *
 cairo_surface_create(JoyBubble *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
+	if (G_LIKELY(priv->surface)) {
+		return cairo_surface_reference(priv->surface);
+	}
 	if (G_UNLIKELY(!priv->window)) {
-		return NULL;
+		goto error;
 	}
+	JoyScreen *screen = joy_bubble_get_screen(self);
+	Display *display = joy_x11_screen_get_display(screen);
+	gint width = joy_bubble_get_width(self);
+	gint height = joy_bubble_get_height(self);
+	Pixmap pixmap = XCreatePixmap(display, priv->window, width,
+			height, joy_x11_screen_get_depth(screen));
+	if (G_UNLIKELY(!pixmap)) {
+		goto error;
+	}
+	priv->surface = joy_x11_screen_cairo_surface_create(screen,
+			display, pixmap, width, height);
 	if (G_UNLIKELY(!priv->surface)) {
-		JoyScreen *screen = joy_bubble_get_screen(self);
-		Display *display = joy_x11_screen_get_display(screen);
-		gint width = joy_bubble_get_width(self);
-		gint height = joy_bubble_get_height(self);
-		Pixmap pixmap = XCreatePixmap(display, priv->window, width,
-				height, joy_x11_screen_get_depth(screen));
-		if (G_UNLIKELY(!pixmap)) {
-			goto error;
-		}
-		priv->surface = joy_x11_screen_cairo_surface_create(screen,
-				display, pixmap, width, height);
-		if (G_UNLIKELY(!priv->surface)) {
-			goto error;
-		}
-		goto exit;
-error:
-		if (priv->surface) {
-			cairo_surface_destroy(priv->surface);
-			priv->surface = NULL;
-		}
-		return NULL;
+		goto error;
 	}
-exit:
 	return cairo_surface_reference(priv->surface);
+error:
+	if (priv->surface) {
+		cairo_surface_destroy(priv->surface);
+		priv->surface = NULL;
+	}
+	return NULL;
 }
 
 static void
