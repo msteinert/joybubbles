@@ -90,7 +90,9 @@ static void
 expose(JoyBubble *self, const cairo_rectangle_int_t *rect)
 {
 	struct Private *priv = GET_PRIVATE(self);
-	cairo_region_union_rectangle(priv->expose, rect);
+	if (0 < rect->width && 0 < rect->height) {
+		cairo_region_union_rectangle(priv->expose, rect);
+	}
 	JOY_BUBBLE_CLASS(joy_gfx3d_window_parent_class)->expose(self, rect);
 }
 
@@ -218,8 +220,8 @@ joy_gfx3d_window_submit(JoyBubble *self, GFX3D_NATIVE_Display display,
 	}
 	GFX3D_NATIVE_Surface surface =
 		GFX3D_Image_Get_NATIVE_Surface(priv->image);
-	gdouble alpha = joy_bubble_get_alpha(self);
 	gint n = cairo_region_num_rectangles(priv->expose);
+	gdouble alpha = joy_bubble_get_alpha(self);
 	if (1. == alpha) {
 		GFX3D_NATIVE_Blit_Blend_Generic_Parms_t parameters = {
 			{
@@ -264,6 +266,33 @@ joy_gfx3d_window_submit(JoyBubble *self, GFX3D_NATIVE_Display display,
 					&parameters);
 		}
 	} else {
+		GFX3D_NATIVE_Blit_Blend_Generic_Parms_t parameters = {
+			{
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eConstantAlpha,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eSourceColor,
+				0,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eDestinationColor,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eInverseSourceAlpha,
+				0,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eZero
+			},
+			{
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eOne,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eSourceAlpha,
+				0,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eDestinationAlpha,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eInverseSourceAlpha,
+				0,
+				GFX3D_NATIVE_BLIT_BLEND_CONST_eZero,
+			},
+			(gint)(0xff * alpha) << 24,
+			0,
+			0,
+			GFX3D_NATIVE_BLIT_FilterCoeffs_eNone,
+			GFX3D_NATIVE_BLIT_FilterCoeffs_eNone,
+			0,
+			0
+		};
 		for (gint i = 0; i < n; ++i) {
 			cairo_rectangle_int_t rect;
 			cairo_region_get_rectangle(priv->expose, i, &rect);
@@ -273,9 +302,11 @@ joy_gfx3d_window_submit(JoyBubble *self, GFX3D_NATIVE_Display display,
 				rect.width,
 				rect.height
 			};
-			GFX3D_NATIVE_Blit_Blend_ModulateAlpha(display, fb,
-					&dst, surface, (gpointer)&rect,
-					(uint8_t)(alpha * 255.));
+			GFX3D_NATIVE_Blit_Blend_Generic(display,
+					fb, &dst,
+					surface, (gpointer)&rect,
+					fb, &dst,
+					&parameters);
 		}
 	}
 	cairo_region_subtract(priv->expose, priv->expose);

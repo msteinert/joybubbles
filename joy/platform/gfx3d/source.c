@@ -281,7 +281,7 @@ get_key(const IM_INPUT *event, JoyDevice *keyboard)
 }
 
 /**
- * \param Handle key & mouse button events.
+ * \brief Handle key & mouse button events.
  *
  * \param self [in] A source object.
  * \param screen [in] The screen \e event occurred on.
