@@ -66,7 +66,6 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_LIBADD = \
 	iterator/libjoybubbles-iterator.la \
 	platform/$(joy_platform)/libjoybubbles-platform.la \
 	source/libjoybubbles-source.la \
-	style/libjoybubbles-style.la \
 	theme/default/libdefault.la
 # install development headers
 pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy
