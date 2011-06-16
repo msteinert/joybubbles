@@ -14,7 +14,9 @@
 #include "joy/platform/x11/application.h"
 #include "joy/platform/x11/screen.h"
 #include "joy/platform/x11/window.h"
+#ifdef HAVE_XCOMPOSITE
 #include <X11/extensions/Xcomposite.h>
+#endif
 #include <X11/Xutil.h>
 
 G_DEFINE_TYPE(JoyX11Screen, joy_x11_screen, JOY_TYPE_SCREEN)
