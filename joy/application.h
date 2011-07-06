@@ -122,7 +122,7 @@ joy_application_get_theme(JoyApplication *self);
 /**
  * \brief Set the application refresh rate.
  *
- * The default refresh rate is may be set when the package is configured.
+ * The default refresh rate is set when the package is configured.
  * The default setting is 60.0 Hz.
  *
  * \param self [in] An application object.

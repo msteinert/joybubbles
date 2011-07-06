@@ -14,7 +14,9 @@
 #include "joy/platform/x11/screen.h"
 #include "joy/platform/x11/window.h"
 #include <string.h>
+#ifdef HAVE_XCOMPOSITE
 #include <X11/extensions/Xcomposite.h>
+#endif
 #include <X11/Xutil.h>
 
 G_DEFINE_TYPE(JoyX11Window, joy_x11_window, JOY_TYPE_WINDOW)
@@ -393,7 +395,7 @@ joy_x11_window_submit(JoyBubble *self, Display *display)
 		return;
 	}
 	if (G_LIKELY(priv->region)) {
-			XSetRegion(display, priv->gc, priv->region);
+		XSetRegion(display, priv->gc, priv->region);
 	}
 	XCopyArea(display, cairo_xlib_surface_get_drawable(priv->surface),
 			priv->window, priv->gc, 0, 0,

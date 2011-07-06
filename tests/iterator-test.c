@@ -46,16 +46,14 @@ test_001(gpointer *fixture, gconstpointer data)
 	for (JoyIterator *iter = joy_iterator_queue_begin(queue); iter;
 			iter = joy_iterator_next(iter)) {
 		const gchar *item = joy_iterator_item(iter);
-		g_assert_cmpstr(item, ==, items[i]);
-		++i;
+		g_assert_cmpstr(item, ==, items[i++]);
 	}
 	g_assert_cmpint(i, ==, n);
 	i = n - 1;
 	for (JoyIterator *iter = joy_iterator_queue_end(queue); iter;
 			iter = joy_iterator_previous(iter)) {
 		const gchar *item = joy_iterator_item(iter);
-		g_assert_cmpstr(item, ==, items[i]);
-		--i;
+		g_assert_cmpstr(item, ==, items[i--]);
 	}
 	g_assert_cmpint(i, ==, -1);
 	g_queue_free(queue);
@@ -93,16 +91,14 @@ test_003(gpointer *fixture, gconstpointer data)
 	for (JoyIterator *iter = joy_iterator_ptr_array_begin(array); iter;
 			iter = joy_iterator_next(iter)) {
 		const gchar *item = joy_iterator_item(iter);
-		g_assert_cmpstr(item, ==, items[i]);
-		++i;
+		g_assert_cmpstr(item, ==, items[i++]);
 	}
 	g_assert_cmpint(i, ==, n);
 	i = n - 1;
 	for (JoyIterator *iter = joy_iterator_ptr_array_end(array); iter;
 			iter = joy_iterator_previous(iter)) {
 		const gchar *item = joy_iterator_item(iter);
-		g_assert_cmpstr(item, ==, items[i]);
-		--i;
+		g_assert_cmpstr(item, ==, items[i--]);
 	}
 	g_assert_cmpint(i, ==, -1);
 	g_ptr_array_free(array, TRUE);

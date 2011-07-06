@@ -151,7 +151,6 @@ static inline void
 handle_event(JoySource *self, JoyBubble *window, XEvent *event)
 {
 	struct Private *priv = GET_PRIVATE(self);
-	joy_x11_window_set_event(window, event);
 	switch (event->type) {
 	case ButtonPress:
 		switch (event->xbutton.button) {
@@ -320,14 +319,18 @@ input(JoySource *self)
 		XEvent event;
 		XNextEvent(priv->display, &event);
 		if (G_UNLIKELY(priv->xid != event.xany.window)) {
+			if (priv->window) {
+				joy_x11_window_set_event(priv->window, NULL);
+			}
 			priv->xid = event.xany.window;
 			priv->window = joy_x11_application_lookup_xid(
 					priv->app, event.xany.window);
+			if (G_UNLIKELY(!priv->window)) {
+				g_message(Q_("x11: unknown XID [%lx]"), priv->xid);
+				continue;
+			}
 		}
-		if (G_UNLIKELY(!priv->window)) {
-			g_message(Q_("x11: unknown XID [%lx]"), priv->xid);
-			continue;
-		}
+		joy_x11_window_set_event(priv->window, &event);
 		handle_event(self, priv->window, &event);
 	}
 	if (G_LIKELY(priv->window)) {
