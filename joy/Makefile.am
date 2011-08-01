@@ -8,8 +8,8 @@ $(srcdir)/marshal.h: marshal.list
 $(srcdir)/marshal.c: marshal.list
 	$(AM_V_GEN)$(GLIB_GENMARSHAL) --prefix=joy_marshal --body $< > $@
 # library definition
-lib_LTLIBRARIES = libjoybubbles-@joy_series_major@.@joy_series_minor@.la
-libjoybubbles_@joy_series_major@_@joy_series_minor@_la_SOURCES = \
+lib_LTLIBRARIES = libjoybubbles-@series_major@.@series_minor@.la
+libjoybubbles_@series_major@_@series_minor@_la_SOURCES = \
 	accumulator.c \
 	accumulator.h \
 	animation.c \
@@ -41,7 +41,7 @@ BUILT_SOURCES = \
 	marshal.c \
 	marshal.h
 # include directories & compiler switches
-libjoybubbles_@joy_series_major@_@joy_series_minor@_la_CFLAGS = \
+libjoybubbles_@series_major@_@series_minor@_la_CFLAGS = \
 	-DJOY_LOCALEDIR=\"$(localedir)\" \
 	-I$(top_srcdir) \
 	$(GLIB_CFLAGS) \
@@ -50,7 +50,7 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_CFLAGS = \
 	$(PANGO_CFLAGS) \
 	$(PANGOCAIRO_CFLAGS) \
 	$(GDK_PIXBUF_CFLAGS)
-libjoybubbles_@joy_series_major@_@joy_series_minor@_la_LDFLAGS = \
+libjoybubbles_@series_major@_@series_minor@_la_LDFLAGS = \
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
 	$(GLIB_LIBS) \
 	$(GOBJECT_LIBS) \
@@ -58,17 +58,17 @@ libjoybubbles_@joy_series_major@_@joy_series_minor@_la_LDFLAGS = \
 	$(PANGO_LIBS) \
 	$(PANGOCAIRO_LIBS) \
 	$(GDK_PIXBUF_LIBS)
-libjoybubbles_@joy_series_major@_@joy_series_minor@_la_LIBADD = \
+libjoybubbles_@series_major@_@series_minor@_la_LIBADD = \
 	animation/libjoybubbles-animation.la \
 	device/libjoybubbles-device.la \
 	easing/libjoybubbles-easing.la \
 	filter/libjoybubbles-filter.la \
 	iterator/libjoybubbles-iterator.la \
-	platform/$(joy_platform)/libjoybubbles-platform.la \
+	platform/$(with_platform)/libjoybubbles-platform.la \
 	source/libjoybubbles-source.la \
 	theme/default/libdefault.la
 # install development headers
-pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy
+pkgincludedir = $(includedir)/joybubbles-$(series)/joy
 pkginclude_HEADERS = \
 	animation.h \
 	application.h \
@@ -92,11 +92,11 @@ pkginclude_HEADERS = \
 	types.h \
 	window.h
 if JOY_DBUS
-libjoybubbles_@joy_series_major@_@joy_series_minor@_la_SOURCES += \
+libjoybubbles_@series_major@_@series_minor@_la_SOURCES += \
 	dbus.c
-libjoybubbles_@joy_series_major@_@joy_series_minor@_la_CFLAGS += \
+libjoybubbles_@series_major@_@series_minor@_la_CFLAGS += \
 	$(DBUS_CFLAGS)
-libjoybubbles_@joy_series_major@_@joy_series_minor@_la_LDFLAGS += \
+libjoybubbles_@series_major@_@series_minor@_la_LDFLAGS += \
 	$(DBUS_LIBS)
 pkginclude_HEADERS += \
 	dbus.h

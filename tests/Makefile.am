@@ -13,7 +13,7 @@ INCLUDES += $(DBUS_CFLAGS)
 endif
 # add libraries
 LIBS = \
-	$(top_builddir)/joy/libjoybubbles-$(joy_series).la
+	$(top_builddir)/joy/libjoybubbles-$(series).la
 # add unit tests
 bin_PROGRAMS = \
 	joybubbles-test \

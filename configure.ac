@@ -5,16 +5,16 @@
 AC_PREREQ([2.59])
 # Library versioning
 # Making releases:
-#	joy_micro_version += 1
-#	joy_interface_age += 1
+#	micro_version += 1
+#	interface_age += 1
 # If functions have been added or backward-compatibility has been broken:
-#	joy_interface_age = 0
-m4_define([joy_major_version], [0])
-m4_define([joy_minor_version], [2])
-m4_define([joy_micro_version], [1])
-m4_define([joy_interface_age], [0])
+#	interface_age = 0
+m4_define([major_version], [0])
+m4_define([minor_version], [2])
+m4_define([micro_version], [1])
+m4_define([interface_age], [0])
 # Initialize autoconf & automake
-AC_INIT([Joybubbles], [joy_major_version.joy_minor_version.joy_micro_version],
+AC_INIT([Joybubbles], [major_version.minor_version.micro_version],
     [https://inv-lx-apps.echostar.com/mantis/], [joybubbles])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.9 foreign -Wno-portability])
@@ -37,62 +37,68 @@ AX_TRY_CFLAGS([-Wstrict-prototypes], [AX_CFLAGS([-Wstrict-prototypes])])
 AX_TRY_CFLAGS([-Wcast-align], [AX_CFLAGS([-Wcast-align])])
 AX_TRY_CFLAGS([-fno-common], [AX_CFLAGS([-fno-common])])
 # Pkg-config versioning
-joy_series_major=joy_major_version
-joy_series_minor=joy_minor_version
-joy_series=$joy_series_major.$joy_series_minor
-AC_SUBST([joy_series_major])
-AC_SUBST([joy_series_minor])
-AC_SUBST([joy_series])
+series_major=major_version
+series_minor=minor_version
+series=$series_major.$series_minor
+AC_SUBST([series_major])
+AC_SUBST([series_minor])
+AC_SUBST([series])
 # Libtool versioning
-LT_CURRENT=m4_eval(100 * joy_minor_version + joy_micro_version - joy_interface_age)
-LT_REVISION=joy_interface_age
-LT_AGE=m4_eval(m4_eval(100 * joy_minor_version + joy_micro_version) - joy_interface_age)
+LT_CURRENT=m4_eval(100 * minor_version + micro_version - interface_age)
+LT_REVISION=interface_age
+LT_AGE=m4_eval(m4_eval(100 * minor_version + micro_version) - interface_age)
 AC_SUBST([LT_CURRENT])
 AC_SUBST([LT_REVISION])
 AC_SUBST([LT_AGE])
 # Checks for dependencies
-AC_SUBST([joy_requires]) # pkg-config Requires
-AC_SUBST([joy_requires_private]) # pkg-config Requires.private
-joy_glib_minimum_version=2.24
-joy_glib_version="glib-2.0 >= $joy_glib_minimum_version"
-AC_SUBST([joy_glib_version])
-PKG_CHECK_MODULES([GLIB], [$joy_glib_version])
-joy_gobject_version="gobject-2.0 >= $joy_glib_minimum_version"
-AC_SUBST([joy_gobject_version])
-PKG_CHECK_MODULES([GOBJECT], [$joy_gobject_version])
-joy_cairo_version="cairo >= 1.10"
-AC_SUBST([joy_cairo_version])
-PKG_CHECK_MODULES([CAIRO], [$joy_cairo_version])
-joy_pango_minimum_version=1.28
-joy_pango_version="pango >= $joy_pango_minimum_version"
-AC_SUBST([joy_pango_version])
-PKG_CHECK_MODULES([PANGO], [$joy_pango_version])
-joy_pangocairo_version="pangocairo >= $joy_pango_minimum_version"
-AC_SUBST([joy_pangocairo_version])
-PKG_CHECK_MODULES([PANGOCAIRO], [$joy_pangocairo_version])
-joy_gdk_pixbuf_version="gdk-pixbuf-2.0"
-AC_SUBST([joy_gdk_pixbuf_version])
-PKG_CHECK_MODULES([GDK_PIXBUF], [$joy_gdk_pixbuf_version])
+AC_SUBST([requires]) # pkg-config Requires
+AC_SUBST([requires_private]) # pkg-config Requires.private
+glib_minimum_version=2.24
+glib_version="glib-2.0 >= $glib_minimum_version"
+AC_SUBST([glib_version])
+PKG_CHECK_MODULES([GLIB], [$glib_version])
+gobject_version="gobject-2.0 >= $glib_minimum_version"
+AC_SUBST([gobject_version])
+PKG_CHECK_MODULES([GOBJECT], [$gobject_version])
+cairo_version="cairo >= 1.10"
+AC_SUBST([cairo_version])
+PKG_CHECK_MODULES([CAIRO], [$cairo_version])
+pango_minimum_version=1.28
+pango_version="pango >= $pango_minimum_version"
+AC_SUBST([pango_version])
+PKG_CHECK_MODULES([PANGO], [$pango_version])
+pangocairo_version="pangocairo >= $pango_minimum_version"
+AC_SUBST([pangocairo_version])
+PKG_CHECK_MODULES([PANGOCAIRO], [$pangocairo_version])
+gdk_pixbuf_version="gdk-pixbuf-2.0"
+AC_SUBST([gdk_pixbuf_version])
+PKG_CHECK_MODULES([GDK_PIXBUF], [$gdk_pixbuf_version])
 # Check for glib-genmarshal
 AC_ARG_VAR([GLIB_GENMARSHAL], [path to the glib-genmarshal(1) utility])
 AS_IF([test "x$GLIB_GENMARSHAL" = "x"],
-	[PKG_CHECK_EXISTS([$joy_glib_version],
-		[GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal $joy_glib_version`])])
+	[PKG_CHECK_EXISTS([$glib_version],
+		[GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal $glib_version`])])
 # Debug option
 AC_ARG_ENABLE([debug],
 	[AS_HELP_STRING([--enable-debug],
-		[enable runtime debugging features @<:@default=no@:>@])],
-	[AC_DEFINE([JOY_DEBUG], [1], [Define to 1 to enable runtime debugging.])
+		[enable runtime debugging features @<:@default=no@:>@])],,
+	[enable_debug=no])
+AS_IF([test "x$enable_debug" = "xno"],
+	[AC_DEFINE([G_DISABLE_CHECKS], [1],
+		[Define to 1 to disable parameter checks.])
+	AC_DEFINE([NDEBUG], [1],
+		[Define to 1 if debugging is not enabled.])],
+	[AC_DEFINE([JOY_DEBUG], [1],
+		[Define to 1 to enable runtime debugging.])
 	AX_TRY_CFLAGS([-g], [AX_CFLAGS([-g])])
-	joy_debug=yes],
-	[AC_DEFINE([G_DISABLE_CHECKS], [1], [Define to 1 to disable parameter checks.])
-	AX_TRY_CFLAGS([-Werror], [AX_CFLAGS([-Werror])])
-	joy_debug=no])
+	AX_TRY_CFLAGS([-Werror], [AX_CFLAGS([-Werror])])])
 # Tracing option
 AC_ARG_ENABLE([trace],
 	[AS_HELP_STRING([--enable-trace],
-		[enable runtime tracing features @<:@default=no@:>@])],
-	[AS_IF([test "x$joy_debug" = "xno"],
+		[enable runtime tracing features @<:@default=no@:>@])],,
+	[enable_trace=no])
+AS_IF([test "x$enable_trace" = "xno"],,
+	[AS_IF([test "x$enable_debug" = "xno"],
 		[AC_MSG_ERROR([Debugging must be enabled to enable tracing.])])
 	AC_SEARCH_LIBS([bfd_openr], [bfd],
 		[AC_MSG_WARN([Linking with libbfd makes this library subject to the terms of the GPL!])
@@ -106,78 +112,44 @@ AC_ARG_ENABLE([trace],
 	AX_TRY_CFLAGS([-finstrument-functions],
 		[AX_CFLAGS([-finstrument-functions])],
 		[AC_MSG_ERROR(['-finstrument-functions' is required for tracing.])])
-	AC_DEFINE([JOY_TRACE], [1], [Define to 1 to enable runtime tracing.])
-	joy_trace=yes],
-	[joy_trace=no])
+	AC_DEFINE([JOY_TRACE], [1], [Define to 1 to enable runtime tracing.])])
 # Default refresh rate
 AC_ARG_ENABLE([refresh],
 	[AS_HELP_STRING([--enable-refresh],
 		[set the screen refresh rate @<:@default=60.0@:>@])],,
-	[enableval=60.0])
-AC_CACHE_CHECK([for screen refresh rate], [joy_cv_enable_refresh],
-	[joy_cv_enable_refresh=$enableval])
-AC_DEFINE_UNQUOTED([JOY_REFRESH], [$joy_cv_enable_refresh],
+	[enable_refresh=60.0])
+AC_DEFINE_UNQUOTED([JOY_REFRESH], [$enable_refresh],
 	[Set to the default refresh rate.])
 # D-Bus
 AC_ARG_ENABLE([dbus],
 	[AS_HELP_STRING([--enable-dbus],
 		[enable D-Bus bindings @<:@default=auto@:>@])],,
-	[enableval=auto])
-AC_CACHE_CHECK([for D-Bus support], [joy_cv_with_dbus],
-	[joy_cv_with_dbus="$enableval"])
-AS_IF([test "x$joy_cv_with_dbus" != "xno"],
-	[joy_dbus_version="dbus-1 >= 1.1" # should be 1.2
-	PKG_CHECK_MODULES([DBUS], [$joy_dbus_version],
+	[enable_dbus=auto])
+AS_IF([test "x$enable_dbus" != "xno"],
+	[dbus_version="dbus-1 >= 1.1" # should be 1.2
+	PKG_CHECK_MODULES([DBUS], [$dbus_version],
 		[AC_DEFINE([JOY_HAVE_DBUS], [1],
 			[Define to 1 if D-Bus is available.])
-		joy_requires+="$joy_dbus_version "
-		joy_dbus=yes],
-		[joy_dbus=no])],
-	[joy_dbus=no])
-AM_CONDITIONAL([JOY_DBUS], [test "x$joy_dbus" = "xyes"])
+		requires+="$dbus_version "
+		enable_dbus=yes],
+		[enable_dbus=no])],
+	[enable_dbus=no])
+AM_CONDITIONAL([JOY_DBUS], [test "x$enable_dbus" = "xyes"])
 # Platform option
-joy_platform_default=x11
 AC_ARG_WITH([platform],
 	[AS_HELP_STRING([--with-platform],
-		[select the graphics platform @<:@x11|gfx3d@:>@])],
-	[AS_CASE([$withval],
-	[x11|gfx3d],
-		[joy_platform=$withval],
-	[*],
-		[AC_MSG_WARN([Unknown platform selected @<:@$withval:>@, defaulting to @<:@$joy_platform_default@:>@])
-		joy_platform=$joy_platform_default])],
-	[joy_platform=$joy_platform_default])
-AC_DEFINE_UNQUOTED([JOY_PLATFORM], ["$joy_platform"],
-	[Define to the platform.])
-AC_SUBST([joy_platform])
-# Easing support
-AC_ARG_ENABLE([easing],
-	[AS_HELP_STRING([--disable-easing],
-		[disable easing support for animation tweening])],
-	[joy_easing=$enableval],
-	[joy_easing=yes])
-AS_IF([test "x$joy_easing" = "xyes"],
-	[AC_DEFINE([JOY_ENABLE_EASING], [1],
-	[Define to 1 to enable easing functions.])])
-# Native language support
-AC_ARG_ENABLE([nls],
-	[AS_HELP_STRING([--enable-nls],
-		[enable native language support @<:@default=no@:>@])],
-	[joy_nls=$enableval],
-	[joy_nls=no])
-AS_IF([test "x$joy_nls" = "xyes"],
-	[AC_DEFINE([ENABLE_NLS], [1], [Define to 1 to enable i18n.])
-	AC_CHECK_FUNCS([bind_textdomain_codeset])])
-# Platform-specific setup
-AS_CASE([$joy_platform],
+		[select the graphics platform @<:@x11|gfx3d@:>@])],,
+	[AC_MSG_WARN([Unknown platform selected @<:@$with_platform:>@, defaulting to @<:@$x11@:>@])
+	with_platform=x11])
+AC_SUBST([with_platform])
+AS_CASE([$with_platform],
 [x11],
-	[joy_requires_private+="x11 "
+	[requires_private+="x11 "
 	PKG_CHECK_MODULES([X11], [x11])
 	PKG_CHECK_MODULES([CAIRO_XLIB], [cairo-xlib])
 	PKG_CHECK_MODULES([XCOMPOSITE], [xcomposite],
 		[AC_DEFINE([HAVE_XCOMPOSITE], [1],
-			[Define to 1 if XComposite is available.])],
-		[:])
+			[Define to 1 if XComposite is available.])])
 	AC_DEFINE([JOY_PLATFORM_X11], [1],
 		[Define to 1 if the platform is x11.])],
 [gfx3d],
@@ -195,7 +167,23 @@ AS_CASE([$joy_platform],
 	AC_DEFINE([JOY_PLATFORM_GFX3D], [1],
 		[Define to 1 if the platform is gfx3d.])],
 [*],
-	[:])
+	[AC_MSG_ERROR([Unknown platform @<:@$with_platform:>@])])
+# Easing support
+AC_ARG_ENABLE([easing],
+	[AS_HELP_STRING([--disable-easing],
+		[disable easing support for animation tweening])],,
+	[enable_easing=yes])
+AS_IF([test "x$enable_easing" = "xyes"],
+	[AC_DEFINE([JOY_ENABLE_EASING], [1],
+	[Define to 1 to enable easing functions.])])
+# Native language support
+AC_ARG_ENABLE([nls],
+	[AS_HELP_STRING([--enable-nls],
+		[enable native language support @<:@default=no@:>@])],,
+	[enable_nls=no])
+AS_IF([test "x$enable_nls" = "xyes"],
+	[AC_DEFINE([ENABLE_NLS], [1], [Define to 1 to enable i18n.])
+	AC_CHECK_FUNCS([bind_textdomain_codeset])])
 # Set input files for keysyms
 JOY_KEYSYMDEF_H="http://cgit.freedesktop.org/xorg/proto/x11proto/plain/keysymdef.h"
 JOY_XF86KEYSYMS_H="http://cgit.freedesktop.org/xorg/proto/x11proto/plain/XF86keysym.h"
@@ -204,7 +192,7 @@ AC_ARG_VAR([JOY_KEYSYM_INPUT_H],
 AS_IF([test "x$JOY_KEYSYM_INPUT_H" = "x"],
 	[JOY_KEYSYM_INPUT_H="$JOY_KEYSYMDEF_H $JOY_XF86KEYSYMS_H"])
 # Configure theme directory
-themedir="\$(libdir)/joybubbles-$joy_series/theme"
+themedir="\$(libdir)/joybubbles-$series/theme"
 AC_SUBST(themedir)
 # GLib configuration
 AC_DEFINE_UNQUOTED([G_LOG_DOMAIN], ["$PACKAGE_NAME"],
@@ -246,10 +234,10 @@ AC_MSG_RESULT([
 $PACKAGE_NAME build options:
 	Host: $host
 	Version: $VERSION
-	Platform: $joy_platform
-	D-Bus: $joy_dbus
-	Easing Functions: $joy_easing
-	Native Language Support: $joy_nls
-	Debugging: $joy_debug
-	Tracing: $joy_trace
+	Platform: $with_platform
+	D-Bus: $enable_dbus
+	Easing Functions: $enable_easing
+	Native Language Support: $enable_nls
+	Debugging: $enable_debug
+	Tracing: $enable_trace
 ])

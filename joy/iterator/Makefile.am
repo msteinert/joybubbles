@@ -16,7 +16,7 @@ libjoybubbles_iterator_la_CFLAGS = \
 	$(GOBJECT_CFLAGS) \
 	$(PANGO_CFLAGS)
 # install development headers
-pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/iterator
+pkgincludedir = $(includedir)/joybubbles-$(series)/joy/iterator
 pkginclude_HEADERS = \
 	hash.h \
 	list.h \

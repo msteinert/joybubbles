@@ -11,7 +11,7 @@ libjoybubbles_source_la_CFLAGS = \
 	$(GOBJECT_CFLAGS)
 libjoybubbles_source_la_LDFLAGS =
 # install development headers
-pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/source
+pkgincludedir = $(includedir)/joybubbles-$(series)/joy/source
 pkginclude_HEADERS =
 if JOY_DBUS
 libjoybubbles_source_la_SOURCES  += dbus.c

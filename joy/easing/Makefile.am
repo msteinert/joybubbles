@@ -17,7 +17,7 @@ libjoybubbles_easing_la_CFLAGS = \
 	-I$(top_srcdir) \
 	$(GLIB_CFLAGS)
 # install development headers
-pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/easing
+pkgincludedir = $(includedir)/joybubbles-$(series)/joy/easing
 pkginclude_HEADERS = \
 	back.h \
 	bounce.h \

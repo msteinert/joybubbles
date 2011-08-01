@@ -15,6 +15,6 @@ libdefault_la_CFLAGS = \
 	$(CAIRO_CFLAGS) \
 	$(PANGO_CFLAGS)
 # install development headers
-pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/theme
+pkgincludedir = $(includedir)/joybubbles-$(series)/joy/theme
 pkginclude_HEADERS = \
 	default.h

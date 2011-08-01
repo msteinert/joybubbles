@@ -17,7 +17,7 @@ libjoybubbles_animation_la_CFLAGS = \
 	$(CAIRO_CFLAGS) \
 	$(PANGO_CFLAGS)
 # install development headers
-pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/animation
+pkgincludedir = $(includedir)/joybubbles-$(series)/joy/animation
 pkginclude_HEADERS = \
 	fade.h \
 	move.h \

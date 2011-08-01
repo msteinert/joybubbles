@@ -13,7 +13,7 @@ libjoybubbles_filter_la_CFLAGS = \
 	$(CAIRO_CFLAGS) \
 	$(PANGO_CFLAGS)
 # install development headers
-pkgincludedir = $(includedir)/joybubbles-$(joy_series)/joy/filter
+pkgincludedir = $(includedir)/joybubbles-$(series)/joy/filter
 pkginclude_HEADERS = \
 	gaussian.h \
 	types.h
