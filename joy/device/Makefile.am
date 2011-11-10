@@ -25,3 +25,4 @@ pkginclude_HEADERS = \
 	keysym.h \
 	mouse.h \
 	types.h
+

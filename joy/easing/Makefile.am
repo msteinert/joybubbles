@@ -27,3 +27,4 @@ pkginclude_HEADERS = \
 	exponential.h \
 	polynomial.h \
 	sinusoidal.h
+

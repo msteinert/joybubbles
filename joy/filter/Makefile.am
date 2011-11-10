@@ -17,3 +17,4 @@ pkgincludedir = $(includedir)/joybubbles-$(series)/joy/filter
 pkginclude_HEADERS = \
 	gaussian.h \
 	types.h
+

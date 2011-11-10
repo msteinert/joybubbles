@@ -32,3 +32,4 @@ CLEANFILES = \
 	joybubbles.xml
 DISTCLEANFILES = \
 	joybubbles.html core core.*
+

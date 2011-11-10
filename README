@@ -86,3 +86,4 @@ up click events for buttons. The mouse provides the following event types:
 4.2 Keyboard
 
 The keyboard device provides down and up key events.
+

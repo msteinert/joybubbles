@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -136,3 +136,4 @@ main(int argc, char *argv[])
 	g_test_add(CLASS "/004", gpointer, NULL, NULL, test_004, NULL);
 	return g_test_run();
 }
+

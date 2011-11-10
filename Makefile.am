@@ -3,3 +3,4 @@
 
 SUBDIRS = joy pkgconfig tests
 ACLOCAL_AMFLAGS = -I m4
+

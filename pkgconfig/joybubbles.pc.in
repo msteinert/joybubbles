@@ -10,3 +10,4 @@ Requires: @glib_version@ @gobject_version@ @cairo_version@ @pango_version@ @requ
 Requires.private: @pangocairo_version@ @gdk_pixbuf_version@ @requires_private@
 Libs: -L${libdir} -ljoybubbles-@series@
 CFlags: -I${includedir}
+
