@@ -1,12 +1,12 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
  *
  * The following applies to the algorithms used in this file:
  *
- * Open source under the BSD License. 
+ * Open source under the BSD License.
  *
  * Copyright 2001 Robert Penner
  * All rights reserved.
@@ -43,7 +43,7 @@ gdouble
 joy_easing_in_out_quad(gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
-	time *= 2.; 
+	time *= 2.;
 	if (time < 1.) {
 		return time * time / 2.;
 	} else {
@@ -222,3 +222,4 @@ joy_easing_out_in_quint(gpointer self, gdouble time)
 	return time;
 #endif
 }
+

@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -18,3 +18,4 @@ joy_boolean_accumulator(GSignalInvocationHint *hint, GValue *accu,
 	g_value_set_boolean(accu, ready);
 	return ready ? FALSE : TRUE;
 }
+

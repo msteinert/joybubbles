@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -79,3 +79,4 @@ joy_easing_cosine_curve(gpointer self G_GNUC_UNUSED, gdouble time)
 G_END_DECLS
 
 #endif // JOY_EASING_CURVE_H
+

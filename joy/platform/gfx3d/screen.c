@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -335,7 +335,7 @@ submit(JoyScreen *self)
 #if !CAIRO_HAS_GFX3D_SURFACE
 		GFX3D_Display_Cache_Flush(priv->display);
 #endif // !CAIRO_HAS_GFX3D_SURFACE
-		GFX3D_NATIVE_Display display = 
+		GFX3D_NATIVE_Display display =
 			GFX3D_Display_Get_NATIVE_Display(priv->display);
 		GFX3D_NATIVE_Surface surface =
 			GFX3D_Display_FrameBuffer_Get_NATIVE_Surface(
@@ -717,3 +717,4 @@ joy_gfx3d_screen_lower_window(JoyScreen *self, JoyBubble *window)
 	}
 	g_queue_push_tail_link(priv->windows, node);
 }
+

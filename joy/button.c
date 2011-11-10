@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -299,3 +299,4 @@ joy_button_get_text(const JoyBubble *self)
 	struct Private *priv = GET_PRIVATE(self);
 	return priv->label ? joy_label_get_text(priv->label) : NULL;
 }
+

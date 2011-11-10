@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -161,12 +161,12 @@ joy_x11_application_class_init(JoyX11ApplicationClass *klass)
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 
-JoyApplication * 
-joy_platform_application_new(void) 
-{ 
+JoyApplication *
+joy_platform_application_new(void)
+{
 	return g_object_new(JOY_TYPE_X11_APPLICATION,
-			NULL); 
-} 
+			NULL);
+}
 
 Display *
 joy_x11_application_get_display(JoyApplication *self)
@@ -225,3 +225,4 @@ joy_x11_application_get_keyboard(JoyApplication *self)
 	g_return_val_if_fail(JOY_IS_X11_APPLICATION(self), NULL);
 	return GET_PRIVATE(self)->keyboard;
 }
+

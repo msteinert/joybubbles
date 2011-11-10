@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -204,7 +204,7 @@ error:
 	} else {
 		priv->surface = NULL;
 		priv->width = 0;
-		priv->height = 0; 
+		priv->height = 0;
 	}
 	if (!joy_bubble_get_width(self) || !joy_bubble_get_height(self)) {
 		joy_bubble_resize(self, priv->width, priv->height);
@@ -384,3 +384,4 @@ joy_image_get_height(JoyBubble *self)
 	}
 	return priv->height;
 }
+

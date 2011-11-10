@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -122,9 +122,10 @@ joy_gfx3d_application_class_init(JoyGfx3dApplicationClass *klass)
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 
-JoyApplication * 
-joy_platform_application_new(void) 
-{ 
+JoyApplication *
+joy_platform_application_new(void)
+{
 	return g_object_new(JOY_TYPE_GFX3D_APPLICATION,
-			NULL); 
-} 
+			NULL);
+}
+

@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -72,3 +72,4 @@ joy_iterator_ptr_new(gconstpointer data);
 G_END_DECLS
 
 #endif // JOY_ITERATOR_PTR_H
+

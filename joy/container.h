@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -82,7 +82,7 @@ joy_container_get_type(void) G_GNUC_CONST;
  *
  * \return An iterator to the first child of \e self or NULL if \e self does
  *         not have any children.
- * 
+ *
  */
 G_GNUC_WARN_UNUSED_RESULT
 JoyIterator *
@@ -95,7 +95,7 @@ joy_container_begin(JoyBubble *self);
  *
  * \return An iterator to the last child of \e self or NULL if \e self does
  *         not have any children.
- * 
+ *
  */
 G_GNUC_WARN_UNUSED_RESULT
 JoyIterator *
@@ -122,3 +122,4 @@ joy_container_remove(JoyBubble *self, JoyBubble *child);
 G_END_DECLS
 
 #endif // JOY_CONTAINER_H
+

@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -94,7 +94,7 @@ joy_style_get_parent(JoyStyle *self);
  * \brief Set the font description for the specified style.
  *
  * \param self [in] A style object.
- * \param desc [in] The new font 
+ * \param desc [in] The new font
  */
 void
 joy_style_set_font_description(JoyStyle *self,
@@ -202,3 +202,4 @@ joy_style_draw_foreground(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
 G_END_DECLS
 
 #endif // JOY_STYLE_H
+

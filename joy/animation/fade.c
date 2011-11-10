@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -117,3 +117,4 @@ joy_animation_fade_set_alpha(JoyAnimation *self, gdouble alpha)
 	g_return_if_fail(JOY_IS_ANIMATION_FADE(self));
 	GET_PRIVATE(self)->alpha = CLAMP(alpha, 0., 1.);
 }
+

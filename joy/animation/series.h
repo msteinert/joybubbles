@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -79,3 +79,4 @@ joy_animation_series_add(JoyAnimation *self, JoyAnimation *child);
 G_END_DECLS
 
 #endif // JOY_ANIMATION_SERIES_H
+

@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -35,3 +35,4 @@ typedef struct JoyGfx3dWindow_ JoyGfx3dWindow;
 G_END_DECLS
 
 #endif // JOY_GFX3D_TYPES_H
+

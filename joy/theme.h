@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -68,7 +68,7 @@ joy_theme_get_type(void) G_GNUC_CONST;
  * The specified style will be returned for calls to joy_theme_get_style()
  * for widgets with a name or type that matches \e name.
  *
- * \param self [in] A theme object. 
+ * \param self [in] A theme object.
  * \param name [in] A widget type or name.
  * \param style [in] The style to specify for \e name.
  */
@@ -109,3 +109,4 @@ joy_theme_style_create(JoyStyle *self, JoyBubble *widget);
 G_END_DECLS
 
 #endif // JOY_THEME_H
+

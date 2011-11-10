@@ -1,5 +1,5 @@
 /* Copyright 2011 EchoStar Corporation
- * 
+ *
  * EchoStar Corporation
  * 100 Inverness Terrace East
  * Englewood, CO 80112
@@ -163,3 +163,4 @@ joy_x11_screen_cairo_surface_create(JoyScreen *self, Display *display,
 G_END_DECLS
 
 #endif // JOY_X11_SCREEN_H
+
