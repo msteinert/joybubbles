@@ -174,9 +174,10 @@ joy_animation_pause(JoyAnimation *self);
  * This function is only useful in screen implementations.
  *
  * \param self [in] An animation object.
+ * \param frame [in] Duration of the previous frame.
  */
 void
-joy_animation_frame(JoyAnimation *self);
+joy_animation_advance(JoyAnimation *self, gdouble frame);
 
 G_END_DECLS
 

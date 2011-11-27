@@ -262,9 +262,10 @@ joy_screen_in_animation(JoyScreen *self);
  * \brief Animate all windows on a given screen.
  *
  * \param self [in] A screen object.
+ * \param frame [in] Duration of the previous frame.
  */
 void
-joy_screen_animate(JoyScreen *self);
+joy_screen_animate(JoyScreen *self, gdouble frame);
 
 /**
  * \brief Draw all windows on a given screen.

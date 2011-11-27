@@ -16,7 +16,8 @@ LIBS = \
 	$(top_builddir)/joy/libjoybubbles-$(series).la
 # add unit tests
 bin_PROGRAMS = \
-	joybubbles-test \
+	joybubbles-test
+check_PROGRAMS = \
 	iterator-test
 TESTS = $(check_PROGRAMS)
 # add source files

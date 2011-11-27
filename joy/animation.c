@@ -41,8 +41,8 @@ static guint signals[SIGNAL_LAST] = { 0 };
 struct Private {
 	JoyBubble *widget;
 	JoyAnimationState state;
+	gdouble elapsed;
 	gdouble duration;
-	GTimer *timer;
 	gboolean looping;
 	gint loop;
 	gint count;
@@ -57,17 +57,6 @@ joy_animation_init(JoyAnimation *self)
 	struct Private *priv = GET_PRIVATE(self);
 	priv->state = JOY_ANIMATION_STOP;
 	priv->duration = .25;
-	priv->timer = g_timer_new();
-}
-
-static void
-finalize(GObject *base)
-{
-	struct Private *priv = GET_PRIVATE(base);
-	if (priv->timer) {
-		g_timer_destroy(priv->timer);
-	}
-	G_OBJECT_CLASS(joy_animation_parent_class)->finalize(base);
 }
 
 enum Properties {
@@ -102,7 +91,6 @@ static void
 joy_animation_class_init(JoyAnimationClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
-	object_class->finalize = finalize;
 	object_class->set_property = set_property;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	// JoyAnimation::start
@@ -211,9 +199,9 @@ joy_animation_start(JoyAnimation *self)
 				joy_screen_add_animation(screen, self);
 			}
 		}
-		g_timer_start(priv->timer);
 		g_signal_emit(self, signals[SIGNAL_START], 0, priv->widget);
 		priv->state = JOY_ANIMATION_START;
+		priv->elapsed = 0.;
 	}
 }
 
@@ -231,7 +219,6 @@ joy_animation_stop(JoyAnimation *self)
 		if (G_LIKELY(screen)) {
 			joy_screen_remove_animation(screen, self);
 		}
-		g_timer_stop(priv->timer);
 		g_signal_emit(self, signals[SIGNAL_STOP], 0, priv->widget);
 		priv->state = JOY_ANIMATION_STOP;
 	}
@@ -246,14 +233,13 @@ joy_animation_pause(JoyAnimation *self)
 		return;
 	}
 	if (JOY_ANIMATION_START == priv->state) {
-		g_timer_stop(priv->timer);
 		g_signal_emit(self, signals[SIGNAL_PAUSE], 0, priv->widget);
 		priv->state = JOY_ANIMATION_PAUSE;
 	}
 }
 
 void
-joy_animation_frame(JoyAnimation *self)
+joy_animation_advance(JoyAnimation *self, gdouble frame)
 {
 	g_return_if_fail(JOY_IS_ANIMATION(self));
 	struct Private *priv = GET_PRIVATE(self);
@@ -266,7 +252,8 @@ joy_animation_frame(JoyAnimation *self)
 	if (G_UNLIKELY(!priv->widget)) {
 		return;
 	}
-	gdouble elapsed = g_timer_elapsed(priv->timer, NULL) / priv->duration;
+	priv->elapsed += frame;
+	gdouble elapsed = priv->elapsed / priv->duration;
 	if (G_UNLIKELY(1. < elapsed)) {
 		elapsed = 1.;
 	}

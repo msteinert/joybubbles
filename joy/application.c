@@ -341,6 +341,7 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 		priv->status = EXIT_FAILURE;
 		goto exit;
 	}
+	gdouble frame = 0.;
 	gdouble elapsed = 0.;
 	gdouble ptime = priv->min;
 	while (!priv->quit) {
@@ -348,16 +349,19 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 			if (joy_screen_in_animation(screen)) {
 				elapsed = joy_sink_poll(priv->sink,
 						priv->frame - ptime);
+				frame = g_timer_elapsed(timer, NULL);
+				g_timer_start(timer);
+				joy_screen_animate(screen, frame);
 			} else {
 				elapsed = 0.;
 				joy_sink_wait(priv->sink,
 						priv->frame - priv->min);
+				g_timer_start(timer);
 			}
 		} else {
 			elapsed = 0.;
+			g_timer_start(timer);
 		}
-		g_timer_start(timer);
-		joy_screen_animate(screen);
 		joy_screen_draw(screen);
 		ptime = g_timer_elapsed(timer, NULL);
 		if (ptime + elapsed < priv->frame) {

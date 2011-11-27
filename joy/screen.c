@@ -229,15 +229,8 @@ joy_screen_cairo_surface_create(JoyScreen *self,
 		gint width, gint height)
 {
 	g_return_val_if_fail(JOY_IS_SCREEN(self), NULL);
-	cairo_surface_t *surface = JOY_SCREEN_GET_CLASS(self)->
+	return JOY_SCREEN_GET_CLASS(self)->
 		cairo_surface_create(self, width, height);
-	if (surface) {
-		cairo_t *cr = cairo_create(surface);
-		cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
-		cairo_paint(cr);
-		cairo_destroy(cr);
-	}
-	return surface;
 }
 
 void
@@ -294,13 +287,13 @@ joy_screen_in_animation(JoyScreen *self)
 
 JOY_GNUC_HOT
 void
-joy_screen_animate(JoyScreen *self)
+joy_screen_animate(JoyScreen *self, gdouble frame)
 {
 	g_return_if_fail(JOY_IS_SCREEN(self));
 	struct Private *priv = GET_PRIVATE(self);
 	for (gint i = 0; i < priv->animations->len; ++i) {
 		JoyAnimation *animation = priv->animations->pdata[i];
-		joy_animation_frame(animation);
+		joy_animation_advance(animation, frame);
 	}
 }
 
@@ -316,6 +309,7 @@ joy_screen_draw(JoyScreen *self)
 			joy_window_cairo_surface_create(window);
 		if (G_LIKELY(surface)) {
 			cairo_t *cr = cairo_create(surface);
+			cairo_surface_destroy(surface);
 			joy_bubble_draw(window, cr);
 			cairo_destroy(cr);
 		}
