@@ -30,4 +30,3 @@ joy_sketch_new(void)
 			"vertical-expand", TRUE,
 			NULL);
 }
-

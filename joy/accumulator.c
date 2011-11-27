@@ -18,4 +18,3 @@ joy_boolean_accumulator(GSignalInvocationHint *hint, GValue *accu,
 	g_value_set_boolean(accu, ready);
 	return ready ? FALSE : TRUE;
 }
-

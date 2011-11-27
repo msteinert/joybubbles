@@ -104,4 +104,3 @@ joy_label_get_justify(JoyBubble *self);
 G_END_DECLS
 
 #endif // JOY_LABEL_H
-

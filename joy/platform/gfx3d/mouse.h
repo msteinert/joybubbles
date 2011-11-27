@@ -72,4 +72,3 @@ joy_gfx3d_mouse_new(JoyScreen *screen);
 G_END_DECLS
 
 #endif // JOY_GFX3D_MOUSE_H
-

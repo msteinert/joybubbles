@@ -680,4 +680,3 @@ joy_bubble_damage(JoyBubble *self, gint x, gint y, gint width, gint height);
 G_END_DECLS
 
 #endif // JOY_BUBBLE_H
-

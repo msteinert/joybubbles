@@ -112,4 +112,3 @@ joy_x11_mouse_new(void)
 	return g_object_new(JOY_TYPE_X11_MOUSE,
 			NULL);
 }
-

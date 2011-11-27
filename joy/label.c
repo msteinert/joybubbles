@@ -313,4 +313,3 @@ joy_label_get_justify(JoyBubble *self)
 	g_return_val_if_fail(JOY_IS_BUBBLE(self), FALSE);
 	return GET_PRIVATE(self)->justify;
 }
-

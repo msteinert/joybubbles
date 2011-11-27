@@ -128,4 +128,3 @@ joy_platform_application_new(void)
 	return g_object_new(JOY_TYPE_GFX3D_APPLICATION,
 			NULL);
 }
-

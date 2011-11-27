@@ -272,4 +272,3 @@ joy_animation_advance(JoyAnimation *self, gdouble frame)
 		}
 	}
 }
-

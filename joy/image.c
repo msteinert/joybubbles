@@ -384,4 +384,3 @@ joy_image_get_height(JoyBubble *self)
 	}
 	return priv->height;
 }
-

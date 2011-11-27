@@ -190,4 +190,3 @@ joy_sink_wait(JoySink *self, gdouble seconds)
 	}
 	return elapsed;
 }
-

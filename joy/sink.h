@@ -117,4 +117,3 @@ joy_sink_wait(JoySink *self, gdouble seconds);
 G_END_DECLS
 
 #endif // JOY_SINK_H
-

@@ -170,4 +170,3 @@ joy_filter_gaussian_get_radius(JoyFilter *self)
 	g_return_val_if_fail(JOY_IS_FILTER_GAUSSIAN(self), 0.);
 	return GET_PRIVATE(self)->radius;
 }
-

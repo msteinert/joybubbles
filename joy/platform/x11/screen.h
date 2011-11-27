@@ -163,4 +163,3 @@ joy_x11_screen_cairo_surface_create(JoyScreen *self, Display *display,
 G_END_DECLS
 
 #endif // JOY_X11_SCREEN_H
-

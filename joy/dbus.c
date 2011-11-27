@@ -242,4 +242,3 @@ joy_dbus_get_connection(JoyDBus *self)
 	g_return_val_if_fail(JOY_IS_DBUS(self), NULL);
 	return GET_PRIVATE(self)->connection;
 }
-

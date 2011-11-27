@@ -121,4 +121,3 @@ joy_iterator_list_end(const GList *node)
 	}
 	return NULL;
 }
-

@@ -311,4 +311,3 @@ joy_screen_disable_mirroring(JoyScreen *self, JoyScreen *mirror,
 G_END_DECLS
 
 #endif // JOY_SCREEN_H
-

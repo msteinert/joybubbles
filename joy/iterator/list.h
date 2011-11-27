@@ -101,4 +101,3 @@ joy_iterator_list_end(const GList *node);
 G_END_DECLS
 
 #endif // JOY_ITERATOR_LIST_H
-

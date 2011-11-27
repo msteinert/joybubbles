@@ -204,4 +204,3 @@ joy_gfx3d_screen_lower_window(JoyScreen *self, JoyBubble *window);
 G_END_DECLS
 
 #endif // JOY_GFX3D_SCREEN_H
-

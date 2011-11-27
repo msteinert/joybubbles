@@ -405,4 +405,3 @@ joy_x11_window_submit(JoyBubble *self, Display *display)
 		XEmptyRegion(priv->region);
 	}
 }
-

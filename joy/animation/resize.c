@@ -138,4 +138,3 @@ joy_animation_resize_set_height(JoyAnimation *self, gint height)
 	g_return_if_fail(height >= 0);
 	GET_PRIVATE(self)->height = height;
 }
-

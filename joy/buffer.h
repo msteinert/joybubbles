@@ -95,4 +95,3 @@ joy_buffer_draw(JoyBuffer *self, JoyBubble *widget, guint id, cairo_t *cr,
 G_END_DECLS
 
 #endif // JOY_BUFFER_H
-

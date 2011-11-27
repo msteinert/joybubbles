@@ -63,4 +63,3 @@ joy_theme_default_new(void);
 G_END_DECLS
 
 #endif // JOY_THEME_DEFAULT_H
-

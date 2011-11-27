@@ -202,4 +202,3 @@ joy_style_draw_foreground(JoyStyle *self, JoyBubble *widget, cairo_t *cr);
 G_END_DECLS
 
 #endif // JOY_STYLE_H
-

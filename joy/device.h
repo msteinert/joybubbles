@@ -78,4 +78,3 @@ joy_device_get_screen(JoyDevice *self);
 G_END_DECLS
 
 #endif // JOY_DEVICE_H
-

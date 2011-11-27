@@ -80,4 +80,3 @@ joy_animation_fade_set_alpha(JoyAnimation *self, gdouble alpha);
 G_END_DECLS
 
 #endif // JOY_ANIMATION_FADE_H
-

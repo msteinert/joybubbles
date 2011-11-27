@@ -77,4 +77,3 @@ joy_easing_out_in_back(gpointer self, gdouble time)
 G_END_DECLS
 
 #endif // JOY_EASING_BACK_H
-

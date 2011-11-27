@@ -57,4 +57,3 @@ typedef struct JoyWindow_ JoyWindow;
 G_END_DECLS
 
 #endif // JOY_TYPES_H
-

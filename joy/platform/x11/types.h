@@ -35,4 +35,3 @@ typedef struct JoyX11Window_ JoyX11Window;
 G_END_DECLS
 
 #endif // JOY_X11_TYPES_H
-

@@ -112,4 +112,3 @@ joy_iterator_hash_begin(const GHashTable *hash)
 	}
 	return NULL;
 }
-

@@ -33,4 +33,3 @@ joy_iterator_queue_end(const GQueue *queue)
 	GList *node = g_queue_peek_tail_link((GQueue *)queue);
 	return G_LIKELY(node) ? joy_iterator_list_new(node) : NULL;
 }
-

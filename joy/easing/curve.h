@@ -79,4 +79,3 @@ joy_easing_cosine_curve(gpointer self G_GNUC_UNUSED, gdouble time)
 G_END_DECLS
 
 #endif // JOY_EASING_CURVE_H
-

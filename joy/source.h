@@ -199,4 +199,3 @@ joy_source_error(JoySource *self);
 G_END_DECLS
 
 #endif // JOY_SOURCE_H
-

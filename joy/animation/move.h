@@ -90,4 +90,3 @@ joy_animation_move_set_y(JoyAnimation *self, gint y);
 G_END_DECLS
 
 #endif // JOY_ANIMATION_MOVE_H
-

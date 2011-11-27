@@ -299,4 +299,3 @@ joy_button_get_text(const JoyBubble *self)
 	struct Private *priv = GET_PRIVATE(self);
 	return priv->label ? joy_label_get_text(priv->label) : NULL;
 }
-

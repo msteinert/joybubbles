@@ -31,4 +31,3 @@ typedef struct JoyAnimationSeries_ JoyAnimationSeries;
 G_END_DECLS
 
 #endif // JOY_ANIMATION_TYPES_H
-

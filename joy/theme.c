@@ -173,4 +173,3 @@ joy_theme_style_create(JoyStyle *self, JoyBubble *widget)
 	g_return_val_if_fail(JOY_IS_BUBBLE(widget), NULL);
 	return JOY_THEME_GET_CLASS(self)->style_create(self, widget);
 }
-

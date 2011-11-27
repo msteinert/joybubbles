@@ -132,4 +132,3 @@ joy_x11_application_get_keyboard(JoyApplication *self);
 G_END_DECLS
 
 #endif // JOY_X11_APPLICATION_H
-

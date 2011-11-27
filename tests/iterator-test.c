@@ -136,4 +136,3 @@ main(int argc, char *argv[])
 	g_test_add(CLASS "/004", gpointer, NULL, NULL, test_004, NULL);
 	return g_test_run();
 }
-

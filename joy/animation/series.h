@@ -79,4 +79,3 @@ joy_animation_series_add(JoyAnimation *self, JoyAnimation *child);
 G_END_DECLS
 
 #endif // JOY_ANIMATION_SERIES_H
-

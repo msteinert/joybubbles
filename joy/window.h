@@ -114,4 +114,3 @@ joy_window_lower(JoyBubble *self);
 G_END_DECLS
 
 #endif // JOY_WINDOW_H
-

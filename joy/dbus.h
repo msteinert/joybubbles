@@ -66,4 +66,3 @@ joy_dbus_get_connection(JoyDBus *self);
 G_END_DECLS
 
 #endif // JOY_DBUS_H
-

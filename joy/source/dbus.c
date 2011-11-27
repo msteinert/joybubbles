@@ -127,4 +127,3 @@ joy_source_dbus_new(JoyDBus *dbus, DBusWatch *watch)
 			"watch", watch,
 			NULL);
 }
-

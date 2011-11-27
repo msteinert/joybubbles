@@ -41,4 +41,3 @@ joy_iterator_ptr_new(gconstpointer data)
 	}
 	return NULL;
 }
-

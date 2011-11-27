@@ -141,4 +141,3 @@ joy_buffer_draw(JoyBuffer *self, JoyBubble *widget, guint id, cairo_t *cr,
 		cairo_paint_with_alpha(cr, self->alpha);
 	}
 }
-

@@ -717,4 +717,3 @@ joy_gfx3d_screen_lower_window(JoyScreen *self, JoyBubble *window)
 	}
 	g_queue_push_tail_link(priv->windows, node);
 }
-

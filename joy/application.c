@@ -431,4 +431,3 @@ __cyg_profile_func_exit(void *this_fn, void *call_site)
 #endif // HAVE_BFD
 }
 #endif // JOY_TRACE
-

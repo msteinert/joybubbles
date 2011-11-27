@@ -92,4 +92,3 @@ joy_style_default_button_new(JoyBubble *button)
 	return g_object_new(JOY_TYPE_STYLE_DEFAULT_BUTTON,
 			NULL);
 }
-

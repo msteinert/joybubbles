@@ -311,4 +311,3 @@ joy_gfx3d_window_submit(JoyBubble *self, GFX3D_NATIVE_Display display,
 	}
 	cairo_region_subtract(priv->expose, priv->expose);
 }
-

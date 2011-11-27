@@ -25,4 +25,3 @@ typedef struct JoyDeviceMouse_ JoyDeviceMouse;
 G_END_DECLS
 
 #endif // JOY_DEVICE_TYPES_H
-

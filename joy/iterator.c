@@ -109,4 +109,3 @@ joy_iterator_item(JoyIterator *self)
 	g_return_val_if_fail(JOY_IS_ITERATOR(self), NULL);
 	return GET_PRIVATE(self)->item;
 }
-

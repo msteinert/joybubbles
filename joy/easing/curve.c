@@ -81,4 +81,3 @@ joy_easing_cosine_curve(gpointer self, gdouble time)
 	return time;
 #endif
 }
-

@@ -61,4 +61,3 @@ joy_gfx3d_application_get_type(void) G_GNUC_CONST;
 G_END_DECLS
 
 #endif // JOY_GFX3D_APPLICATION_H
-

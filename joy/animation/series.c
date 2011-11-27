@@ -108,4 +108,3 @@ joy_animation_series_add(JoyAnimation *self, JoyAnimation *child)
 	g_signal_connect(child, "stop", G_CALLBACK(on_stop), self);
 	g_queue_push_tail(GET_PRIVATE(self)->children, g_object_ref(child));
 }
-

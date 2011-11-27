@@ -31,4 +31,3 @@ joy_gfx3d_keyboard_new(JoyScreen *screen)
 			"screen", screen,
 			NULL);
 }
-

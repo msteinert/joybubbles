@@ -292,4 +292,3 @@ joy_marshal_BOOLEAN__POINTER (GClosure     *closure,
 
   g_value_set_boolean (return_value, v_return);
 }
-

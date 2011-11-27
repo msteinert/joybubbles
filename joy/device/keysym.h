@@ -2303,4 +2303,3 @@ typedef enum {
 G_END_DECLS
 
 #endif // JOY_DEVICE_KEYSYM_H
-

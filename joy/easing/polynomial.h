@@ -213,4 +213,3 @@ joy_easing_out_in_quint(gpointer self G_GNUC_UNUSED, gdouble time)
 G_END_DECLS
 
 #endif // JOY_EASING_POLYNOMIAL_H
-

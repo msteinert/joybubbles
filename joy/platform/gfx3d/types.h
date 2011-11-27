@@ -35,4 +35,3 @@ typedef struct JoyGfx3dWindow_ JoyGfx3dWindow;
 G_END_DECLS
 
 #endif // JOY_GFX3D_TYPES_H
-

@@ -222,4 +222,3 @@ joy_easing_out_in_quint(gpointer self, gdouble time)
 	return time;
 #endif
 }
-

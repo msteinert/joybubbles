@@ -70,4 +70,3 @@ joy_source_dbus_new(JoyDBus *dbus, DBusWatch *watch);
 G_END_DECLS
 
 #endif // JOY_SOURCE_DBUS_H
-

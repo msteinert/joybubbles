@@ -327,4 +327,3 @@ joy_style_draw_foreground(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
 		klass->draw_foreground(self, widget, cr);
 	}
 }
-

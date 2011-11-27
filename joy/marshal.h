@@ -72,4 +72,3 @@ extern void joy_marshal_BOOLEAN__POINTER (GClosure     *closure,
 G_END_DECLS
 
 #endif /* __joy_marshal_MARSHAL_H__ */
-

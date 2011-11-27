@@ -68,4 +68,3 @@ joy_sketch_new(void);
 G_END_DECLS
 
 #endif // JOY_SKETCH_H
-

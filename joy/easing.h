@@ -23,4 +23,3 @@
 #include <joy/easing/sinusoidal.h>
 
 #endif // JOY_EASING_H
-

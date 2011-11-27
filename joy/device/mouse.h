@@ -215,4 +215,3 @@ joy_device_mouse_visible(JoyDevice *self);
 G_END_DECLS
 
 #endif // JOY_DEVICE_MOUSE_H
-

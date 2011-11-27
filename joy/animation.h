@@ -182,4 +182,3 @@ joy_animation_advance(JoyAnimation *self, gdouble frame);
 G_END_DECLS
 
 #endif // JOY_ANIMATION_H
-

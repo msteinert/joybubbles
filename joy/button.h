@@ -92,4 +92,3 @@ joy_button_get_text(const JoyBubble *self);
 G_END_DECLS
 
 #endif // JOY_BUTTON_H
-

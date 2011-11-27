@@ -134,4 +134,3 @@ joy_animation_move_set_y(JoyAnimation *self, gint y)
 	g_return_if_fail(JOY_IS_ANIMATION_MOVE(self));
 	GET_PRIVATE(self)->y = y;
 }
-

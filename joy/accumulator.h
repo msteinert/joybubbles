@@ -28,4 +28,3 @@ joy_boolean_accumulator(GSignalInvocationHint *hint, GValue *accu,
 G_END_DECLS
 
 #endif // JOY_ACCUMULATOR_H
-

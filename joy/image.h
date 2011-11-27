@@ -111,4 +111,3 @@ joy_image_get_height(JoyBubble *self);
 G_END_DECLS
 
 #endif // JOY_IMAGE_H
-

@@ -129,4 +129,3 @@ joy_device_keyboard_get_mouse(JoyDevice *self);
 G_END_DECLS
 
 #endif // JOY_DEVICE_KEYBOARD_H
-

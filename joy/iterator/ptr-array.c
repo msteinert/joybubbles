@@ -118,4 +118,3 @@ joy_iterator_ptr_array_end(const GPtrArray *array)
 {
 	return joy_iterator_ptr_array_new(array, array->len - 1);
 }
-

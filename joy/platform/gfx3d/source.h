@@ -73,4 +73,3 @@ joy_gfx3d_source_new(JoyApplication *app);
 G_END_DECLS
 
 #endif // JOY_GFX3D_SOURCE_H
-

@@ -153,4 +153,3 @@ joy_window_lower(JoyBubble *self)
 	g_return_if_fail(JOY_IS_WINDOW(self));
 	JOY_WINDOW_GET_CLASS(self)->raise(self);
 }
-

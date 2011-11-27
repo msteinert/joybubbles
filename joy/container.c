@@ -284,4 +284,3 @@ joy_container_remove(JoyBubble *self, JoyBubble *child)
 	g_return_if_fail(joy_bubble_get_parent(child) == self);
 	g_signal_emit(self, signals[SIGNAL_REMOVE], 0, child);
 }
-

@@ -102,4 +102,3 @@ joy_iterator_item(JoyIterator *self);
 G_END_DECLS
 
 #endif // JOY_ITERATOR_H
-

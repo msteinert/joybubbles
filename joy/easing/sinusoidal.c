@@ -67,4 +67,3 @@ joy_easing_out_in_sine(gpointer self, gdouble time)
 	return time;
 #endif
 }
-

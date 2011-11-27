@@ -33,4 +33,3 @@
 #include <joy/window.h>
 
 #endif // JOY_BUBBLES_H
-

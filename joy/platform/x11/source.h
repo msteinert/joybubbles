@@ -74,4 +74,3 @@ joy_x11_source_new(JoyApplication *display);
 G_END_DECLS
 
 #endif // JOY_X11_SOURCE_H
-

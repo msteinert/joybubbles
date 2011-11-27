@@ -109,4 +109,3 @@ joy_theme_style_create(JoyStyle *self, JoyBubble *widget);
 G_END_DECLS
 
 #endif // JOY_THEME_H
-

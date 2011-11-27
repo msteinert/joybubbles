@@ -369,4 +369,3 @@ joy_x11_source_new(JoyApplication *app)
 			"application", app,
 			NULL);
 }
-

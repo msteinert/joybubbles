@@ -79,4 +79,3 @@ joy_animation_parallel_add(JoyAnimation *self, JoyAnimation *child);
 G_END_DECLS
 
 #endif // JOY_ANIMATION_PARALLEL_H
-

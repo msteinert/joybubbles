@@ -90,4 +90,3 @@ joy_animation_resize_set_height(JoyAnimation *self, gint height);
 G_END_DECLS
 
 #endif // JOY_ANIMATION_RESIZE_H
-

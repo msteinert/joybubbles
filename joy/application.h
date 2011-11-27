@@ -233,4 +233,3 @@ joy_application_run(JoyApplication *self, JoyScreen *screen);
 G_END_DECLS
 
 #endif // JOY_APPLICATION_H
-

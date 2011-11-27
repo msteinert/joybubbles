@@ -544,4 +544,3 @@ joy_gfx3d_source_new(JoyApplication *app)
 			"application", app,
 			NULL);
 }
-

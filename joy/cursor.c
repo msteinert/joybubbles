@@ -137,4 +137,3 @@ joy_cursor_get_hotspot_y(JoyCursor *self)
 	g_return_val_if_fail(JOY_IS_CURSOR(self), 0);
 	return GET_PRIVATE(self)->y;
 }
-

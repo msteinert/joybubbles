@@ -29,4 +29,3 @@ typedef struct JoyIteratorPtrArray_ JoyIteratorPtrArray;
 G_END_DECLS
 
 #endif // JOY_ITERATOR_TYPES_H
-

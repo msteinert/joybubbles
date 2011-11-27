@@ -23,4 +23,3 @@ typedef struct JoyFilterGaussian_ JoyFilterGaussian;
 G_END_DECLS
 
 #endif // JOY_FILTER_TYPES_H
-

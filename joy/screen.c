@@ -342,4 +342,3 @@ joy_screen_disable_mirroring(JoyScreen *self, JoyScreen *mirror,
 	return JOY_SCREEN_GET_CLASS(self)->
 		disable_mirroring(self, mirror, error);
 }
-

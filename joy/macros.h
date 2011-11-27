@@ -70,4 +70,3 @@ G_STMT_START { \
 G_END_DECLS
 
 #endif // JOY_MACROS_H
-

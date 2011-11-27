@@ -86,4 +86,3 @@ joy_gfx3d_window_submit(JoyBubble *self, GFX3D_NATIVE_Display display,
 G_END_DECLS
 
 #endif // JOY_GFX3D_WINDOW_H
-

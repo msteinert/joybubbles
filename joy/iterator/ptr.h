@@ -72,4 +72,3 @@ joy_iterator_ptr_new(gconstpointer data);
 G_END_DECLS
 
 #endif // JOY_ITERATOR_PTR_H
-

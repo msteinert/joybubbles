@@ -33,4 +33,3 @@ joy_error_quark(void);
 G_END_DECLS
 
 #endif // JOY_ERROR_H
-

@@ -75,4 +75,3 @@ joy_iterator_hash_begin(const GHashTable *hash);
 G_END_DECLS
 
 #endif // JOY_ITERATOR_HASH_H
-

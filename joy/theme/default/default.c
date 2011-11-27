@@ -67,4 +67,3 @@ joy_theme_default_new(void)
 	return g_object_new(JOY_TYPE_THEME_DEFAULT,
 			NULL);
 }
-

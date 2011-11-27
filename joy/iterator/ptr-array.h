@@ -102,4 +102,3 @@ joy_iterator_ptr_array_end(const GPtrArray *array);
 G_END_DECLS
 
 #endif // JOY_ITERATOR_PTR_ARRAY_H
-

@@ -225,4 +225,3 @@ joy_x11_application_get_keyboard(JoyApplication *self)
 	g_return_val_if_fail(JOY_IS_X11_APPLICATION(self), NULL);
 	return GET_PRIVATE(self)->keyboard;
 }
-

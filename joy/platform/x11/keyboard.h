@@ -70,4 +70,3 @@ joy_x11_keyboard_new(void);
 G_END_DECLS
 
 #endif // JOY_X11_KEYBOARD_H
-

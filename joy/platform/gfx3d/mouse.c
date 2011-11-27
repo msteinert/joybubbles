@@ -100,4 +100,3 @@ joy_gfx3d_mouse_new(JoyScreen *screen)
 			"screen", screen,
 			NULL);
 }
-

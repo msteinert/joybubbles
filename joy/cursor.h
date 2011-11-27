@@ -114,4 +114,3 @@ joy_cursor_get_hotspot_y(JoyCursor *self);
 G_END_DECLS
 
 #endif // JOY_CURSOR_H
-

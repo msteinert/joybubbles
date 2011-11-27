@@ -88,4 +88,3 @@ joy_easing_out_in_back(gpointer self, gdouble time)
 	return time;
 #endif
 }
-

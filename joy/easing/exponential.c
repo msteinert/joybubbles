@@ -79,4 +79,3 @@ joy_easing_out_in_exp(gpointer self, gdouble time)
 	return time;
 #endif
 }
-

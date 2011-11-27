@@ -63,4 +63,3 @@ joy_style_default_button_new(JoyBubble *button);
 G_END_DECLS
 
 #endif // JOY_STYLE_DEFAULT_BUTTON_H
-

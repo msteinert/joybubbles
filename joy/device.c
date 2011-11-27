@@ -106,4 +106,3 @@ joy_device_get_screen(JoyDevice *self)
 	g_return_val_if_fail(JOY_IS_DEVICE(self), NULL);
 	return GET_PRIVATE(self)->screen;
 }
-

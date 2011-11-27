@@ -66,4 +66,3 @@ joy_iterator_queue_end(const GQueue *queue);
 G_END_DECLS
 
 #endif // JOY_ITERATOR_QUEUE_H
-

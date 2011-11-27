@@ -157,4 +157,3 @@ joy_device_mouse_visible(JoyDevice *self)
 	g_return_val_if_fail(JOY_IS_DEVICE_MOUSE(self), FALSE);
 	return JOY_DEVICE_MOUSE_GET_CLASS(self)->visible(self);
 }
-

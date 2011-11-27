@@ -136,12 +136,14 @@ on_clicked(JoyBubble *button, struct ButtonDown *down)
 	joy_animation_pause(down->fade);
 	gdouble alpha;
 	if (down->in) {
-		joy_animation_set_easing(down->fade, joy_easing_out_cubic,
+		joy_animation_set_easing(down->fade,
+				joy_easing_out_cubic,
 				NULL);
 		down->in = FALSE;
 		alpha = 0.;
 	} else {
-		joy_animation_set_easing(down->fade, joy_easing_in_cubic,
+		joy_animation_set_easing(down->fade,
+				joy_easing_in_cubic,
 				NULL);
 		down->in = TRUE;
 		alpha = 1.;
@@ -396,4 +398,3 @@ error:
 	status = EXIT_FAILURE;
 	goto exit;
 }
-

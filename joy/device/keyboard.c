@@ -183,4 +183,3 @@ joy_device_keyboard_modifier_state(JoyDevice *self)
 	g_return_val_if_fail(JOY_IS_DEVICE_KEYBOARD(self), JOY_MOD_NONE);
 	return GET_PRIVATE(self)->modifier;
 }
-

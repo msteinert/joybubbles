@@ -89,4 +89,3 @@ joy_filter_gaussian_get_radius(JoyFilter *self);
 G_END_DECLS
 
 #endif // JOY_FILTER_GAUSSIAN_H
-

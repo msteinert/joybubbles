@@ -99,4 +99,3 @@ joy_easing_out_in_bounce(gpointer self, gdouble time)
 	return time;
 #endif
 }
-

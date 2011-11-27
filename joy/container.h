@@ -122,4 +122,3 @@ joy_container_remove(JoyBubble *self, JoyBubble *child);
 G_END_DECLS
 
 #endif // JOY_CONTAINER_H
-

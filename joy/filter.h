@@ -77,4 +77,3 @@ joy_filter_apply(JoyFilter *self, JoyBubble *widget, cairo_t *cr);
 G_END_DECLS
 
 #endif // JOY_FILTER_H
-
