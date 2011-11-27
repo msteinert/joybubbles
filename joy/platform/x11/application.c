@@ -9,6 +9,7 @@
 #include "config.h"
 #endif
 #include "joy/iterator/ptr-array.h"
+#include "joy/macros.h"
 #include "joy/platform/x11/application.h"
 #include "joy/platform/x11/keyboard.h"
 #include "joy/platform/x11/mouse.h"
@@ -147,6 +148,34 @@ begin(JoyApplication *self)
 	return NULL;
 }
 
+static gboolean
+arg_display_cb(const gchar *key, const gchar *value, gpointer self)
+{
+	JOY_UNIMPLEMENTED;
+	return TRUE;
+}
+
+static const GOptionEntry const x11_arguments[] = {
+	{ "x11-display", '\0', 0,
+		G_OPTION_ARG_CALLBACK, arg_display_cb,
+		N_("The X11 display to use"),
+		N_("NAME") },
+	{ NULL }
+};
+
+static void
+add_options(JoyApplication *self, GOptionContext *context)
+{
+	GOptionGroup *group = g_option_group_new("x11",
+			Q_("X11 Options"),
+			Q_("Show X11 Options"), self, NULL);
+	if (!group) {
+		return;
+	}
+	g_option_group_add_entries(group, x11_arguments);
+	g_option_context_add_group(context, group);
+}
+
 static void
 joy_x11_application_class_init(JoyX11ApplicationClass *klass)
 {
@@ -158,6 +187,7 @@ joy_x11_application_class_init(JoyX11ApplicationClass *klass)
 	application_class->get_screen = get_screen;
 	application_class->get_default_screen = get_default_screen;
 	application_class->begin = begin;
+	application_class->add_options = add_options;
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 

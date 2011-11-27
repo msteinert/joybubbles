@@ -57,6 +57,9 @@ typedef JoyScreen *
 typedef JoyIterator *
 (*JoyApplicationBegin)(JoyApplication *self);
 
+typedef void
+(*JoyApplicationAddOptions)(JoyApplication *self, GOptionContext *context);
+
 struct JoyApplicationClass_ {
 	/*< private >*/
 	GObjectClass parent_class;
@@ -64,6 +67,7 @@ struct JoyApplicationClass_ {
 	JoyApplicationGetScreen get_screen;
 	JoyApplicationGetDefaultScreen get_default_screen;
 	JoyApplicationBegin begin;
+	JoyApplicationAddOptions add_options;
 };
 
 G_GNUC_NO_INSTRUMENT

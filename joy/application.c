@@ -75,11 +75,18 @@ finalize(GObject *base)
 }
 
 static void
+add_options(JoyApplication *self, GOptionContext *context)
+{
+	// Do nothing
+}
+
+static void
 joy_application_class_init(JoyApplicationClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->dispose = dispose;
 	object_class->finalize = finalize;
+	klass->add_options = add_options;
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 
@@ -222,7 +229,6 @@ post_hook(GOptionContext *context, GOptionGroup *group, gpointer data,
 static GOptionGroup *
 get_option_group(JoyApplication *self)
 {
-	g_return_val_if_fail(JOY_IS_APPLICATION(self), NULL);
 	struct Private *priv = GET_PRIVATE(self);
 	if (!priv->initialized) {
 		setlocale(LC_ALL, "");
@@ -280,6 +286,7 @@ joy_application_add_options(JoyApplication *self,
 	if (G_LIKELY(group)) {
 		g_option_context_add_group(context, group);
 	}
+	JOY_APPLICATION_GET_CLASS(self)->add_options(self, context);
 }
 
 JoyScreen *
