@@ -8,8 +8,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "joy/error.h"
 #include "joy/iterator/ptr-array.h"
-#include "joy/macros.h"
 #include "joy/platform/x11/application.h"
 #include "joy/platform/x11/keyboard.h"
 #include "joy/platform/x11/mouse.h"
@@ -32,6 +32,7 @@ struct Private {
 	GHashTable *xids;
 	JoyDevice *keyboard;
 	JoyDevice *mouse;
+	gchar *display_name;
 };
 
 static void
@@ -47,36 +48,6 @@ destroy(gpointer object)
 {
 	g_object_run_dispose(G_OBJECT(object));
 	g_object_unref(object);
-}
-
-static void
-constructed(GObject *base)
-{
-	JoyApplication *self = JOY_APPLICATION(base);
-	struct Private *priv = GET_PRIVATE(base);
-	priv->display = XOpenDisplay(NULL);
-	if (G_UNLIKELY(!priv->display)) {
-		goto exit;
-	}
-	// initialize screen(s)
-	priv->screens = g_ptr_array_sized_new(ScreenCount(priv->display));
-	if (priv->screens) {
-		g_ptr_array_set_free_func(priv->screens, destroy);
-		for (gint n = 0; n < ScreenCount(priv->display); ++n) {
-			JoyBubble *screen = joy_x11_screen_new(self, n);
-			g_ptr_array_add(priv->screens, screen);
-		}
-	}
-	joy_application_add_source(self, joy_x11_source_new(self));
-	priv->keyboard = joy_x11_keyboard_new();
-	priv->mouse = joy_x11_mouse_new();
-	joy_device_keyboard_set_mouse(priv->keyboard, priv->mouse);
-	joy_device_mouse_set_keyboard(priv->mouse, priv->keyboard);
-exit:
-	if (G_OBJECT_CLASS(joy_x11_application_parent_class)->constructed) {
-		G_OBJECT_CLASS(joy_x11_application_parent_class)->
-			constructed(base);
-	}
 }
 
 static void
@@ -110,6 +81,9 @@ finalize(GObject *base)
 	}
 	if (priv->display) {
 		XCloseDisplay(priv->display);
+	}
+	if (priv->display_name) {
+		g_free(priv->display_name);
 	}
 	G_OBJECT_CLASS(joy_x11_application_parent_class)->finalize(base);
 }
@@ -151,17 +125,59 @@ begin(JoyApplication *self)
 static gboolean
 arg_display_cb(const gchar *key, const gchar *value, gpointer self)
 {
-	JOY_UNIMPLEMENTED;
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->display_name) {
+		g_free(priv->display_name);
+	}
+	priv->display_name = g_strdup(value);
 	return TRUE;
 }
 
 static const GOptionEntry const x11_arguments[] = {
 	{ "x11-display", '\0', 0,
 		G_OPTION_ARG_CALLBACK, arg_display_cb,
-		N_("The X11 display to use"),
+		N_("The X display to use"),
 		N_("NAME") },
 	{ NULL }
 };
+
+static gboolean
+post_hook(GOptionContext *context, GOptionGroup *group, gpointer self,
+		GError **error)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (priv->display) {
+		return TRUE;
+	}
+	const gchar *display_name = NULL;
+	if (priv->display_name) {
+		display_name = priv->display_name;
+	} else if (g_getenv("DISPLAY")) {
+		display_name = g_getenv("DISPLAY");
+	}
+	priv->display = XOpenDisplay(display_name);
+	if (G_UNLIKELY(!priv->display)) {
+		g_set_error(error, JOY_ERROR, JOY_ERROR_FAILURE,
+				"x11: Failed to open display '%s'",
+				display_name);
+		return FALSE;
+	}
+	// initialize screen(s)
+	priv->screens = g_ptr_array_sized_new(ScreenCount(priv->display));
+	if (priv->screens) {
+		g_ptr_array_set_free_func(priv->screens, destroy);
+		for (gint n = 0; n < ScreenCount(priv->display); ++n) {
+			JoyBubble *screen = joy_x11_screen_new(self, n);
+			g_ptr_array_add(priv->screens, screen);
+		}
+	}
+	joy_application_add_source(self, joy_x11_source_new(self));
+	priv->keyboard = joy_x11_keyboard_new();
+	priv->mouse = joy_x11_mouse_new();
+	joy_device_keyboard_set_mouse(priv->keyboard, priv->mouse);
+	joy_device_mouse_set_keyboard(priv->mouse, priv->keyboard);
+	return TRUE;
+}
 
 static void
 add_options(JoyApplication *self, GOptionContext *context)
@@ -172,6 +188,7 @@ add_options(JoyApplication *self, GOptionContext *context)
 	if (!group) {
 		return;
 	}
+	g_option_group_set_parse_hooks(group, NULL, post_hook);
 	g_option_group_add_entries(group, x11_arguments);
 	g_option_context_add_group(context, group);
 }
@@ -180,7 +197,6 @@ static void
 joy_x11_application_class_init(JoyX11ApplicationClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
-	object_class->constructed = constructed;
 	object_class->dispose = dispose;
 	object_class->finalize = finalize;
 	JoyApplicationClass *application_class = JOY_APPLICATION_CLASS(klass);
