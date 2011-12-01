@@ -474,8 +474,8 @@ joy_gfx3d_screen_cairo_surface_create(JoyScreen *self, GFX3D_Image image)
 	g_return_val_if_fail(image, NULL);
 	struct Private *priv = GET_PRIVATE(self);
 #if CAIRO_HAS_GFX3D_SURFACE
-	cairo_surface_t *surface = cairo_gfx3d_surface_create(priv->display,
-			image, CAIRO_FORMAT_ARGB32);
+	cairo_surface_t *surface =
+		cairo_gfx3d_surface_create(priv->display, image);
 	cairo_status_t status = cairo_surface_status(surface);
 	if (G_UNLIKELY(CAIRO_STATUS_SUCCESS != status)) {
 		return NULL;
