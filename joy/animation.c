@@ -32,7 +32,7 @@ enum Signals {
 	SIGNAL_START,
 	SIGNAL_STOP,
 	SIGNAL_PAUSE,
-	SIGNAL_FRAME,
+	SIGNAL_ADVANCE,
 	SIGNAL_LAST
 };
 
@@ -114,11 +114,11 @@ joy_animation_class_init(JoyAnimationClass *klass)
 			G_STRUCT_OFFSET(JoyAnimationClass, pause),
 			NULL, NULL, joy_marshal_VOID__OBJECT, G_TYPE_NONE,
 			1, G_TYPE_OBJECT);
-	// JoyAnimation::frame
-	signals[SIGNAL_FRAME] =
-		g_signal_new(g_intern_static_string("frame"),
+	// JoyAnimation::advance
+	signals[SIGNAL_ADVANCE] =
+		g_signal_new(g_intern_static_string("advance"),
 			G_OBJECT_CLASS_TYPE(klass), G_SIGNAL_RUN_FIRST,
-			G_STRUCT_OFFSET(JoyAnimationClass, frame),
+			G_STRUCT_OFFSET(JoyAnimationClass, advance),
 			NULL, NULL, joy_marshal_VOID__OBJECT_DOUBLE,
 			G_TYPE_NONE, 2, G_TYPE_OBJECT, G_TYPE_DOUBLE);
 	g_object_class_install_property(object_class, PROP_WIDGET,
@@ -257,7 +257,7 @@ joy_animation_advance(JoyAnimation *self, gdouble frame)
 	if (G_UNLIKELY(1. < elapsed)) {
 		elapsed = 1.;
 	}
-	g_signal_emit(self, signals[SIGNAL_FRAME], 0, priv->widget,
+	g_signal_emit(self, signals[SIGNAL_ADVANCE], 0, priv->widget,
 			priv->function
 			? priv->function(priv->object, elapsed)
 			: elapsed);

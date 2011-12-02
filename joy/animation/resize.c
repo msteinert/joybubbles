@@ -80,7 +80,7 @@ stop(JoyAnimation *self, JoyBubble *widget)
 }
 
 static void
-frame(JoyAnimation *self, JoyBubble *widget, gdouble percent)
+advance(JoyAnimation *self, JoyBubble *widget, gdouble percent)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	gint width = priv->start_width +
@@ -98,7 +98,7 @@ joy_animation_resize_class_init(JoyAnimationResizeClass *klass)
 	JoyAnimationClass *animation_class = JOY_ANIMATION_CLASS(klass);
 	animation_class->start = start;
 	animation_class->stop = stop;
-	animation_class->frame = frame;
+	animation_class->advance = advance;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	g_object_class_install_property(object_class, PROP_WIDTH,
 		g_param_spec_int("width", Q_("Width"),

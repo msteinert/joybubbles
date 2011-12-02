@@ -61,7 +61,7 @@ typedef void
 (*JoyAnimationPause)(JoyAnimation *self, JoyBubble *widget);
 
 typedef void
-(*JoyAnimationFrame)(JoyAnimation *self, JoyBubble *widget, gdouble percent);
+(*JoyAnimationAdvance)(JoyAnimation *self, JoyBubble *widget, gdouble percent);
 
 struct JoyAnimationClass_ {
 	/*< private >*/
@@ -70,7 +70,7 @@ struct JoyAnimationClass_ {
 	JoyAnimationStart start;
 	JoyAnimationStop stop;
 	JoyAnimationPause pause;
-	JoyAnimationFrame frame;
+	JoyAnimationAdvance advance;
 };
 
 G_GNUC_NO_INSTRUMENT

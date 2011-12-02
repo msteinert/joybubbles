@@ -77,7 +77,7 @@ stop(JoyAnimation *self, JoyBubble *widget)
 }
 
 static void
-frame(JoyAnimation *self, JoyBubble *widget, gdouble percent)
+advance(JoyAnimation *self, JoyBubble *widget, gdouble percent)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	gdouble alpha = priv->start_alpha +
@@ -93,7 +93,7 @@ joy_animation_fade_class_init(JoyAnimationFadeClass *klass)
 	JoyAnimationClass *animation_class = JOY_ANIMATION_CLASS(klass);
 	animation_class->start = start;
 	animation_class->stop = stop;
-	animation_class->frame = frame;
+	animation_class->advance = advance;
 	g_type_class_add_private(klass, sizeof(struct Private));
 	g_object_class_install_property(object_class, PROP_ALPHA,
 		g_param_spec_double("alpha", Q_("Alpha"),
