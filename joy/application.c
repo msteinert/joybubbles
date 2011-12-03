@@ -17,6 +17,7 @@
 #include "joy/source.h"
 #include "joy/theme.h"
 #include "joy/theme/default/default.h"
+#include "joy/timer.h"
 #include <locale.h>
 #include <stdlib.h>
 
@@ -36,8 +37,6 @@ struct Private {
 	gboolean quit;
 	gchar *name;
 	gint status;
-	gdouble frame;
-	gdouble min;
 };
 
 static void
@@ -47,8 +46,6 @@ joy_application_init(JoyApplication *self)
 	struct Private *priv = GET_PRIVATE(self);
 	priv->sink = joy_sink_new();
 	priv->status = EXIT_SUCCESS;
-	priv->frame = 1. / JOY_REFRESH;
-	priv->min = priv->frame / 3.;
 }
 
 static void
@@ -171,33 +168,7 @@ joy_application_get_theme(JoyApplication *self)
 	return GET_PRIVATE(self)->theme;
 }
 
-void
-joy_application_set_refresh(JoyApplication *self, gdouble refresh)
-{
-	g_return_if_fail(JOY_IS_APPLICATION(self));
-	struct Private *priv = GET_PRIVATE(self);
-	priv->frame = 1. / refresh;
-	priv->min = priv->frame / 3.;
-}
-
-static gboolean
-arg_refresh_cb(const gchar *key, const gchar *value, gpointer self)
-{
-	errno = 0;
-	double refresh = g_ascii_strtod(value, NULL);
-	if (errno) {
-		g_message(Q_("%s: not a valid refresh rate"), value);
-		return FALSE;
-	}
-	joy_application_set_refresh(self, refresh);
-	return TRUE;
-}
-
 static const GOptionEntry const joy_arguments[] = {
-	{ "joybubbles-refresh", '\0', 0,
-		G_OPTION_ARG_CALLBACK, arg_refresh_cb,
-		N_("The refresh rate [" G_STRINGIFY(JOY_REFRESH) " Hz]"),
-		N_("RATE") },
 	{ NULL }
 };
 
@@ -343,44 +314,40 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 	g_return_val_if_fail(JOY_IS_APPLICATION(self), EXIT_FAILURE);
 	g_return_val_if_fail(JOY_IS_SCREEN(screen), EXIT_FAILURE);
 	struct Private *priv = GET_PRIVATE(self);
-	GTimer *timer = g_timer_new();
+	JoyTimer *timer = joy_timer_new();
 	if (G_UNLIKELY(!timer)) {
 		priv->status = EXIT_FAILURE;
 		goto exit;
 	}
-	gdouble frame = 0.;
-	gdouble elapsed = 0.;
-	gdouble ptime = priv->min;
+	joy_screen_draw(screen);
+	joy_screen_submit(screen);
+	gulong update = joy_screen_eta(screen) * .3 * 1000000L;
 	while (!priv->quit) {
-		if (ptime + elapsed < priv->frame) {
+		gulong elapsed = 0;
+		gulong eta = joy_screen_eta(screen);
+		gulong error = (gdouble)eta * .01;
+		joy_timer_start(timer);
+		while (elapsed + update + error < eta) {
+			glong timeout = -1;
 			if (joy_screen_in_animation(screen)) {
-				elapsed = joy_sink_poll(priv->sink,
-						priv->frame - ptime);
-				frame = g_timer_elapsed(timer, NULL);
-				g_timer_start(timer);
-				joy_screen_animate(screen, frame);
-			} else {
-				elapsed = 0.;
-				joy_sink_wait(priv->sink,
-						priv->frame - priv->min);
-				g_timer_start(timer);
+				timeout = eta - elapsed - update - error;
 			}
-		} else {
-			elapsed = 0.;
-			g_timer_start(timer);
+			joy_sink_poll(priv->sink, timeout);
+			elapsed = joy_timer_elapsed(timer);
+		}
+		joy_timer_start(timer);
+		if (joy_screen_in_animation(screen)) {
+			joy_screen_animate(screen);
 		}
 		joy_screen_draw(screen);
-		ptime = g_timer_elapsed(timer, NULL);
-		if (ptime + elapsed < priv->frame) {
+		update = joy_timer_elapsed(timer);
+		if (elapsed + update < eta) {
 			joy_screen_submit(screen);
-			if (ptime < priv->min) {
-				ptime = priv->min;
-			}
 		}
 	}
 exit:
 	if (timer) {
-		g_timer_destroy(timer);
+		joy_timer_destroy(timer);
 	}
 	gint status = priv->status;
 	g_object_run_dispose(G_OBJECT(self));

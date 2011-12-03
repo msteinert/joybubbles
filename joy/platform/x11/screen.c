@@ -14,6 +14,7 @@
 #include "joy/platform/x11/application.h"
 #include "joy/platform/x11/screen.h"
 #include "joy/platform/x11/window.h"
+#include "joy/timer.h"
 #ifdef HAVE_XCOMPOSITE
 #include <X11/extensions/Xcomposite.h>
 #endif
@@ -35,6 +36,9 @@ struct Private {
 	Colormap colormap;
 	gint depth;
 	gboolean composite;
+	JoyTimer *timer;
+	gulong submit;
+	gulong frame;
 };
 
 static void
@@ -53,6 +57,7 @@ joy_x11_screen_init(JoyX11Screen *self)
 	if (G_LIKELY(priv->windows)) {
 		g_ptr_array_set_free_func(priv->windows, destroy);
 	}
+	priv->timer = joy_timer_new();
 }
 
 static void
@@ -119,6 +124,16 @@ dispose(GObject *base)
 
 	}
 	G_OBJECT_CLASS(joy_x11_screen_parent_class)->dispose(base);
+}
+
+static void
+finalize(GObject *base)
+{
+	struct Private *priv = GET_PRIVATE(base);
+	if (priv->timer) {
+		joy_timer_destroy(priv->timer);
+	}
+	G_OBJECT_CLASS(joy_x11_screen_parent_class)->finalize(base);
 }
 
 static JoyIterator *
@@ -194,16 +209,25 @@ error:
 	return NULL;
 }
 
+static gulong
+eta(JoyScreen *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	return priv->frame - priv->submit;
+}
+
 JOY_GNUC_HOT
 static void
 submit(JoyScreen *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	Display *display = joy_x11_screen_get_display(self);
+	joy_timer_start(priv->timer);
 	for (gint i = 0; i < priv->windows->len; ++i) {
 		JoyBubble *window = priv->windows->pdata[i];
 		joy_x11_window_submit(window, display);
 	}
+	priv->submit = joy_timer_elapsed(priv->timer);
 }
 
 static gboolean
@@ -230,19 +254,21 @@ joy_x11_screen_class_init(JoyX11ScreenClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->constructed = constructed;
 	object_class->dispose = dispose;
+	object_class->finalize = finalize;
 	JoyScreenClass *screen_class = JOY_SCREEN_CLASS(klass);
 	screen_class->begin = begin;
 	screen_class->end = end;
 	screen_class->window_create = window_create;
 	screen_class->cairo_surface_type = cairo_surface_type;
 	screen_class->cairo_surface_create = cairo_surface_create;
+	screen_class->eta = eta;
 	screen_class->submit = submit;
 	screen_class->enable_mirroring = enable_mirroring;
 	screen_class->disable_mirroring = disable_mirroring;
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 
-JoyBubble *
+JoyScreen *
 joy_x11_screen_new(JoyApplication *app, guint id)
 {
 	g_return_val_if_fail(JOY_IS_X11_APPLICATION(app), NULL);
@@ -261,6 +287,13 @@ joy_x11_screen_new(JoyApplication *app, guint id)
 			"height", HeightOfScreen(screen),
 			"screen-id", id,
 			NULL);
+}
+
+void
+joy_x11_screen_set_refresh(JoyScreen *self, gdouble refresh)
+{
+	g_return_if_fail(JOY_IS_X11_SCREEN(self));
+	GET_PRIVATE(self)->frame = (1. / refresh) * 1000000L;
 }
 
 Screen *

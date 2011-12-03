@@ -69,8 +69,12 @@ joy_x11_screen_get_type(void) G_GNUC_CONST;
  */
 G_GNUC_INTERNAL
 G_GNUC_WARN_UNUSED_RESULT
-JoyBubble *
+JoyScreen *
 joy_x11_screen_new(JoyApplication *app, guint id);
+
+G_GNUC_INTERNAL
+void
+joy_x11_screen_set_refresh(JoyScreen *self, gdouble refresh);
 
 /**
  * \brief Get the X11 screen.

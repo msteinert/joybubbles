@@ -253,15 +253,15 @@ joy_animation_advance(JoyAnimation *self, gdouble frame)
 		return;
 	}
 	priv->elapsed += frame;
-	gdouble elapsed = priv->elapsed / priv->duration;
-	if (G_UNLIKELY(1. < elapsed)) {
-		elapsed = 1.;
+	gdouble percent = priv->elapsed / priv->duration;
+	if (G_UNLIKELY(1. < percent)) {
+		percent = 1.;
 	}
 	g_signal_emit(self, signals[SIGNAL_ADVANCE], 0, priv->widget,
 			priv->function
-			? priv->function(priv->object, elapsed)
-			: elapsed);
-	if (G_UNLIKELY(1. == elapsed)) {
+			? priv->function(priv->object, percent)
+			: percent);
+	if (G_UNLIKELY(1. == percent)) {
 		if (++priv->count >= priv->loop && !priv->looping) {
 			joy_animation_stop(self);
 		} else {

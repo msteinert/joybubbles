@@ -62,6 +62,9 @@ typedef JoyIterator *
 typedef JoyIterator *
 (*JoyScreenEnd)(JoyScreen *self);
 
+typedef gulong
+(*JoyScreenEta)(JoyScreen *self);
+
 typedef void
 (*JoyScreenSubmit)(JoyScreen *self);
 
@@ -77,6 +80,7 @@ struct JoyScreenClass_ {
 	JoyScreenCairoSurfaceCreate cairo_surface_create;
 	JoyScreenBegin begin;
 	JoyScreenEnd end;
+	JoyScreenEta eta;
 	JoyScreenSubmit submit;
 	JoyScreenMirror enable_mirroring;
 	JoyScreenMirror disable_mirroring;
@@ -262,10 +266,9 @@ joy_screen_in_animation(JoyScreen *self);
  * \brief Animate all windows on a given screen.
  *
  * \param self [in] A screen object.
- * \param frame [in] Duration of the previous frame.
  */
 void
-joy_screen_animate(JoyScreen *self, gdouble frame);
+joy_screen_animate(JoyScreen *self);
 
 /**
  * \brief Draw all windows on a given screen.
@@ -274,6 +277,9 @@ joy_screen_animate(JoyScreen *self, gdouble frame);
  */
 void
 joy_screen_draw(JoyScreen *self);
+
+gulong
+joy_screen_eta(JoyScreen *self);
 
 /**
  * \brief Submit a screen for updates.

@@ -91,28 +91,11 @@ joy_sink_remove(JoySink *self, JoySource *source);
  * This function processes events for the specified maximum number of seconds.
  *
  * \param self [in] An input sink object.
- * \param seconds [in] The number of seconds to process events.
- *
- * \return The number of elapsed seconds.
+ * \param msec [in] The number of microseconds to poll for.
  */
 G_GNUC_INTERNAL
-gdouble
-joy_sink_poll(JoySink *self, gdouble seconds);
-
-/**
- * \brief Wait for an event to become available.
- *
- * This function blocks until an event is available. Events will be processed
- * for the specified minimum number of seconds before returning.
- *
- * \param self [in] An input sink object.
- * \param seconds [in] The number of seconds to process events.
- *
- * \return The number of elapsed seconds.
- */
-G_GNUC_INTERNAL
-gdouble
-joy_sink_wait(JoySink *self, gdouble seconds);
+void
+joy_sink_poll(JoySink *self, glong msec);
 
 G_END_DECLS
 

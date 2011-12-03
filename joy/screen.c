@@ -33,6 +33,7 @@ struct Private {
 	gpointer cache[2];
 	gint id;
 	GPtrArray *animations;
+	GTimer *timer;
 };
 
 static void
@@ -42,6 +43,7 @@ joy_screen_init(JoyScreen *self)
 	struct Private *priv = GET_PRIVATE(self);
 	priv->focus = g_hash_table_new(g_direct_hash, g_direct_equal);
 	priv->animations = g_ptr_array_new_with_free_func(g_object_unref);
+	priv->timer = g_timer_new();
 }
 
 static void
@@ -65,6 +67,9 @@ finalize(GObject *base)
 	struct Private *priv = GET_PRIVATE(base);
 	if (priv->focus) {
 		g_hash_table_destroy(priv->focus);
+	}
+	if (priv->timer) {
+		g_timer_destroy(priv->timer);
 	}
 	G_OBJECT_CLASS(joy_screen_parent_class)->finalize(base);
 }
@@ -260,8 +265,11 @@ joy_screen_add_animation(JoyScreen *self, JoyAnimation *animation)
 {
 	g_return_if_fail(JOY_IS_SCREEN(self));
 	g_return_if_fail(JOY_IS_ANIMATION(animation));
-	g_ptr_array_add(GET_PRIVATE(self)->animations,
-			g_object_ref(animation));
+	struct Private *priv = GET_PRIVATE(self);
+	if (!priv->animations->len) {
+		g_timer_start(priv->timer);
+	}
+	g_ptr_array_add(priv->animations, g_object_ref(animation));
 }
 
 void
@@ -287,13 +295,15 @@ joy_screen_in_animation(JoyScreen *self)
 
 JOY_GNUC_HOT
 void
-joy_screen_animate(JoyScreen *self, gdouble frame)
+joy_screen_animate(JoyScreen *self)
 {
 	g_return_if_fail(JOY_IS_SCREEN(self));
 	struct Private *priv = GET_PRIVATE(self);
+	gdouble elapsed = g_timer_elapsed(priv->timer, NULL);
+	g_timer_start(priv->timer);
 	for (gint i = 0; i < priv->animations->len; ++i) {
 		JoyAnimation *animation = priv->animations->pdata[i];
-		joy_animation_advance(animation, frame);
+		joy_animation_advance(animation, elapsed);
 	}
 }
 
@@ -314,6 +324,13 @@ joy_screen_draw(JoyScreen *self)
 			cairo_destroy(cr);
 		}
 	}
+}
+
+gulong
+joy_screen_eta(JoyScreen *self)
+{
+	g_return_if_fail(JOY_IS_SCREEN(self));
+	return JOY_SCREEN_GET_CLASS(self)->eta(self);
 }
 
 void

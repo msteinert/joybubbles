@@ -8,6 +8,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <errno.h>
 #include "joy/error.h"
 #include "joy/iterator/ptr-array.h"
 #include "joy/platform/x11/application.h"
@@ -33,6 +34,7 @@ struct Private {
 	JoyDevice *keyboard;
 	JoyDevice *mouse;
 	gchar *display_name;
+	gdouble refresh;
 };
 
 static void
@@ -41,6 +43,7 @@ joy_x11_application_init(JoyX11Application *self)
 	self->priv = ASSIGN_PRIVATE(self);
 	struct Private *priv = GET_PRIVATE(self);
 	priv->xids = g_hash_table_new(g_direct_hash, g_direct_equal);
+	priv->refresh = JOY_REFRESH;
 }
 
 static void
@@ -133,11 +136,29 @@ arg_display_cb(const gchar *key, const gchar *value, gpointer self)
 	return TRUE;
 }
 
+static gboolean
+arg_refresh_cb(const gchar *key, const gchar *value, gpointer self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	errno = 0;
+	double refresh = g_ascii_strtod(value, NULL);
+	if (errno) {
+		g_message(Q_("%s: not a valid refresh rate"), value);
+		return FALSE;
+	}
+	priv->refresh = refresh;
+	return TRUE;
+}
+
 static const GOptionEntry const x11_arguments[] = {
 	{ "x11-display", '\0', 0,
 		G_OPTION_ARG_CALLBACK, arg_display_cb,
 		N_("The X display to use"),
 		N_("NAME") },
+	{ "x11-refresh", '\0', 0,
+		G_OPTION_ARG_CALLBACK, arg_refresh_cb,
+		N_("The refresh rate [" G_STRINGIFY(JOY_REFRESH) " Hz]"),
+		N_("RATE") },
 	{ NULL }
 };
 
@@ -167,7 +188,8 @@ post_hook(GOptionContext *context, GOptionGroup *group, gpointer self,
 	if (priv->screens) {
 		g_ptr_array_set_free_func(priv->screens, destroy);
 		for (gint n = 0; n < ScreenCount(priv->display); ++n) {
-			JoyBubble *screen = joy_x11_screen_new(self, n);
+			JoyScreen *screen = joy_x11_screen_new(self, n);
+			joy_x11_screen_set_refresh(screen, priv->refresh);
 			g_ptr_array_add(priv->screens, screen);
 		}
 	}
