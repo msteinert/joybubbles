@@ -46,21 +46,22 @@ joy_timer_start(JoyTimer *self)
 gulong
 joy_timer_elapsed(JoyTimer *self)
 {
-	struct timespec end, diff = self->start;
+	struct timespec end, start = self->start;
 	if (clock_gettime(CLOCK_MONOTONIC, &end)) {
 		g_message("clock_gettime: %s", g_strerror(errno));
+		return 0;
 	}
-	if (end.tv_nsec < diff.tv_nsec) {
-		gulong sec = (gulong)((diff.tv_nsec - end.tv_nsec) / (1E9 + 1));
-		diff.tv_sec += sec;
-		diff.tv_nsec = (gulong)(1E9 * sec);
+	if (end.tv_nsec < start.tv_nsec) {
+		int nsec = (start.tv_nsec - end.tv_nsec) / 1E9 + 1;
+		start.tv_nsec -= 1E9 * nsec;
+		start.tv_sec += nsec;
 	}
-	if (end.tv_nsec - diff.tv_nsec > 1E9) {
-		gulong sec = (end.tv_nsec - diff.tv_nsec) / 1E9;
-		diff.tv_sec -= sec;
-		diff.tv_nsec += (gulong)(1E9 * sec);
+	if (end.tv_nsec - start.tv_nsec > 1E9) {
+		int nsec = (end.tv_nsec - start.tv_nsec) / 1E9;
+		start.tv_nsec += 1E9 * nsec;
+		start.tv_sec -= nsec;
 	}
-	diff.tv_sec = end.tv_sec - diff.tv_sec;
-	diff.tv_nsec = end.tv_nsec - diff.tv_nsec;
-	return (diff.tv_sec * 1000000L) + (diff.tv_nsec * 0.001);
+	start.tv_sec = end.tv_sec - start.tv_sec;
+	start.tv_nsec = end.tv_nsec - start.tv_nsec;
+	return (start.tv_sec * 1000000) + (start.tv_nsec * 0.001);
 }

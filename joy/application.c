@@ -319,18 +319,15 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 		priv->status = EXIT_FAILURE;
 		goto exit;
 	}
-	joy_screen_draw(screen);
-	joy_screen_submit(screen);
-	gulong update = joy_screen_eta(screen) * .3 * 1000000L;
+	gulong update = joy_screen_eta(screen) * .9 * 1000000L;
 	while (!priv->quit) {
 		gulong elapsed = 0;
 		gulong eta = joy_screen_eta(screen);
-		gulong error = (gdouble)eta * .01;
 		joy_timer_start(timer);
-		while (elapsed + update + error < eta) {
+		while (elapsed + update < eta) {
 			glong timeout = -1;
 			if (joy_screen_in_animation(screen)) {
-				timeout = eta - elapsed - update - error;
+				timeout = eta - elapsed - update;
 			}
 			joy_sink_poll(priv->sink, timeout);
 			elapsed = joy_timer_elapsed(timer);
@@ -341,7 +338,11 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 		}
 		joy_screen_draw(screen);
 		update = joy_timer_elapsed(timer);
-		if (elapsed + update < eta) {
+		if (joy_screen_in_animation(screen)) {
+			if (elapsed + update < eta) {
+				joy_screen_submit(screen);
+			}
+		} else {
 			joy_screen_submit(screen);
 		}
 	}
