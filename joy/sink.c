@@ -121,7 +121,7 @@ joy_sink_remove(JoySink *self, JoySource *source)
 
 JOY_GNUC_HOT
 void
-joy_sink_poll(JoySink *self, glong msec)
+joy_sink_poll(JoySink *self, glong usec)
 {
 	g_return_val_if_fail(JOY_IS_SINK(self), 0.);
 	struct Private *priv = GET_PRIVATE(self);
@@ -136,8 +136,8 @@ joy_sink_poll(JoySink *self, glong msec)
 		return;
 	}
 	glong timeout = -1;
-	if (0 < msec) {
-		timeout = (glong)(msec * 0.001);
+	if (0 < usec) {
+		timeout = (glong)(usec * .001);
 	}
 	guint nfds = priv->fds->len;
 	GPollFD *fds = &g_array_index(priv->fds, GPollFD, 0);

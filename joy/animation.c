@@ -41,8 +41,8 @@ static guint signals[SIGNAL_LAST] = { 0 };
 struct Private {
 	JoyBubble *widget;
 	JoyAnimationState state;
-	gdouble elapsed;
-	gdouble duration;
+	gulong elapsed;
+	gulong duration;
 	gboolean looping;
 	gint loop;
 	gint count;
@@ -148,14 +148,14 @@ joy_animation_set_duration(JoyAnimation *self, gdouble seconds)
 {
 	g_return_if_fail(JOY_IS_ANIMATION(self));
 	g_return_if_fail(0. < seconds);
-	GET_PRIVATE(self)->duration = seconds;
+	GET_PRIVATE(self)->duration = seconds * 1000000;
 }
 
 gdouble
 joy_animation_get_duration(JoyAnimation *self)
 {
 	g_return_val_if_fail(JOY_IS_ANIMATION(self), 0.);
-	return GET_PRIVATE(self)->duration;
+	return GET_PRIVATE(self)->duration * .000001;
 }
 
 void
@@ -239,11 +239,11 @@ joy_animation_pause(JoyAnimation *self)
 }
 
 void
-joy_animation_advance(JoyAnimation *self, gdouble frame)
+joy_animation_advance(JoyAnimation *self, gulong frame)
 {
 	g_return_if_fail(JOY_IS_ANIMATION(self));
 	struct Private *priv = GET_PRIVATE(self);
-	if (G_UNLIKELY(0. == priv->duration)) {
+	if (G_UNLIKELY(0 == priv->duration)) {
 		return;
 	}
 	if (G_UNLIKELY(JOY_ANIMATION_START != priv->state)) {
@@ -253,7 +253,7 @@ joy_animation_advance(JoyAnimation *self, gdouble frame)
 		return;
 	}
 	priv->elapsed += frame;
-	gdouble percent = priv->elapsed / priv->duration;
+	gdouble percent = (gdouble)priv->elapsed / (gdouble)priv->duration;
 	if (G_UNLIKELY(1. < percent)) {
 		percent = 1.;
 	}

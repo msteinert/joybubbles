@@ -14,6 +14,7 @@
 #include "joy/macros.h"
 #include "joy/screen.h"
 #include "joy/theme.h"
+#include "joy/timer.h"
 #include "joy/window.h"
 
 G_DEFINE_ABSTRACT_TYPE(JoyScreen, joy_screen, G_TYPE_OBJECT)
@@ -33,7 +34,7 @@ struct Private {
 	gpointer cache[2];
 	gint id;
 	GPtrArray *animations;
-	GTimer *timer;
+	JoyTimer *timer;
 };
 
 static void
@@ -43,7 +44,7 @@ joy_screen_init(JoyScreen *self)
 	struct Private *priv = GET_PRIVATE(self);
 	priv->focus = g_hash_table_new(g_direct_hash, g_direct_equal);
 	priv->animations = g_ptr_array_new_with_free_func(g_object_unref);
-	priv->timer = g_timer_new();
+	priv->timer = joy_timer_new();
 }
 
 static void
@@ -69,7 +70,7 @@ finalize(GObject *base)
 		g_hash_table_destroy(priv->focus);
 	}
 	if (priv->timer) {
-		g_timer_destroy(priv->timer);
+		joy_timer_destroy(priv->timer);
 	}
 	G_OBJECT_CLASS(joy_screen_parent_class)->finalize(base);
 }
@@ -267,7 +268,7 @@ joy_screen_add_animation(JoyScreen *self, JoyAnimation *animation)
 	g_return_if_fail(JOY_IS_ANIMATION(animation));
 	struct Private *priv = GET_PRIVATE(self);
 	if (!priv->animations->len) {
-		g_timer_start(priv->timer);
+		joy_timer_start(priv->timer);
 	}
 	g_ptr_array_add(priv->animations, g_object_ref(animation));
 }
@@ -299,8 +300,8 @@ joy_screen_animate(JoyScreen *self)
 {
 	g_return_if_fail(JOY_IS_SCREEN(self));
 	struct Private *priv = GET_PRIVATE(self);
-	gdouble elapsed = g_timer_elapsed(priv->timer, NULL);
-	g_timer_start(priv->timer);
+	gdouble elapsed = joy_timer_elapsed(priv->timer);
+	joy_timer_start(priv->timer);
 	for (gint i = 0; i < priv->animations->len; ++i) {
 		JoyAnimation *animation = priv->animations->pdata[i];
 		joy_animation_advance(animation, elapsed);

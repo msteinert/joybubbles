@@ -43,6 +43,7 @@ struct Private {
 	GFX3D_Display cursor;
 	gint x, y, x_hot, y_hot;
 	gboolean moved;
+	gulong frame;
 };
 
 static void
@@ -310,6 +311,13 @@ error:
 	return NULL;
 }
 
+static gulong
+eta(JoyScreen *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	return CLAMP(priv->frame, 0, 16666);
+}
+
 JOY_GNUC_HOT
 static void
 submit(JoyScreen *self)
@@ -348,9 +356,11 @@ submit(JoyScreen *self)
 					priv->area);
 		}
 		// flip the display
-		GFX3D_Display_Show_Partial(priv->display,
+		GFX3D_Display_Show_TimingInfo info = { 0 };
+		GFX3D_Display_Show_Partial_Ext(priv->display,
 				(gpointer)priv->rects->data,
-				priv->rects->len, 1);
+				priv->rects->len, 1, &info);
+		priv->frame = info.uTimeMinCommitPartialToVSync;
 		g_array_set_size(priv->rects, 0);
 	} else {
 		if (priv->moved) {
@@ -424,6 +434,7 @@ joy_gfx3d_screen_class_init(JoyGfx3dScreenClass *klass)
 	screen_class->window_create = window_create;
 	screen_class->cairo_surface_type = cairo_surface_type;
 	screen_class->cairo_surface_create = cairo_surface_create;
+	screen_class->eta = eta;
 	screen_class->submit = submit;
 	screen_class->enable_mirroring = enable_mirroring;
 	screen_class->disable_mirroring = disable_mirroring;

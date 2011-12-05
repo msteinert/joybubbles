@@ -63,5 +63,5 @@ joy_timer_elapsed(JoyTimer *self)
 	}
 	start.tv_sec = end.tv_sec - start.tv_sec;
 	start.tv_nsec = end.tv_nsec - start.tv_nsec;
-	return (start.tv_sec * 1000000) + (start.tv_nsec * 0.001);
+	return (start.tv_sec * 1000000) + (start.tv_nsec * .001);
 }

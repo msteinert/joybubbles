@@ -177,7 +177,7 @@ joy_animation_pause(JoyAnimation *self);
  * \param frame [in] Duration of the previous frame.
  */
 void
-joy_animation_advance(JoyAnimation *self, gdouble frame);
+joy_animation_advance(JoyAnimation *self, gulong frame);
 
 G_END_DECLS
 

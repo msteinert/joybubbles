@@ -95,7 +95,7 @@ joy_sink_remove(JoySink *self, JoySource *source);
  */
 G_GNUC_INTERNAL
 void
-joy_sink_poll(JoySink *self, glong msec);
+joy_sink_poll(JoySink *self, glong usec);
 
 G_END_DECLS
 

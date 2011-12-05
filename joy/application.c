@@ -319,7 +319,7 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 		priv->status = EXIT_FAILURE;
 		goto exit;
 	}
-	gulong update = joy_screen_eta(screen) * .9 * 1000000L;
+	gulong update = G_MAXULONG;
 	while (!priv->quit) {
 		gulong elapsed = 0;
 		gulong eta = joy_screen_eta(screen);
@@ -345,6 +345,7 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 		} else {
 			joy_screen_submit(screen);
 		}
+		update += 500;
 	}
 exit:
 	if (timer) {

@@ -16,6 +16,7 @@
 #include "joy/platform/gfx3d/screen.h"
 #include "joy/platform/gfx3d/source.h"
 #include "joy/platform/gfx3d/window.h"
+#include "joy/timer.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -31,8 +32,8 @@ G_DEFINE_TYPE(JoyGfx3dSource, joy_gfx3d_source, JOY_TYPE_SOURCE)
 
 struct Private {
 	JoyApplication *app;
-	GTimer *timer;
 	JoyScreen *screen;
+	JoyTimer *timer;
 	gint tv;
 };
 
@@ -41,8 +42,8 @@ joy_gfx3d_source_init(JoyGfx3dSource *self)
 {
 	self->priv = ASSIGN_PRIVATE(self);
 	struct Private *priv = GET_PRIVATE(self);
-	priv->timer = g_timer_new();
-	g_timer_start(priv->timer);
+	priv->timer = joy_timer_new();
+	joy_timer_start(priv->timer);
 	priv->tv = IM_TV_NONE;
 }
 
@@ -64,7 +65,7 @@ finalize(GObject *base)
 	struct Private *priv = GET_PRIVATE(base);
 	close(joy_source_get_descriptor(self));
 	if (priv->timer) {
-		g_timer_destroy(priv->timer);
+		joy_timer_destroy(priv->timer);
 	}
 	G_OBJECT_CLASS(joy_gfx3d_source_parent_class)->finalize(base);
 }
@@ -498,7 +499,7 @@ input(JoySource *self)
 			g_message(Q_("gfx3d: unrecognized TV (%d)"), event.tv);
 			continue;
 		}
-		gulong timestamp = g_timer_elapsed(priv->timer, NULL) * 1000;
+		gulong timestamp = joy_timer_elapsed(priv->timer) * .001;
 		switch (event.key) {
 		case INPUT_KEY_RELATIVE_POINT:
 			relative_motion_event(self, screen, &event, timestamp);
