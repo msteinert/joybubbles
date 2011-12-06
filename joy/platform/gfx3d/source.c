@@ -17,6 +17,7 @@
 #include "joy/platform/gfx3d/source.h"
 #include "joy/platform/gfx3d/window.h"
 #include "joy/timer.h"
+#include "joy/timespec.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -499,7 +500,9 @@ input(JoySource *self)
 			g_message(Q_("gfx3d: unrecognized TV (%d)"), event.tv);
 			continue;
 		}
-		gulong timestamp = joy_timer_elapsed(priv->timer) * .001;
+		struct timespec elapsed;
+		joy_timer_elapsed(priv->timer, &elapsed);
+		gulong timestamp = joy_timespec_milliseconds(&elapsed);
 		switch (event.key) {
 		case INPUT_KEY_RELATIVE_POINT:
 			relative_motion_event(self, screen, &event, timestamp);

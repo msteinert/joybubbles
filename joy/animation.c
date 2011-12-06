@@ -56,7 +56,7 @@ joy_animation_init(JoyAnimation *self)
 	self->priv = ASSIGN_PRIVATE(self);
 	struct Private *priv = GET_PRIVATE(self);
 	priv->state = JOY_ANIMATION_STOP;
-	priv->duration = .25;
+	priv->duration = .25 * 1e6;
 }
 
 enum Properties {
@@ -148,14 +148,14 @@ joy_animation_set_duration(JoyAnimation *self, gdouble seconds)
 {
 	g_return_if_fail(JOY_IS_ANIMATION(self));
 	g_return_if_fail(0. < seconds);
-	GET_PRIVATE(self)->duration = seconds * 1000000;
+	GET_PRIVATE(self)->duration = seconds * 1e6;
 }
 
 gdouble
 joy_animation_get_duration(JoyAnimation *self)
 {
 	g_return_val_if_fail(JOY_IS_ANIMATION(self), 0.);
-	return GET_PRIVATE(self)->duration * .000001;
+	return 1.e-6 * GET_PRIVATE(self)->duration;
 }
 
 void

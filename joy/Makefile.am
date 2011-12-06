@@ -36,6 +36,9 @@ libjoybubbles_@series_major@_@series_minor@_la_SOURCES = \
 	sketch.c \
 	theme.c \
 	timer.c \
+	timer.h \
+	timespec.c \
+	timespec.h \
 	source.c \
 	window.c
 BUILT_SOURCES = \

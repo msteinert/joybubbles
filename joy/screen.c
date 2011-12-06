@@ -15,6 +15,7 @@
 #include "joy/screen.h"
 #include "joy/theme.h"
 #include "joy/timer.h"
+#include "joy/timespec.h"
 #include "joy/window.h"
 
 G_DEFINE_ABSTRACT_TYPE(JoyScreen, joy_screen, G_TYPE_OBJECT)
@@ -300,11 +301,13 @@ joy_screen_animate(JoyScreen *self)
 {
 	g_return_if_fail(JOY_IS_SCREEN(self));
 	struct Private *priv = GET_PRIVATE(self);
-	gdouble elapsed = joy_timer_elapsed(priv->timer);
+	struct timespec elapsed;
+	joy_timer_elapsed(priv->timer, &elapsed);
 	joy_timer_start(priv->timer);
 	for (gint i = 0; i < priv->animations->len; ++i) {
 		JoyAnimation *animation = priv->animations->pdata[i];
-		joy_animation_advance(animation, elapsed);
+		joy_animation_advance(animation,
+				joy_timespec_microseconds(&elapsed));
 	}
 }
 

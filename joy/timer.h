@@ -29,12 +29,16 @@ void
 joy_timer_destroy(JoyTimer *self);
 
 G_GNUC_INTERNAL
+const struct timespec *
+joy_timer_get_start(JoyTimer *self);
+
+G_GNUC_INTERNAL
 void
 joy_timer_start(JoyTimer *self);
 
 G_GNUC_INTERNAL
-gulong
-joy_timer_elapsed(JoyTimer *self);
+gint
+joy_timer_elapsed(JoyTimer *self, struct timespec *elapsed);
 
 G_END_DECLS
 

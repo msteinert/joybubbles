@@ -18,6 +18,7 @@
 #include "joy/theme.h"
 #include "joy/theme/default/default.h"
 #include "joy/timer.h"
+#include "joy/timespec.h"
 #include <locale.h>
 #include <stdlib.h>
 
@@ -319,33 +320,41 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 		priv->status = EXIT_FAILURE;
 		goto exit;
 	}
-	gulong update = G_MAXULONG;
+	struct timespec update = {
+		G_MAXLONG,
+		G_MAXLONG
+	};
 	while (!priv->quit) {
-		gulong elapsed = 0;
+		struct timespec elapsed = { 0 };
 		gulong eta = joy_screen_eta(screen);
+		gulong total = joy_timespec_microseconds(&update);
 		joy_timer_start(timer);
-		while (elapsed + update < eta) {
+		while (total < eta) {
 			glong timeout = -1;
 			if (joy_screen_in_animation(screen)) {
-				timeout = eta - elapsed - update;
+				timeout = eta
+					- joy_timespec_microseconds(&elapsed)
+					- joy_timespec_microseconds(&update);
 			}
 			joy_sink_poll(priv->sink, timeout);
-			elapsed = joy_timer_elapsed(timer);
+			joy_timer_elapsed(timer, &elapsed);
+			total = joy_timespec_microseconds(&elapsed)
+				+ joy_timespec_microseconds(&update);
 		}
 		joy_timer_start(timer);
-		if (joy_screen_in_animation(screen)) {
-			joy_screen_animate(screen);
-		}
+		joy_screen_animate(screen);
 		joy_screen_draw(screen);
-		update = joy_timer_elapsed(timer);
+		joy_timer_elapsed(timer, &update);
 		if (joy_screen_in_animation(screen)) {
-			if (elapsed + update < eta) {
+			total = joy_timespec_microseconds(&elapsed)
+				+ joy_timespec_microseconds(&update);
+			if (total < eta) {
 				joy_screen_submit(screen);
 			}
 		} else {
 			joy_screen_submit(screen);
 		}
-		update += 500;
+		joy_timespec_add_microseconds(&update, 500);
 	}
 exit:
 	if (timer) {

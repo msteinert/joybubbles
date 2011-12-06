@@ -15,6 +15,7 @@
 #include "joy/platform/x11/screen.h"
 #include "joy/platform/x11/window.h"
 #include "joy/timer.h"
+#include "joy/timespec.h"
 #ifdef HAVE_XCOMPOSITE
 #include <X11/extensions/Xcomposite.h>
 #endif
@@ -37,7 +38,7 @@ struct Private {
 	gint depth;
 	gboolean composite;
 	JoyTimer *timer;
-	gulong submit;
+	struct timespec submit;
 	gulong frame;
 };
 
@@ -213,7 +214,7 @@ static gulong
 eta(JoyScreen *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
-	return priv->frame - priv->submit;
+	return priv->frame - joy_timespec_microseconds(&priv->submit);
 }
 
 JOY_GNUC_HOT
@@ -227,7 +228,7 @@ submit(JoyScreen *self)
 		JoyBubble *window = priv->windows->pdata[i];
 		joy_x11_window_submit(window, display);
 	}
-	priv->submit = joy_timer_elapsed(priv->timer);
+	joy_timer_elapsed(priv->timer, &priv->submit);
 }
 
 static gboolean
@@ -293,7 +294,7 @@ void
 joy_x11_screen_set_refresh(JoyScreen *self, gdouble refresh)
 {
 	g_return_if_fail(JOY_IS_X11_SCREEN(self));
-	GET_PRIVATE(self)->frame = (1. / refresh) * 1000000L;
+	GET_PRIVATE(self)->frame = (1. / refresh) * 1e6;
 }
 
 Screen *

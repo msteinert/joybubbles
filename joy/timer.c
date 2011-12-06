@@ -10,6 +10,7 @@
 #endif
 #include <errno.h>
 #include "joy/timer.h"
+#include "joy/timespec.h"
 #include "joy/style.h"
 #include <time.h>
 
@@ -35,6 +36,12 @@ joy_timer_destroy(JoyTimer *self)
 	}
 }
 
+const struct timespec *
+joy_timer_get_start(JoyTimer *self)
+{
+	return &self->start;
+}
+
 void
 joy_timer_start(JoyTimer *self)
 {
@@ -43,25 +50,13 @@ joy_timer_start(JoyTimer *self)
 	}
 }
 
-gulong
-joy_timer_elapsed(JoyTimer *self)
+gint
+joy_timer_elapsed(JoyTimer *self, struct timespec *elapsed)
 {
-	struct timespec end, start = self->start;
-	if (clock_gettime(CLOCK_MONOTONIC, &end)) {
+	if (clock_gettime(CLOCK_MONOTONIC, elapsed)) {
 		g_message("clock_gettime: %s", g_strerror(errno));
-		return 0;
+		return -1;
 	}
-	if (end.tv_nsec < start.tv_nsec) {
-		int nsec = (start.tv_nsec - end.tv_nsec) / 1E9 + 1;
-		start.tv_nsec -= 1E9 * nsec;
-		start.tv_sec += nsec;
-	}
-	if (end.tv_nsec - start.tv_nsec > 1E9) {
-		int nsec = (end.tv_nsec - start.tv_nsec) / 1E9;
-		start.tv_nsec += 1E9 * nsec;
-		start.tv_sec -= nsec;
-	}
-	start.tv_sec = end.tv_sec - start.tv_sec;
-	start.tv_nsec = end.tv_nsec - start.tv_nsec;
-	return (start.tv_sec * 1000000) + (start.tv_nsec * .001);
+	joy_timespec_subtract(elapsed, &self->start);
+	return 0;
 }

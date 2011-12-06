@@ -54,8 +54,7 @@ joy_gfx3d_screen_init(JoyGfx3dScreen *self)
 	priv->windows = g_queue_new();
 	priv->area = cairo_region_create();
 	priv->expose = cairo_region_create();
-	priv->rects = g_array_sized_new(FALSE, FALSE,
-			sizeof(GFX3D_Rect), 128);
+	priv->rects = g_array_sized_new(FALSE, FALSE, sizeof(GFX3D_Rect), 128);
 }
 
 static void
@@ -81,8 +80,7 @@ cursor_init(JoyScreen *self)
 {
 	JoyCursor *cursor = NULL;
 	cairo_t *cr = NULL;
-	cairo_surface_t *image =
-		joy_screen_cairo_surface_create(self, 20, 20);
+	cairo_surface_t *image = joy_screen_cairo_surface_create(self, 20, 20);
 	if (!image) {
 		goto exit;
 	}
@@ -121,8 +119,8 @@ constructed(GObject *base)
 	gint width = joy_screen_get_width(self);
 	gint height = joy_screen_get_height(self);
 	// create the display
-	priv->display = GFX3D_Display_Create(width, height,
-			width, height, 8, joy_screen_get_id(self));
+	priv->display = GFX3D_Display_Create(width, height, width, height,
+			8, joy_screen_get_id(self));
 	if (G_UNLIKELY(!priv->display)) {
 		goto exit;
 	}
@@ -133,8 +131,7 @@ constructed(GObject *base)
 			GFX3D_DISPLAY_SHOW_MODE_VSYNC_WAIT_ONLY);
 	// clear the display
 	GFX3D_Rect rect = { 0, 0, width, height };
-	GFX3D_Display_ClearAlpha2D(priv->display, NULL, &rect,
-			0., 0., 0., 0.);
+	GFX3D_Display_ClearAlpha2D(priv->display, NULL, &rect, 0., 0., 0., 0.);
 	// show the display
 	GFX3D_Display_Visibility_Set(priv->display, 1);
 	// set the display location
