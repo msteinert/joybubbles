@@ -21,6 +21,10 @@ G_BEGIN_DECLS
 
 G_GNUC_INTERNAL
 inline struct timespec *
+joy_timespec_gettime(struct timespec *x, clockid_t id);
+
+G_GNUC_INTERNAL
+inline struct timespec *
 joy_timespec_add(struct timespec *x, const struct timespec *y);
 
 G_GNUC_INTERNAL

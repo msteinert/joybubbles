@@ -38,8 +38,9 @@ struct Private {
 	gint depth;
 	gboolean composite;
 	JoyTimer *timer;
-	struct timespec submit;
 	gulong frame;
+	struct timespec eta;
+	struct timespec elapsed;
 };
 
 static void
@@ -70,13 +71,13 @@ constructed(GObject *base)
 	if (G_UNLIKELY(!display)) {
 		goto exit;
 	}
+	priv->composite = FALSE;
 #ifdef HAVE_XCOMPOSITE
 	gint ignore;
 	if (XCompositeQueryExtension(display, &ignore, &ignore)) {
 		priv->composite = TRUE;
-	} else
+	}
 #endif
-		priv->composite = FALSE;
 	// search for the best Visual
 	XVisualInfo template;
 	template.screen = joy_screen_get_id(self);
@@ -210,11 +211,14 @@ error:
 	return NULL;
 }
 
-static gulong
+static const struct timespec *
 eta(JoyScreen *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
-	return priv->frame - joy_timespec_microseconds(&priv->submit);
+	joy_timespec_gettime(&priv->eta, CLOCK_MONOTONIC);
+	joy_timespec_add_nanoseconds(&priv->eta, priv->frame);
+	joy_timespec_subtract(&priv->eta, &priv->elapsed);
+	return &priv->eta;
 }
 
 JOY_GNUC_HOT
@@ -228,7 +232,7 @@ submit(JoyScreen *self)
 		JoyBubble *window = priv->windows->pdata[i];
 		joy_x11_window_submit(window, display);
 	}
-	joy_timer_elapsed(priv->timer, &priv->submit);
+	joy_timer_elapsed(priv->timer, &priv->elapsed);
 }
 
 static gboolean
@@ -294,7 +298,7 @@ void
 joy_x11_screen_set_refresh(JoyScreen *self, gdouble refresh)
 {
 	g_return_if_fail(JOY_IS_X11_SCREEN(self));
-	GET_PRIVATE(self)->frame = (1. / refresh) * 1e6;
+	GET_PRIVATE(self)->frame = (1. / refresh) * 1e9;
 }
 
 Screen *

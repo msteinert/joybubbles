@@ -62,7 +62,7 @@ typedef JoyIterator *
 typedef JoyIterator *
 (*JoyScreenEnd)(JoyScreen *self);
 
-typedef gulong
+typedef const struct timespec *
 (*JoyScreenEta)(JoyScreen *self);
 
 typedef void
@@ -278,7 +278,7 @@ joy_screen_animate(JoyScreen *self);
 void
 joy_screen_draw(JoyScreen *self);
 
-gulong
+const struct timespec *
 joy_screen_eta(JoyScreen *self);
 
 /**

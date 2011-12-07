@@ -22,9 +22,7 @@ JoyTimer *
 joy_timer_new(void)
 {
 	JoyTimer *self = g_slice_new0(JoyTimer);
-	if (clock_gettime(CLOCK_MONOTONIC, &self->start)) {
-		g_message("clock_gettime: %s", g_strerror(errno));
-	}
+	joy_timespec_gettime(&self->start, CLOCK_MONOTONIC);
 	return self;
 }
 
@@ -45,18 +43,12 @@ joy_timer_get_start(JoyTimer *self)
 void
 joy_timer_start(JoyTimer *self)
 {
-	if (clock_gettime(CLOCK_MONOTONIC, &self->start)) {
-		g_message("clock_gettime: %s", g_strerror(errno));
-	}
+	joy_timespec_gettime(&self->start, CLOCK_MONOTONIC);
 }
 
-gint
+void
 joy_timer_elapsed(JoyTimer *self, struct timespec *elapsed)
 {
-	if (clock_gettime(CLOCK_MONOTONIC, elapsed)) {
-		g_message("clock_gettime: %s", g_strerror(errno));
-		return -1;
-	}
+	joy_timespec_gettime(elapsed, CLOCK_MONOTONIC);
 	joy_timespec_subtract(elapsed, &self->start);
-	return 0;
 }

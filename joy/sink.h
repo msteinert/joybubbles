@@ -91,11 +91,11 @@ joy_sink_remove(JoySink *self, JoySource *source);
  * This function processes events for the specified maximum number of seconds.
  *
  * \param self [in] An input sink object.
- * \param msec [in] The number of microseconds to poll for.
+ * \param timeout [in] The upper limit on the amount of time to block.
  */
 G_GNUC_INTERNAL
 void
-joy_sink_poll(JoySink *self, glong usec);
+joy_sink_poll(JoySink *self, const struct timespec *timeout);
 
 G_END_DECLS
 

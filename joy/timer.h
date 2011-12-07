@@ -37,7 +37,7 @@ void
 joy_timer_start(JoyTimer *self);
 
 G_GNUC_INTERNAL
-gint
+void
 joy_timer_elapsed(JoyTimer *self, struct timespec *elapsed);
 
 G_END_DECLS

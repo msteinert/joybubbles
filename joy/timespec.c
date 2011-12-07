@@ -8,7 +8,17 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <errno.h>
 #include "joy/timespec.h"
+
+struct timespec *
+joy_timespec_gettime(struct timespec *x, clockid_t id)
+{
+	if (clock_gettime(id, x)) {
+		g_message("clock_gettime: %s", g_strerror(errno));
+	}
+	return x;
+}
 
 struct timespec *
 joy_timespec_add(struct timespec *x, const struct timespec *y)
@@ -93,7 +103,7 @@ joy_timespec_subtract_milliseconds(struct timespec *x, gulong msec)
 {
 	struct timespec y;
 	joy_timespec_from_milliseconds(&y, msec);
-	joy_timespec_add(x, &y);
+	joy_timespec_subtract(x, &y);
 	return x;
 }
 
@@ -102,7 +112,7 @@ joy_timespec_subtract_microseconds(struct timespec *x, gulong usec)
 {
 	struct timespec y;
 	joy_timespec_from_microseconds(&y, usec);
-	joy_timespec_add(x, &y);
+	joy_timespec_subtract(x, &y);
 	return x;
 }
 
@@ -111,26 +121,24 @@ joy_timespec_subtract_nanoseconds(struct timespec *x, gulong nsec)
 {
 	struct timespec y;
 	joy_timespec_from_nanoseconds(&y, nsec);
-	joy_timespec_add(x, &y);
+	joy_timespec_subtract(x, &y);
 	return x;
 }
 
 gint
 joy_timespec_compare(const struct timespec *x, const struct timespec *y)
 {
-	if (x->tv_sec == y->tv_sec) {
-		if (x->tv_nsec == y->tv_nsec) {
-			return 0;
-		} else if (x->tv_nsec < y->tv_nsec) {
-			return -1;
-		} else {
-			return 1;
-		}
-	} else if (x->tv_sec < y->tv_sec) {
+	if (x->tv_sec < y->tv_sec) {
 		return -1;
-	} else {
+	} else if (x->tv_sec == y->tv_sec) {
+		if (x->tv_nsec < y->tv_nsec) {
+			return -1;
+		} else if (x->tv_nsec == y->tv_nsec) {
+			return 0;
+		}
 		return 1;
 	}
+	return 1;
 }
 
 gdouble

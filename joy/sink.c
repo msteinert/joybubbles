@@ -5,6 +5,8 @@
  * Englewood, CO 80112
  */
 
+#define _GNU_SOURCE
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -12,6 +14,7 @@
 #include "joy/macros.h"
 #include "joy/sink.h"
 #include "joy/source.h"
+#include <poll.h>
 
 G_DEFINE_TYPE(JoySink, joy_sink, G_TYPE_OBJECT)
 
@@ -35,7 +38,7 @@ joy_sink_init(JoySink *self)
 	if (G_LIKELY(priv->sources)) {
 		g_ptr_array_set_free_func(priv->sources, g_object_unref);
 	}
-	priv->fds = g_array_sized_new(FALSE, TRUE, sizeof(GPollFD), 1);
+	priv->fds = g_array_sized_new(FALSE, TRUE, sizeof(struct pollfd), 1);
 }
 
 static void
@@ -88,19 +91,19 @@ joy_sink_add(JoySink *self, JoySource *source)
 	g_return_if_fail(JOY_IS_SOURCE(source));
 	struct Private *priv = GET_PRIVATE(self);
 	g_ptr_array_add(priv->sources, g_object_ref_sink(source));
-	GPollFD fd = {
+	struct pollfd fd = {
 		joy_source_get_descriptor(source),
 		joy_source_get_condition(source),
 		0
 	};
 	g_array_append_val(priv->fds, fd);
 	if (G_LIKELY(G_IO_HUP & fd.events)) {
-		g_signal_connect(source, "hangup",
-				G_CALLBACK(source_destroy), self);
+		g_signal_connect(source, "hangup", G_CALLBACK(source_destroy),
+				self);
 	}
-	if (G_LIKELY(G_IO_ERR & fd.events)) {
-		g_signal_connect(source, "error",
-				G_CALLBACK(source_destroy), self);
+	if (G_IO_ERR & fd.events) {
+		g_signal_connect(source, "error", G_CALLBACK(source_destroy),
+				self);
 	}
 }
 
@@ -121,7 +124,7 @@ joy_sink_remove(JoySink *self, JoySource *source)
 
 JOY_GNUC_HOT
 void
-joy_sink_poll(JoySink *self, glong usec)
+joy_sink_poll(JoySink *self, const struct timespec *timeout)
 {
 	g_return_val_if_fail(JOY_IS_SINK(self), 0.);
 	struct Private *priv = GET_PRIVATE(self);
@@ -135,20 +138,19 @@ joy_sink_poll(JoySink *self, glong usec)
 	if (prepared) {
 		return;
 	}
-	glong timeout = -1;
-	if (0 < usec) {
-		timeout = (glong)(usec * .001);
-	}
 	guint nfds = priv->fds->len;
-	GPollFD *fds = &g_array_index(priv->fds, GPollFD, 0);
-	gint events = g_poll(fds, nfds, timeout);
-	if (-1 == events) {
-		return;
-	}
-	for (gint i = 0; i < nfds; ++i) {
-		if (fds[i].revents & fds[i].events) {
-			joy_source_dispatch(priv->sources->pdata[i],
-					fds[i].revents);
+	struct pollfd *fds = &g_array_index(priv->fds, struct pollfd, 0);
+	gint events = ppoll(fds, nfds, timeout, NULL);
+	if (events) {
+		if (-1 == events) {
+			g_message("ppoll: %s", g_strerror(errno));
+			return;
+		}
+		for (gint i = 0; i < nfds; ++i) {
+			if (fds[i].revents & fds[i].events) {
+				joy_source_dispatch(priv->sources->pdata[i],
+						fds[i].revents);
+			}
 		}
 	}
 }

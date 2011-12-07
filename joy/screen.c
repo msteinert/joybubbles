@@ -330,7 +330,7 @@ joy_screen_draw(JoyScreen *self)
 	}
 }
 
-gulong
+const struct timespec *
 joy_screen_eta(JoyScreen *self)
 {
 	g_return_if_fail(JOY_IS_SCREEN(self));

@@ -320,41 +320,37 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 		priv->status = EXIT_FAILURE;
 		goto exit;
 	}
-	struct timespec update = {
-		G_MAXLONG,
-		G_MAXLONG
+	struct timespec elapsed = {
+		G_MAXSHORT,
+		G_MAXSHORT
 	};
 	while (!priv->quit) {
-		struct timespec elapsed = { 0 };
-		gulong eta = joy_screen_eta(screen);
-		gulong total = joy_timespec_microseconds(&update);
-		joy_timer_start(timer);
-		while (total < eta) {
-			glong timeout = -1;
+		struct timespec now;
+		struct timespec total = elapsed;
+		const struct timespec *eta = joy_screen_eta(screen);
+		while (-1 == joy_timespec_compare(joy_timespec_add(&total, joy_timespec_gettime(&now, CLOCK_MONOTONIC)), eta)) {
 			if (joy_screen_in_animation(screen)) {
-				timeout = eta
-					- joy_timespec_microseconds(&elapsed)
-					- joy_timespec_microseconds(&update);
+				struct timespec timeout = *eta;
+				joy_timespec_subtract(&timeout, &total);
+				joy_sink_poll(priv->sink, &timeout);
+			} else {
+				joy_sink_poll(priv->sink, NULL);
 			}
-			joy_sink_poll(priv->sink, timeout);
-			joy_timer_elapsed(timer, &elapsed);
-			total = joy_timespec_microseconds(&elapsed)
-				+ joy_timespec_microseconds(&update);
+			total = elapsed;
 		}
 		joy_timer_start(timer);
 		joy_screen_animate(screen);
 		joy_screen_draw(screen);
-		joy_timer_elapsed(timer, &update);
+		joy_timer_elapsed(timer, &elapsed);
 		if (joy_screen_in_animation(screen)) {
-			total = joy_timespec_microseconds(&elapsed)
-				+ joy_timespec_microseconds(&update);
-			if (total < eta) {
+			joy_timespec_gettime(&now, CLOCK_MONOTONIC);
+			if (-1 == joy_timespec_compare(&now, eta)) {
 				joy_screen_submit(screen);
 			}
 		} else {
 			joy_screen_submit(screen);
 		}
-		joy_timespec_add_microseconds(&update, 500);
+		joy_timespec_add_nanoseconds(&elapsed, 1000000);
 	}
 exit:
 	if (timer) {
