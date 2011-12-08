@@ -9,7 +9,6 @@
 #include "config.h"
 #endif
 #include <errno.h>
-#include <fcntl.h>
 #include <input_mgr_lite.h>
 #include "joy/bubble.h"
 #include "joy/platform/gfx3d/application.h"
@@ -18,8 +17,6 @@
 #include "joy/platform/gfx3d/window.h"
 #include "joy/timer.h"
 #include "joy/timespec.h"
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 G_DEFINE_TYPE(JoyGfx3dSource, joy_gfx3d_source, JOY_TYPE_SOURCE)
@@ -535,15 +532,11 @@ joy_gfx3d_source_class_init(JoyGfx3dSourceClass *klass)
 }
 
 JoySource *
-joy_gfx3d_source_new(JoyApplication *app)
+joy_gfx3d_source_new(JoyApplication *app, gint descriptor)
 {
 	g_return_val_if_fail(JOY_IS_GFX3D_APPLICATION(app), NULL);
-	gint fd = open(INPUT_MANAGER_FIFO_NAME, O_RDONLY | O_NONBLOCK);
-	if (G_UNLIKELY(-1 == fd)) {
-		return NULL;
-	}
 	return g_object_new(JOY_TYPE_GFX3D_SOURCE,
-			"descriptor", fd,
+			"descriptor", descriptor,
 			"condition", G_IO_IN,
 			"application", app,
 			NULL);

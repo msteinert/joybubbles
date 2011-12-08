@@ -63,12 +63,13 @@ joy_gfx3d_source_get_type(void) G_GNUC_CONST;
  * \brief Create a new GFX3D source object.
  *
  * \param app [in] A GFX3D application.
+ * \param descriptor [in] The input_mgr file descriptor.
  *
  * \return A new GFX3D source object.
  */
 G_GNUC_INTERNAL
 JoySource *
-joy_gfx3d_source_new(JoyApplication *app);
+joy_gfx3d_source_new(JoyApplication *app, gint descriptor);
 
 G_END_DECLS
 

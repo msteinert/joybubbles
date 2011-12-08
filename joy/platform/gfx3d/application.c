@@ -8,10 +8,16 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <errno.h>
+#include <fcntl.h>
+#include <input_mgr_lite.h>
+#include "joy/error.h"
 #include "joy/iterator/ptr-array.h"
 #include "joy/platform/gfx3d/application.h"
 #include "joy/platform/gfx3d/screen.h"
 #include "joy/platform/gfx3d/source.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 
 G_DEFINE_TYPE(JoyGfx3dApplication, joy_gfx3d_application, \
 		JOY_TYPE_APPLICATION)
@@ -38,34 +44,6 @@ destroy(gpointer object)
 {
 	g_object_run_dispose(G_OBJECT(object));
 	g_object_unref(object);
-}
-
-static void
-constructed(GObject *base)
-{
-	JoyApplication *self = JOY_APPLICATION(base);
-	struct Private *priv = GET_PRIVATE(base);
-	// initialize screens
-	priv->screens = g_ptr_array_sized_new(2);
-	if (priv->screens) {
-		g_ptr_array_set_free_func(priv->screens, destroy);
-		JoyBubble *screen;
-		// add HD screen
-		screen = joy_gfx3d_screen_new(self, 0, 1280, 720);
-		if (screen) {
-			g_ptr_array_add(priv->screens, screen);
-		}
-		// add SD screen
-		screen = joy_gfx3d_screen_new(self, 1, 640, 480);
-		if (screen) {
-			g_ptr_array_add(priv->screens, screen);
-		}
-	}
-	joy_application_add_source(self, joy_gfx3d_source_new(self));
-	if (G_OBJECT_CLASS(joy_gfx3d_application_parent_class)->constructed) {
-		G_OBJECT_CLASS(joy_gfx3d_application_parent_class)->
-			constructed(base);
-	}
 }
 
 static void
@@ -109,16 +87,78 @@ begin(JoyApplication *self)
 	return NULL;
 }
 
+static const GOptionEntry const gfx3d_arguments[] = {
+	{ NULL }
+};
+
+static gboolean
+post_hook(GOptionContext *context, GOptionGroup *group, gpointer self,
+		GError **error)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	// initialize screens
+	priv->screens = g_ptr_array_sized_new(2);
+	if (!priv->screens) {
+		g_set_error_literal(error, JOY_ERROR, JOY_ERROR_FAILURE,
+				"gfx3d: out of memory");
+		return FALSE;
+	}
+	g_ptr_array_set_free_func(priv->screens, destroy);
+	JoyBubble *screen;
+	// add HD screen
+	screen = joy_gfx3d_screen_new(self, 0, 1280, 720);
+	if (!screen) {
+		g_set_error_literal(error, JOY_ERROR, JOY_ERROR_FAILURE,
+				"gfx3d: failed to initialize the HD display");
+		return FALSE;
+	}
+	g_ptr_array_add(priv->screens, screen);
+	// add SD screen
+	screen = joy_gfx3d_screen_new(self, 1, 640, 480);
+	if (!screen) {
+		g_set_error_literal(error, JOY_ERROR, JOY_ERROR_FAILURE,
+				"gfx3d: failed to initialize the SD display");
+		return FALSE;
+	}
+	g_ptr_array_add(priv->screens, screen);
+	// add input_mgr source
+	gint descriptor = open(INPUT_MANAGER_FIFO_NAME, O_RDONLY | O_NONBLOCK);
+	if (G_UNLIKELY(-1 == descriptor)) {
+		g_set_error(error, JOY_ERROR, JOY_ERROR_FAILURE,
+				"gfx3d: %s: %s",
+				INPUT_MANAGER_FIFO_NAME,
+				g_strerror(errno));
+		return FALSE;
+	}
+	JoySource *source = joy_gfx3d_source_new(self, descriptor);
+	joy_application_add_source(self, source);
+	return TRUE;
+}
+
+static void
+add_options(JoyApplication *self, GOptionContext *context)
+{
+	GOptionGroup *group = g_option_group_new("gfx3d",
+			Q_("GFX3D Options"),
+			Q_("Show GFX3D Options"), self, NULL);
+	if (!group) {
+		return;
+	}
+	g_option_group_set_parse_hooks(group, NULL, post_hook);
+	g_option_group_add_entries(group, gfx3d_arguments);
+	g_option_context_add_group(context, group);
+}
+
 static void
 joy_gfx3d_application_class_init(JoyGfx3dApplicationClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
-	object_class->constructed = constructed;
 	object_class->dispose = dispose;
 	JoyApplicationClass *application_class = JOY_APPLICATION_CLASS(klass);
 	application_class->get_screen = get_screen;
 	application_class->get_default_screen = get_default_screen;
 	application_class->begin = begin;
+	application_class->add_options = add_options;
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 
