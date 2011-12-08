@@ -444,7 +444,7 @@ joy_gfx3d_screen_class_init(JoyGfx3dScreenClass *klass)
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 
-JoyBubble *
+JoyScreen *
 joy_gfx3d_screen_new(JoyApplication *app, guint id, gint width, gint height)
 {
 	g_return_val_if_fail(JOY_IS_GFX3D_APPLICATION(app), NULL);
@@ -454,6 +454,16 @@ joy_gfx3d_screen_new(JoyApplication *app, guint id, gint width, gint height)
 			"width", width,
 			"height", height,
 			NULL);
+}
+
+void
+joy_gfx3d_screen_set_vsync(JoyScreen *self, gboolean vsync)
+{
+	g_return_if_fail(JOY_IS_GFX3D_SCREEN(self));
+	struct Private *priv = GET_PRIVATE(self);
+	GFX3D_Display_Show_Mode_Set(priv->display,
+			vsync ? GFX3D_DISPLAY_SHOW_MODE_SYNCHRONOUS
+			: GFX3D_DISPLAY_SHOW_MODE_ASYNCHRONOUS);
 }
 
 GFX3D_Display

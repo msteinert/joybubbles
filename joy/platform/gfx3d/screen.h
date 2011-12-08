@@ -72,8 +72,12 @@ joy_gfx3d_screen_get_type(void) G_GNUC_CONST;
  */
 G_GNUC_INTERNAL
 G_GNUC_WARN_UNUSED_RESULT
-JoyBubble *
+JoyScreen *
 joy_gfx3d_screen_new(JoyApplication *app, guint id, gint width, gint height);
+
+G_GNUC_INTERNAL
+void
+joy_gfx3d_screen_set_vsync(JoyScreen *self, gboolean vsync);
 
 /**
  * \brief Get the GFX3D display.

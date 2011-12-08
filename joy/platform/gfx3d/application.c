@@ -31,12 +31,16 @@ G_DEFINE_TYPE(JoyGfx3dApplication, joy_gfx3d_application, \
 
 struct Private {
 	GPtrArray *screens;
+	gboolean vsync;
+	gchar *input;
 };
 
 static void
 joy_gfx3d_application_init(JoyGfx3dApplication *self)
 {
 	self->priv = ASSIGN_PRIVATE(self);
+	struct Private *priv = GET_PRIVATE(self);
+	priv->vsync = TRUE;
 }
 
 static void
@@ -87,7 +91,33 @@ begin(JoyApplication *self)
 	return NULL;
 }
 
+static gboolean
+arg_vsync_cb(const gchar *key, const gchar *value, gpointer self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	if (0 == strcasecmp("false", value)) {
+		priv->vsync = FALSE;
+	}
+	return TRUE;
+}
+
+static gboolean
+arg_input_cb(const gchar *key, const gchar *value, gpointer self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	priv->input = g_strdup(value);
+	return TRUE;
+}
+
 static const GOptionEntry const gfx3d_arguments[] = {
+	{"gfx3d-vsync", '\0', 0,
+		G_OPTION_ARG_CALLBACK, arg_vsync_cb,
+		N_("Synchronize with the vertical refresh [true]"),
+		N_("[true|false]")},
+	{"gfx3d-input", '\0', 0,
+		G_OPTION_ARG_CALLBACK, arg_input_cb,
+		N_("The input FIFO [" INPUT_MANAGER_FIFO_NAME "]"),
+		N_("PATH")},
 	{ NULL }
 };
 
@@ -104,30 +134,32 @@ post_hook(GOptionContext *context, GOptionGroup *group, gpointer self,
 		return FALSE;
 	}
 	g_ptr_array_set_free_func(priv->screens, destroy);
-	JoyBubble *screen;
-	// add HD screen
+	JoyScreen *screen;
+	// initialize the HD display
 	screen = joy_gfx3d_screen_new(self, 0, 1280, 720);
 	if (!screen) {
 		g_set_error_literal(error, JOY_ERROR, JOY_ERROR_FAILURE,
 				"gfx3d: failed to initialize the HD display");
 		return FALSE;
 	}
+	joy_gfx3d_screen_set_vsync(screen, priv->vsync);
 	g_ptr_array_add(priv->screens, screen);
-	// add SD screen
+	// initialize the SD display
 	screen = joy_gfx3d_screen_new(self, 1, 640, 480);
 	if (!screen) {
 		g_set_error_literal(error, JOY_ERROR, JOY_ERROR_FAILURE,
 				"gfx3d: failed to initialize the SD display");
 		return FALSE;
 	}
+	joy_gfx3d_screen_set_vsync(screen, priv->vsync);
 	g_ptr_array_add(priv->screens, screen);
 	// add input_mgr source
-	gint descriptor = open(INPUT_MANAGER_FIFO_NAME, O_RDONLY | O_NONBLOCK);
+	const gchar *input = priv->input ? priv->input
+		: INPUT_MANAGER_FIFO_NAME;
+	gint descriptor = open(input, O_RDONLY | O_NONBLOCK);
 	if (G_UNLIKELY(-1 == descriptor)) {
 		g_set_error(error, JOY_ERROR, JOY_ERROR_FAILURE,
-				"gfx3d: %s: %s",
-				INPUT_MANAGER_FIFO_NAME,
-				g_strerror(errno));
+				"gfx3d: %s: %s", input, g_strerror(errno));
 		return FALSE;
 	}
 	JoySource *source = joy_gfx3d_source_new(self, descriptor);
