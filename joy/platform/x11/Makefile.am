@@ -31,4 +31,3 @@ libjoybubbles_platform_la_LDFLAGS = \
 	$(X11_LIBS) \
 	$(XCOMPOSITE_LIBS) \
 	$(CAIRO_XLIB_LIBS)
-

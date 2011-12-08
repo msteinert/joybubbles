@@ -378,13 +378,11 @@ exit:
 	if (down.fade) {
 		g_object_unref(down.fade);
 	}
-#if 0
 #ifdef JOY_HAVE_DBUS
 	if (dbus) {
 		g_object_unref(dbus);
 	}
 #endif // JOY_HAVE_DBUS
-#endif
 	return status;
 error:
 	if (error) {

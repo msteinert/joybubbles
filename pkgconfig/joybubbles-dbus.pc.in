@@ -7,4 +7,3 @@ Name: Joybubbles D-Bus
 Description: D-Bus bindings for Joybubbles
 Version: @VERSION@
 Requires: joybubbles = @VERSION@
-

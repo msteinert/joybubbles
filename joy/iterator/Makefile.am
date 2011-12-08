@@ -24,4 +24,3 @@ pkginclude_HEADERS = \
 	ptr-array.h \
 	queue.h \
 	types.h
-

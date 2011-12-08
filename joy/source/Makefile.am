@@ -19,4 +19,3 @@ libjoybubbles_source_la_CFLAGS += $(DBUS_CFLAGS)
 libjoybubbles_source_la_LDFLAGS += $(DBUS_LIBS)
 pkginclude_HEADERS += dbus.h
 endif
-

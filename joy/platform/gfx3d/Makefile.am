@@ -28,4 +28,3 @@ libjoybubbles_platform_la_CFLAGS = \
 	$(INPUT_MGR_CFLAGS)
 libjoybubbles_platform_la_LDFLAGS = \
 	$(GFX3D_LIBS)
-

@@ -241,4 +241,3 @@ $PACKAGE_NAME build options:
 	Debugging: $enable_debug
 	Tracing: $enable_trace
 ])
-

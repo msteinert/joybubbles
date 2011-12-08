@@ -6,4 +6,3 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = \
 	joybubbles.pc \
 	joybubbles-dbus.pc
-

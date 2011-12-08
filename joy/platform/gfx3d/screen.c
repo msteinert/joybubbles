@@ -366,8 +366,8 @@ submit(JoyScreen *self)
 				priv->rects->len, 1);
 		g_array_set_size(priv->rects, 0);
 	} else {
-		if (priv->moved) {
-			GFX3D_Display_Show_Ch_Reload(priv->display);
+		if (priv->moved && priv->cursor) {
+			GFX3D_Display_Show_Ch_Reload(priv->cursor);
 		}
 	}
 	priv->moved = FALSE;

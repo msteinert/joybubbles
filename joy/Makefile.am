@@ -107,4 +107,3 @@ pkginclude_HEADERS += \
 endif
 EXTRA_DIST = \
 	marshal.list
-

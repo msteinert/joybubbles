@@ -18,4 +18,3 @@ libdefault_la_CFLAGS = \
 pkgincludedir = $(includedir)/joybubbles-$(series)/joy/theme
 pkginclude_HEADERS = \
 	default.h
-

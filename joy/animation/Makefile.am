@@ -25,4 +25,3 @@ pkginclude_HEADERS = \
 	resize.h \
 	series.h \
 	types.h
-
