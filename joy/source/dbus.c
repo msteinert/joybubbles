@@ -66,28 +66,28 @@ set_property(GObject *base, guint id, const GValue *value, GParamSpec *pspec)
 }
 
 static void
-dispatch(JoySource *self, gushort revents)
+dispatch(JoySource *self, GIOCondition condition)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	DBusConnection *connection = joy_dbus_get_connection(priv->dbus);
 	if (G_UNLIKELY(!connection)) {
 		return;
 	}
-	guint condition = 0;
-	if (revents & G_IO_IN) {
-		condition |= DBUS_WATCH_READABLE;
+	guint flags = 0;
+	if (condition & G_IO_IN) {
+		flags |= DBUS_WATCH_READABLE;
 	}
-	if (revents & G_IO_OUT) {
-		condition |= DBUS_WATCH_WRITABLE;
+	if (condition & G_IO_OUT) {
+		flags |= DBUS_WATCH_WRITABLE;
 	}
-	if (revents & G_IO_HUP) {
-		condition |= DBUS_WATCH_HANGUP;
+	if (condition & G_IO_HUP) {
+		flags |= DBUS_WATCH_HANGUP;
 	}
-	if (revents & G_IO_ERR) {
-		condition |= DBUS_WATCH_ERROR;
+	if (condition & G_IO_ERR) {
+		flags |= DBUS_WATCH_ERROR;
 	}
 	dbus_connection_ref(connection);
-	dbus_watch_handle(priv->watch, condition);
+	dbus_watch_handle(priv->watch, flags);
 	DBusDispatchStatus status =
 		dbus_connection_get_dispatch_status(connection);
 	while (DBUS_DISPATCH_DATA_REMAINS == status) {

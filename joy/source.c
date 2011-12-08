@@ -87,17 +87,17 @@ get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 }
 
 static void
-dispatch(JoySource *self, gushort revents)
+dispatch(JoySource *self, GIOCondition condition)
 {
 	g_return_if_fail(JOY_IS_SOURCE(self));
-	if (G_LIKELY(revents & G_IO_IN)) {
+	if (G_LIKELY(condition & G_IO_IN)) {
 		g_signal_emit(self, signals[SIGNAL_INPUT], 0);
 	} else {
-		if (revents & G_IO_OUT) {
+		if (condition & G_IO_OUT) {
 			g_signal_emit(self, signals[SIGNAL_OUTPUT], 0);
-		} else if (revents & G_IO_HUP) {
+		} else if (condition & G_IO_HUP) {
 			g_signal_emit(self, signals[SIGNAL_HANGUP], 0);
-		} else if (revents & G_IO_ERR) {
+		} else if (condition & G_IO_ERR) {
 			g_signal_emit(self, signals[SIGNAL_ERROR], 0);
 		}
 	}
@@ -213,10 +213,10 @@ joy_source_get_condition(JoySource *self)
 }
 
 void
-joy_source_dispatch(JoySource *self, gushort revents)
+joy_source_dispatch(JoySource *self, GIOCondition condition)
 {
 	g_return_if_fail(JOY_IS_SOURCE(self));
-	JOY_SOURCE_GET_CLASS(self)->dispatch(self, revents);
+	JOY_SOURCE_GET_CLASS(self)->dispatch(self, condition);
 }
 
 void

@@ -339,18 +339,12 @@ joy_application_run(JoyApplication *self, JoyScreen *screen)
 			total = elapsed;
 		}
 		joy_timer_start(timer);
-		joy_screen_animate(screen);
+		if (joy_screen_in_animation(screen)) {
+			joy_screen_animate(screen);
+		}
 		joy_screen_draw(screen);
 		joy_timer_elapsed(timer, &elapsed);
-		if (joy_screen_in_animation(screen)) {
-			joy_timespec_gettime(&now, CLOCK_MONOTONIC);
-			if (-1 == joy_timespec_compare(&now, eta)) {
-				joy_screen_submit(screen);
-			}
-		} else {
-			joy_screen_submit(screen);
-		}
-		joy_timespec_add_nanoseconds(&elapsed, 1000000);
+		joy_screen_submit(screen);
 	}
 exit:
 	if (timer) {

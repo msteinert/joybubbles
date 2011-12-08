@@ -52,7 +52,7 @@ typedef gboolean
 (*JoySourcePrepare)(JoySource *self);
 
 typedef void
-(*JoySourceDispatch)(JoySource *self, gushort revents);
+(*JoySourceDispatch)(JoySource *self, GIOCondition condition);
 
 typedef void
 (*JoySourceInput)(JoySource *self);
@@ -159,10 +159,10 @@ joy_source_get_condition(JoySource *self);
  * \brief Dispatch a poll event for a source.
  *
  * \param self [in] A source object.
- * \param revents [in] Events returned from g_poll().
+ * \param condition [in] Events to dispatch.
  */
 void
-joy_source_dispatch(JoySource *self, gushort revents);
+joy_source_dispatch(JoySource *self, GIOCondition condition);
 
 /**
  * \brief Dispatch an input event (G_IO_IN) for a source.

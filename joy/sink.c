@@ -14,6 +14,7 @@
 #include "joy/macros.h"
 #include "joy/sink.h"
 #include "joy/source.h"
+#include <sys/select.h>
 #include <poll.h>
 
 G_DEFINE_TYPE(JoySink, joy_sink, G_TYPE_OBJECT)
@@ -26,7 +27,10 @@ G_DEFINE_TYPE(JoySink, joy_sink, G_TYPE_OBJECT)
 
 struct Private {
 	GPtrArray *sources;
-	GArray *fds;
+	fd_set readfds;
+	fd_set writefds;
+	fd_set exceptfds;
+	gint nfds;
 };
 
 static void
@@ -38,7 +42,9 @@ joy_sink_init(JoySink *self)
 	if (G_LIKELY(priv->sources)) {
 		g_ptr_array_set_free_func(priv->sources, g_object_unref);
 	}
-	priv->fds = g_array_sized_new(FALSE, TRUE, sizeof(struct pollfd), 1);
+	FD_ZERO(&priv->readfds);
+	FD_ZERO(&priv->writefds);
+	FD_ZERO(&priv->exceptfds);
 }
 
 static void
@@ -53,21 +59,10 @@ dispose(GObject *base)
 }
 
 static void
-finalize(GObject *base)
-{
-	struct Private *priv = GET_PRIVATE(base);
-	if (priv->fds) {
-		g_array_free(priv->fds, TRUE);
-	}
-	G_OBJECT_CLASS(joy_sink_parent_class)->finalize(base);
-}
-
-static void
 joy_sink_class_init(JoySinkClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	object_class->dispose = dispose;
-	object_class->finalize = finalize;
 	g_type_class_add_private(klass, sizeof(struct Private));
 }
 
@@ -84,27 +79,42 @@ source_destroy(JoySource *source, JoySink *self)
 	joy_sink_remove(self, source);
 }
 
+inline static void
+set_nfds(JoySink *self)
+{
+	struct Private *priv = GET_PRIVATE(self);
+	gint largest = 0;
+	for (size_t i = 0; i < priv->sources->len; ++i) {
+		JoySource *source = g_ptr_array_index(priv->sources, i);
+		gint descriptor = joy_source_get_descriptor(source);
+		if (descriptor > largest) {
+			largest = descriptor;
+		}
+	}
+	priv->nfds = largest + 1;
+}
+
 void
 joy_sink_add(JoySink *self, JoySource *source)
 {
 	g_return_if_fail(JOY_IS_SINK(self));
 	g_return_if_fail(JOY_IS_SOURCE(source));
 	struct Private *priv = GET_PRIVATE(self);
+	gint fd = joy_source_get_descriptor(source);
+	GIOCondition events = joy_source_get_condition(source);
 	g_ptr_array_add(priv->sources, g_object_ref_sink(source));
-	struct pollfd fd = {
-		joy_source_get_descriptor(source),
-		joy_source_get_condition(source),
-		0
-	};
-	g_array_append_val(priv->fds, fd);
-	if (G_LIKELY(G_IO_HUP & fd.events)) {
-		g_signal_connect(source, "hangup", G_CALLBACK(source_destroy),
-				self);
+	if (G_IO_IN & events) {
+		FD_SET(fd, &priv->readfds);
 	}
-	if (G_IO_ERR & fd.events) {
+	if (G_IO_OUT & events) {
+		FD_SET(fd, &priv->writefds);
+	}
+	if (G_IO_ERR & events) {
+		FD_SET(fd, &priv->exceptfds);
 		g_signal_connect(source, "error", G_CALLBACK(source_destroy),
 				self);
 	}
+	set_nfds(self);
 }
 
 void
@@ -116,10 +126,14 @@ joy_sink_remove(JoySink *self, JoySource *source)
 	for (gint i = 0; i < priv->sources->len; ++i) {
 		if (priv->sources->pdata[i] == source) {
 			g_ptr_array_remove_index(priv->sources, i);
-			g_array_remove_index(priv->fds, i);
 			return;
 		}
 	}
+	gint fd = joy_source_get_descriptor(source);
+	FD_CLR(fd, &priv->readfds);
+	FD_CLR(fd, &priv->writefds);
+	FD_CLR(fd, &priv->exceptfds);
+	set_nfds(self);
 }
 
 JOY_GNUC_HOT
@@ -138,18 +152,36 @@ joy_sink_poll(JoySink *self, const struct timespec *timeout)
 	if (prepared) {
 		return;
 	}
-	guint nfds = priv->fds->len;
-	struct pollfd *fds = &g_array_index(priv->fds, struct pollfd, 0);
-	gint events = ppoll(fds, nfds, timeout, NULL);
+	fd_set readfds = priv->readfds;
+	fd_set writefds = priv->writefds;
+	fd_set exceptfds = priv->exceptfds;
+	gint events = pselect(priv->nfds, &readfds, &writefds, &exceptfds,
+			timeout, NULL);
 	if (events) {
 		if (-1 == events) {
-			g_message("ppoll: %s", g_strerror(errno));
+			g_message("pselect: %s", g_strerror(errno));
 			return;
 		}
-		for (gint i = 0; i < nfds; ++i) {
-			if (fds[i].revents & fds[i].events) {
-				joy_source_dispatch(priv->sources->pdata[i],
-						fds[i].revents);
+		for (gint fd = 0; fd < priv->nfds; ++fd) {
+			GIOCondition condition = 0;
+			if (FD_ISSET(fd, &priv->readfds)) {
+				condition |= G_IO_IN;
+			}
+			if (FD_ISSET(fd, &priv->writefds)) {
+				condition |= G_IO_OUT;
+			}
+			if (FD_ISSET(fd, &priv->exceptfds)) {
+				condition |= G_IO_ERR;
+			}
+			if (!condition) {
+				continue;
+			}
+			JoySource *source = NULL;
+			for (size_t i = 0; i < priv->sources->len; ++i) {
+				source = g_ptr_array_index(priv->sources, i);
+				if (joy_source_get_descriptor(source) == fd) {
+					joy_source_dispatch(source, condition);
+				}
 			}
 		}
 	}

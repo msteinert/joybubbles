@@ -21,6 +21,7 @@
 #include "joy/platform/gfx3d/keyboard.h"
 #include "joy/platform/gfx3d/screen.h"
 #include "joy/platform/gfx3d/window.h"
+#include "joy/timespec.h"
 #include <gfx3d_cursor.h>
 
 G_DEFINE_TYPE(JoyGfx3dScreen, joy_gfx3d_screen, JOY_TYPE_SCREEN)
@@ -43,7 +44,7 @@ struct Private {
 	GFX3D_Display cursor;
 	gint x, y, x_hot, y_hot;
 	gboolean moved;
-	gulong frame;
+	struct timespec eta;
 };
 
 static void
@@ -126,9 +127,11 @@ constructed(GObject *base)
 	}
 	// disable automatic cache flushing
 	GFX3D_Display_Cache_AutoFlush_Set(priv->display, 0);
-	// sync with the vertical blank
+	// update the screen asynchronously
 	GFX3D_Display_Show_Mode_Set(priv->display,
-			GFX3D_DISPLAY_SHOW_MODE_VSYNC_WAIT_ONLY);
+			//GFX3D_DISPLAY_SHOW_MODE_SYNCHRONOUS);
+			GFX3D_DISPLAY_SHOW_MODE_ASYNCHRONOUS);
+			//GFX3D_DISPLAY_SHOW_MODE_VSYNC_WAIT_ONLY);
 	// clear the display
 	GFX3D_Rect rect = { 0, 0, width, height };
 	GFX3D_Display_ClearAlpha2D(priv->display, NULL, &rect, 0., 0., 0., 0.);
@@ -308,11 +311,16 @@ error:
 	return NULL;
 }
 
-static gulong
+static const struct timespec *
 eta(JoyScreen *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
-	return CLAMP(priv->frame, 0, 16666);
+	GFX3D_Display_Show_TimingInfo info = { 0 };
+	GFX3D_Display_Show_Partial_Ext(priv->display, NULL, 0, 0, &info);
+	joy_timespec_gettime(&priv->eta, CLOCK_MONOTONIC);
+	joy_timespec_add_microseconds(&priv->eta,
+			CLAMP(info.uTimeMinCommitPartialToVSync, 0, 16666));
+	return &priv->eta;
 }
 
 JOY_GNUC_HOT
@@ -353,11 +361,9 @@ submit(JoyScreen *self)
 					priv->area);
 		}
 		// flip the display
-		GFX3D_Display_Show_TimingInfo info = { 0 };
-		GFX3D_Display_Show_Partial_Ext(priv->display,
+		GFX3D_Display_Show_Partial(priv->display,
 				(gpointer)priv->rects->data,
-				priv->rects->len, 1, &info);
-		priv->frame = info.uTimeMinCommitPartialToVSync;
+				priv->rects->len, 1);
 		g_array_set_size(priv->rects, 0);
 	} else {
 		if (priv->moved) {
@@ -609,8 +615,6 @@ joy_gfx3d_screen_set_cursor(JoyScreen *self, JoyCursor *cursor)
 		if (!priv->cursor) {
 			return;
 		}
-		GFX3D_Display_Show_Mode_Set(priv->cursor,
-				GFX3D_DISPLAY_SHOW_MODE_ASYNCHRONOUS);
 	} else {
 		GFX3D_Cursor_Image_Swap(priv->cursor, image, &rect);
 	}
