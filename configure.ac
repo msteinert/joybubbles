@@ -15,7 +15,7 @@ m4_define([micro_version], [2])
 m4_define([interface_age], [1])
 # Initialize autoconf & automake
 AC_INIT([Joybubbles], [major_version.minor_version.micro_version],
-    [https://inv-lx-apps.echostar.com/mantis/], [joybubbles])
+    [https://github.com/msteinert/joybubbles/issues], [joybubbles])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.9 foreign -Wno-portability])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
