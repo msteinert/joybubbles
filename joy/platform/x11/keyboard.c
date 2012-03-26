@@ -13,12 +13,12 @@
 G_DEFINE_TYPE(JoyX11Keyboard, joy_x11_keyboard, JOY_TYPE_DEVICE_KEYBOARD)
 
 static void
-joy_x11_keyboard_init(JoyX11Keyboard *self)
+joy_x11_keyboard_init(G_GNUC_UNUSED JoyX11Keyboard *self)
 {
 }
 
 static void
-joy_x11_keyboard_class_init(JoyX11KeyboardClass *klass)
+joy_x11_keyboard_class_init(G_GNUC_UNUSED JoyX11KeyboardClass *klass)
 {
 }
 

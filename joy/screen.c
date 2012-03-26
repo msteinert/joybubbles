@@ -280,7 +280,7 @@ joy_screen_remove_animation(JoyScreen *self, JoyAnimation *animation)
 	g_return_if_fail(JOY_IS_SCREEN(self));
 	g_return_if_fail(JOY_IS_ANIMATION(animation));
 	struct Private *priv = GET_PRIVATE(self);
-	for (gint i = 0; i < priv->animations->len; ++i) {
+	for (gint i = 0; i < (gint)priv->animations->len; ++i) {
 		if (priv->animations->pdata[i] == animation) {
 			g_ptr_array_remove_index(priv->animations, i);
 			return;
@@ -304,7 +304,7 @@ joy_screen_animate(JoyScreen *self)
 	struct timespec elapsed;
 	joy_timer_elapsed(priv->timer, &elapsed);
 	joy_timer_start(priv->timer);
-	for (gint i = 0; i < priv->animations->len; ++i) {
+	for (gint i = 0; i < (gint)priv->animations->len; ++i) {
 		JoyAnimation *animation = priv->animations->pdata[i];
 		joy_animation_advance(animation,
 				joy_timespec_microseconds(&elapsed));

@@ -13,12 +13,12 @@
 G_DEFINE_TYPE(JoySketch, joy_sketch, JOY_TYPE_BUBBLE)
 
 static void
-joy_sketch_init(JoySketch *self)
+joy_sketch_init(G_GNUC_UNUSED JoySketch *self)
 {
 }
 
 static void
-joy_sketch_class_init(JoySketchClass *klass)
+joy_sketch_class_init(G_GNUC_UNUSED JoySketchClass *klass)
 {
 }
 

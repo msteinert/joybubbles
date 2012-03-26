@@ -275,7 +275,7 @@ window_create(JoyScreen *self)
 }
 
 static cairo_surface_type_t
-cairo_surface_type(JoyScreen *self)
+cairo_surface_type(G_GNUC_UNUSED JoyScreen *self)
 {
 #if CAIRO_HAS_GFX3D_SURFACE
 	return CAIRO_SURFACE_TYPE_GFX3D;
@@ -315,11 +315,14 @@ static const struct timespec *
 eta(JoyScreen *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
-	GFX3D_Display_Show_TimingInfo info = { 0 };
+	GFX3D_Display_Show_TimingInfo info = { 0, 0, 0, 0, 0, 0 };
 	GFX3D_Display_Show_Partial_Ext(priv->display, NULL, 0, 0, &info);
 	joy_timespec_gettime(&priv->eta, CLOCK_MONOTONIC);
-	joy_timespec_add_microseconds(&priv->eta,
-			CLAMP(info.uTimeMinCommitPartialToVSync, 0, 16666));
+	gulong usec = info.uTimeMinCommitPartialToVSync;
+	if (usec > 16666) {
+		usec = 16666;
+	}
+	joy_timespec_add_microseconds(&priv->eta, usec);
 	return &priv->eta;
 }
 

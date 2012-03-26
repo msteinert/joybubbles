@@ -27,7 +27,7 @@ G_BEGIN_DECLS
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_quad(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_quad(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -39,7 +39,7 @@ joy_easing_in_quad(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_quad(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_quad(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -51,7 +51,7 @@ joy_easing_out_quad(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_out_quad(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_out_quad(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -63,7 +63,7 @@ joy_easing_in_out_quad(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_in_quad(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_in_quad(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -75,7 +75,7 @@ joy_easing_out_in_quad(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_cubic(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_cubic(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -87,7 +87,7 @@ joy_easing_in_cubic(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_cubic(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_cubic(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -99,7 +99,7 @@ joy_easing_out_cubic(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_out_cubic(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_out_cubic(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -111,7 +111,7 @@ joy_easing_in_out_cubic(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_in_cubic(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_in_cubic(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -123,7 +123,7 @@ joy_easing_out_in_cubic(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_quart(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_quart(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -135,7 +135,7 @@ joy_easing_in_quart(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_quart(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_quart(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -147,7 +147,7 @@ joy_easing_out_quart(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_out_quart(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_out_quart(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -159,7 +159,7 @@ joy_easing_in_out_quart(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_in_quart(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_in_quart(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -171,7 +171,7 @@ joy_easing_out_in_quart(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_quint(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_quint(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -183,7 +183,7 @@ joy_easing_in_quint(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_quint(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_quint(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -195,7 +195,7 @@ joy_easing_out_quint(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_out_quint(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_out_quint(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -207,7 +207,7 @@ joy_easing_in_out_quint(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_in_quint(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_in_quint(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 G_END_DECLS

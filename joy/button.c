@@ -164,8 +164,12 @@ up(JoyBubble *self)
 }
 
 static void
-key_down(JoyBubble *self, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyKeySym sym)
+key_down(JoyBubble *self,
+	 G_GNUC_UNUSED JoyDevice *device,
+	 G_GNUC_UNUSED gulong timestamp,
+	 G_GNUC_UNUSED gint x,
+	 G_GNUC_UNUSED gint y,
+	 JoyKeySym sym)
 {
 	switch (sym) {
 	case JOY_KEY_Select:
@@ -179,8 +183,12 @@ key_down(JoyBubble *self, JoyDevice *device, gulong timestamp,
 }
 
 static void
-key_up(JoyBubble *self, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyKeySym sym)
+key_up(JoyBubble *self,
+       G_GNUC_UNUSED JoyDevice *device,
+       G_GNUC_UNUSED gulong timestamp,
+       G_GNUC_UNUSED gint x,
+       G_GNUC_UNUSED gint y,
+       JoyKeySym sym)
 {
 	switch (sym) {
 	case JOY_KEY_Select:
@@ -194,8 +202,12 @@ key_up(JoyBubble *self, JoyDevice *device, gulong timestamp,
 }
 
 static void
-button_down(JoyBubble *self, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyMouseButton button)
+button_down(JoyBubble *self,
+	    G_GNUC_UNUSED JoyDevice *device,
+	    G_GNUC_UNUSED gulong timestamp,
+	    G_GNUC_UNUSED gint x,
+	    G_GNUC_UNUSED gint y,
+	    JoyMouseButton button)
 {
 	if (JOY_MOUSE_BUTTON_LEFT == button) {
 		down(self);
@@ -203,8 +215,12 @@ button_down(JoyBubble *self, JoyDevice *device, gulong timestamp,
 }
 
 static void
-button_up(JoyBubble *self, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyMouseButton button)
+button_up(JoyBubble *self,
+	  G_GNUC_UNUSED JoyDevice *device,
+	  G_GNUC_UNUSED gulong timestamp,
+	  G_GNUC_UNUSED gint x,
+	  G_GNUC_UNUSED gint y,
+	  JoyMouseButton button)
 {
 	if (JOY_MOUSE_BUTTON_LEFT == button) {
 		up(self);
@@ -212,13 +228,21 @@ button_up(JoyBubble *self, JoyDevice *device, gulong timestamp,
 }
 
 static void
-enter(JoyBubble *self, JoyDevice *device, gulong timestamp, gint x, gint y)
+enter(JoyBubble *self,
+      G_GNUC_UNUSED JoyDevice *device,
+      G_GNUC_UNUSED gulong timestamp,
+      G_GNUC_UNUSED gint x,
+      G_GNUC_UNUSED gint y)
 {
 	joy_bubble_set_focused(self);
 }
 
 static void
-leave(JoyBubble *self, JoyDevice *device, gulong timestamp, gint x, gint y)
+leave(JoyBubble *self,
+      G_GNUC_UNUSED JoyDevice *device,
+      G_GNUC_UNUSED gulong timestamp,
+      G_GNUC_UNUSED gint x,
+      G_GNUC_UNUSED gint y)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->label && JOY_BUBBLE_STATE_ACTIVE

@@ -15,12 +15,12 @@
 G_DEFINE_TYPE(JoyX11Mouse, joy_x11_mouse, JOY_TYPE_DEVICE_MOUSE)
 
 static void
-joy_x11_mouse_init(JoyX11Mouse *self)
+joy_x11_mouse_init(G_GNUC_UNUSED JoyX11Mouse *self)
 {
 }
 
 static void
-set_cursor(JoyDevice *self, JoyCursor *cursor)
+set_cursor(G_GNUC_UNUSED JoyDevice *self, G_GNUC_UNUSED JoyCursor *cursor)
 {
 	JOY_UNIMPLEMENTED;
 }
@@ -76,19 +76,19 @@ error:
 }
 
 static void
-show(JoyDevice *self)
+show(G_GNUC_UNUSED JoyDevice *self)
 {
 	JOY_UNIMPLEMENTED;
 }
 
 static void
-hide(JoyDevice *self)
+hide(G_GNUC_UNUSED JoyDevice *self)
 {
 	JOY_UNIMPLEMENTED;
 }
 
 static gboolean
-visible(JoyDevice *self)
+visible(G_GNUC_UNUSED JoyDevice *self)
 {
 	JOY_UNIMPLEMENTED;
 	return TRUE;

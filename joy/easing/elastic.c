@@ -57,8 +57,11 @@ G_GNUC_CONST
 
 #ifdef JOY_ENABLE_EASING
 static gdouble
-out_elastic(struct JoyEasingElastic *self, gdouble time,
-		gdouble b, gdouble c, gdouble d)
+out_elastic(struct JoyEasingElastic *self,
+	    gdouble time,
+	    G_GNUC_UNUSED gdouble b,
+	    gdouble c,
+	    G_GNUC_UNUSED gdouble d)
 {
 	gdouble amplitude = AMPLITUDE;
 	gdouble period = PERIOD;

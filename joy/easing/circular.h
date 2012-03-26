@@ -27,7 +27,7 @@ G_BEGIN_DECLS
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_circ(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_circ(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -39,7 +39,7 @@ joy_easing_in_circ(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_circ(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_circ(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -51,7 +51,7 @@ joy_easing_out_circ(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_out_circ(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_out_circ(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -63,7 +63,7 @@ joy_easing_in_out_circ(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_in_circ(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_in_circ(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 G_END_DECLS

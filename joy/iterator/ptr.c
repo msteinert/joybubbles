@@ -13,12 +13,12 @@
 G_DEFINE_TYPE(JoyIteratorPtr, joy_iterator_ptr, JOY_TYPE_ITERATOR)
 
 static void
-joy_iterator_ptr_init(JoyIteratorPtr *self)
+joy_iterator_ptr_init(G_GNUC_UNUSED JoyIteratorPtr *self)
 {
 }
 
 static gpointer
-item(JoyIterator *self)
+item(G_GNUC_UNUSED JoyIterator *self)
 {
 	return NULL;
 }

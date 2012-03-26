@@ -92,7 +92,9 @@ begin(JoyApplication *self)
 }
 
 static gboolean
-arg_vsync_cb(const gchar *key, const gchar *value, gpointer self)
+arg_vsync_cb(G_GNUC_UNUSED const gchar *key,
+	     const gchar *value,
+	     gpointer self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (0 == strcasecmp("false", value)) {
@@ -102,7 +104,9 @@ arg_vsync_cb(const gchar *key, const gchar *value, gpointer self)
 }
 
 static gboolean
-arg_input_cb(const gchar *key, const gchar *value, gpointer self)
+arg_input_cb(G_GNUC_UNUSED const gchar *key,
+	     const gchar *value,
+	     gpointer self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	priv->input = g_strdup(value);
@@ -110,20 +114,32 @@ arg_input_cb(const gchar *key, const gchar *value, gpointer self)
 }
 
 static const GOptionEntry const gfx3d_arguments[] = {
-	{"gfx3d-vsync", '\0', 0,
-		G_OPTION_ARG_CALLBACK, arg_vsync_cb,
+	{
+		"gfx3d-vsync",
+		'\0',
+		0,
+		G_OPTION_ARG_CALLBACK,
+		arg_vsync_cb,
 		N_("Synchronize with the vertical refresh [true]"),
-		N_("[true|false]")},
-	{"gfx3d-input", '\0', 0,
-		G_OPTION_ARG_CALLBACK, arg_input_cb,
+		N_("[true|false]")
+	},
+	{
+		"gfx3d-input",
+		'\0',
+		0,
+		G_OPTION_ARG_CALLBACK,
+		arg_input_cb,
 		N_("The input FIFO [" INPUT_MANAGER_FIFO_NAME "]"),
-		N_("PATH")},
-	{ NULL }
+		N_("PATH")
+	},
+	{ NULL, '\0', 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
 };
 
 static gboolean
-post_hook(GOptionContext *context, GOptionGroup *group, gpointer self,
-		GError **error)
+post_hook(G_GNUC_UNUSED GOptionContext *context,
+	  G_GNUC_UNUSED GOptionGroup *group,
+	  gpointer self,
+	  GError **error)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	// initialize screens

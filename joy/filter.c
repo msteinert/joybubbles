@@ -14,12 +14,12 @@
 G_DEFINE_ABSTRACT_TYPE(JoyFilter, joy_filter, G_TYPE_OBJECT)
 
 static void
-joy_filter_init(JoyFilter *self)
+joy_filter_init(G_GNUC_UNUSED JoyFilter *self)
 {
 }
 
 static void
-joy_filter_class_init(JoyFilterClass *klass)
+joy_filter_class_init(G_GNUC_UNUSED JoyFilterClass *klass)
 {
 }
 

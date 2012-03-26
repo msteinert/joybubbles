@@ -21,7 +21,7 @@
 #include <math.h>
 
 gdouble
-joy_easing_in_exp(gpointer self, gdouble time)
+joy_easing_in_exp(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (0. == time || 1. == time) {
@@ -35,7 +35,7 @@ joy_easing_in_exp(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_exp(gpointer self, gdouble time)
+joy_easing_out_exp(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (1. == time) {
@@ -49,7 +49,7 @@ joy_easing_out_exp(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_out_exp(gpointer self, gdouble time)
+joy_easing_in_out_exp(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (0. == time || 1. == time) {
@@ -67,7 +67,7 @@ joy_easing_in_out_exp(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_in_exp(gpointer self, gdouble time)
+joy_easing_out_in_exp(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (.5 < time) {

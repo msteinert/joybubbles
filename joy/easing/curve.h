@@ -30,7 +30,7 @@ G_BEGIN_DECLS
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_in_curve(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_in_curve(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -45,7 +45,7 @@ joy_easing_in_curve(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_out_curve(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_out_curve(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -59,7 +59,7 @@ joy_easing_out_curve(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_sine_curve(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_sine_curve(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 /**
@@ -73,7 +73,7 @@ joy_easing_sine_curve(gpointer self G_GNUC_UNUSED, gdouble time)
  * \return The transformed elapsed time or frame.
  */
 gdouble
-joy_easing_cosine_curve(gpointer self G_GNUC_UNUSED, gdouble time)
+joy_easing_cosine_curve(gpointer self, gdouble time)
 	G_GNUC_CONST;
 
 G_END_DECLS

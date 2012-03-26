@@ -39,7 +39,7 @@ G_GNUC_CONST
 #endif
 
 gdouble
-joy_easing_in_curve(gpointer self, gdouble time)
+joy_easing_in_curve(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	const gdouble progress = sin_progress(time);
@@ -51,7 +51,7 @@ joy_easing_in_curve(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_curve(gpointer self, gdouble time)
+joy_easing_out_curve(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	const gdouble progress = sin_progress(time);
@@ -63,7 +63,7 @@ joy_easing_out_curve(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_sine_curve(gpointer self, gdouble time)
+joy_easing_sine_curve(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return (sin(((time * G_PI * 2.)) - G_PI_2) + 1.) / 2.;
@@ -73,7 +73,7 @@ joy_easing_sine_curve(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_cosine_curve(gpointer self, gdouble time)
+joy_easing_cosine_curve(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return (cos(((time * G_PI * 2.)) - G_PI_2) + 1.) / 2.;

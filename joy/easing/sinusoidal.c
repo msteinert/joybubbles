@@ -21,7 +21,7 @@
 #include <math.h>
 
 gdouble
-joy_easing_in_sine(gpointer self, gdouble time)
+joy_easing_in_sine(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (1. == time) {
@@ -35,7 +35,7 @@ joy_easing_in_sine(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_sine(gpointer self, gdouble time)
+joy_easing_out_sine(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return sin(time * G_PI_2);
@@ -45,7 +45,7 @@ joy_easing_out_sine(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_out_sine(gpointer self, gdouble time)
+joy_easing_in_out_sine(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return -.5 * (cos(G_PI * time) - 1.);
@@ -55,7 +55,7 @@ joy_easing_in_out_sine(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_in_sine(gpointer self, gdouble time)
+joy_easing_out_in_sine(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (.5 > time) {

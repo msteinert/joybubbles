@@ -15,7 +15,7 @@
 G_DEFINE_TYPE(JoyThemeDefault, joy_theme_default, JOY_TYPE_THEME)
 
 static void
-joy_theme_default_init(JoyThemeDefault *self)
+joy_theme_default_init(G_GNUC_UNUSED JoyThemeDefault *self)
 {
 }
 
@@ -37,7 +37,7 @@ constructed(GObject *base)
 }
 
 static JoyStyle *
-style_create(JoyStyle *self, JoyBubble *widget)
+style_create(G_GNUC_UNUSED JoyStyle *self, JoyBubble *widget)
 {
 	const gchar *name = joy_bubble_get_name(widget);
 	if (G_LIKELY(!name)) {

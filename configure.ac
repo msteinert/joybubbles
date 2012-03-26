@@ -11,8 +11,8 @@ AC_PREREQ([2.59])
 #	interface_age = 0
 m4_define([major_version], [0])
 m4_define([minor_version], [2])
-m4_define([micro_version], [1])
-m4_define([interface_age], [0])
+m4_define([micro_version], [2])
+m4_define([interface_age], [1])
 # Initialize autoconf & automake
 AC_INIT([Joybubbles], [major_version.minor_version.micro_version],
     [https://inv-lx-apps.echostar.com/mantis/], [joybubbles])
@@ -33,6 +33,7 @@ AM_PATH_PYTHON([2.7],,
 	[AC_MSG_WARN([Python 2.7 is required to regenerate key syms])])
 # Enable compiler flags
 AX_TRY_CFLAGS([-Wall], [AX_CFLAGS([-Wall])])
+AX_TRY_CFLAGS([-Wextra], [AX_CFLAGS([-Wextra])])
 AX_TRY_CFLAGS([-Wstrict-prototypes], [AX_CFLAGS([-Wstrict-prototypes])])
 AX_TRY_CFLAGS([-Wcast-align], [AX_CFLAGS([-Wcast-align])])
 AX_TRY_CFLAGS([-fno-common], [AX_CFLAGS([-fno-common])])
@@ -136,11 +137,12 @@ AS_IF([test "x$enable_dbus" != "xno"],
 	[enable_dbus=no])
 AM_CONDITIONAL([JOY_DBUS], [test "x$enable_dbus" = "xyes"])
 # Platform option
+default_platform=x11
 AC_ARG_WITH([platform],
 	[AS_HELP_STRING([--with-platform],
 		[select the graphics platform @<:@x11|gfx3d@:>@])],,
-	[AC_MSG_WARN([Unknown platform selected @<:@$with_platform:>@, defaulting to @<:@$x11@:>@])
-	with_platform=x11])
+	[AC_MSG_WARN([Default platform selected @<:@$default_platform@:>@])
+	with_platform=$default_platform])
 AC_SUBST([with_platform])
 AS_CASE([$with_platform],
 [x11],

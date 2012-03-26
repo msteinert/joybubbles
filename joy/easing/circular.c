@@ -21,7 +21,7 @@
 #include <math.h>
 
 gdouble
-joy_easing_in_circ(gpointer self, gdouble time)
+joy_easing_in_circ(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return -(sqrt(1. - time * time) - 1.);
@@ -31,7 +31,7 @@ joy_easing_in_circ(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_circ(gpointer self, gdouble time)
+joy_easing_out_circ(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	time -= 1.;
@@ -42,7 +42,7 @@ joy_easing_out_circ(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_out_circ(gpointer self, gdouble time)
+joy_easing_in_out_circ(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	time *= 2.;

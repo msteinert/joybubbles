@@ -109,7 +109,7 @@ get_default_screen(JoyApplication *self)
 		return NULL;
 	}
 	gint n = DefaultScreen(priv->display);
-	if (G_LIKELY(priv->screens && (n < priv->screens->len))) {
+	if (G_LIKELY(priv->screens && (n < (gint)priv->screens->len))) {
 		return g_ptr_array_index(priv->screens, n);
 	}
 	return NULL;
@@ -126,7 +126,9 @@ begin(JoyApplication *self)
 }
 
 static gboolean
-arg_display_cb(const gchar *key, const gchar *value, gpointer self)
+arg_display_cb(G_GNUC_UNUSED const gchar *key,
+	       const gchar *value,
+	       gpointer self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->display_name) {
@@ -137,7 +139,9 @@ arg_display_cb(const gchar *key, const gchar *value, gpointer self)
 }
 
 static gboolean
-arg_refresh_cb(const gchar *key, const gchar *value, gpointer self)
+arg_refresh_cb(G_GNUC_UNUSED const gchar *key,
+	       const gchar *value,
+	       gpointer self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	errno = 0;
@@ -151,20 +155,32 @@ arg_refresh_cb(const gchar *key, const gchar *value, gpointer self)
 }
 
 static const GOptionEntry const x11_arguments[] = {
-	{ "x11-display", '\0', 0,
-		G_OPTION_ARG_CALLBACK, arg_display_cb,
+	{
+		"x11-display",
+		'\0',
+		0,
+		G_OPTION_ARG_CALLBACK,
+		arg_display_cb,
 		N_("The X display to use"),
-		N_("NAME") },
-	{ "x11-refresh", '\0', 0,
-		G_OPTION_ARG_CALLBACK, arg_refresh_cb,
+		N_("NAME")
+	},
+	{
+		"x11-refresh",
+		'\0',
+		0,
+		G_OPTION_ARG_CALLBACK,
+		arg_refresh_cb,
 		N_("The refresh rate [" G_STRINGIFY(JOY_REFRESH) " Hz]"),
-		N_("RATE") },
-	{ NULL }
+		N_("RATE")
+	},
+	{ NULL, '\0', 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
 };
 
 static gboolean
-post_hook(GOptionContext *context, GOptionGroup *group, gpointer self,
-		GError **error)
+post_hook(G_GNUC_UNUSED GOptionContext *context,
+	  G_GNUC_UNUSED GOptionGroup *group,
+	  gpointer self,
+	  GError **error)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (priv->display) {

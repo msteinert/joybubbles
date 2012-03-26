@@ -103,8 +103,9 @@ get_property(GObject *base, guint id, GValue *value, GParamSpec *pspec)
 }
 
 static void
-on_notify_font_description(JoyStyle *self, GParamSpec *pspec,
-		PangoLayout *layout)
+on_notify_font_description(JoyStyle *self,
+			   G_GNUC_UNUSED GParamSpec *pspec,
+			   PangoLayout *layout)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (G_UNLIKELY(!priv->desc)) {

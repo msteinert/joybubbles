@@ -48,7 +48,7 @@ dispose(GObject *base)
 }
 
 static void
-start(JoyAnimation *self, JoyBubble *widget)
+start(JoyAnimation *self, G_GNUC_UNUSED JoyBubble *widget)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	for (GList *node = g_queue_peek_head_link(priv->children); node;
@@ -58,7 +58,7 @@ start(JoyAnimation *self, JoyBubble *widget)
 }
 
 static void
-stop(JoyAnimation *self, JoyBubble *widget)
+stop(JoyAnimation *self, G_GNUC_UNUSED JoyBubble *widget)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	for (GList *node = g_queue_peek_head_link(priv->children); node;
@@ -68,7 +68,7 @@ stop(JoyAnimation *self, JoyBubble *widget)
 }
 
 static void
-pause(JoyAnimation *self, JoyBubble *widget)
+pause(JoyAnimation *self, G_GNUC_UNUSED JoyBubble *widget)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	for (GList *node = g_queue_peek_head_link(priv->children); node;
@@ -98,7 +98,9 @@ joy_animation_parallel_new(void)
 }
 
 static void
-on_stop(JoyAnimation *child, JoyBubble *widget, JoyAnimation *self)
+on_stop(G_GNUC_UNUSED JoyAnimation *child,
+	G_GNUC_UNUSED JoyBubble
+	*widget, JoyAnimation *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	if (++priv->count == g_queue_get_length(priv->children)) {

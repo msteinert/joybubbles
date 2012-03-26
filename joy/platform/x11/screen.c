@@ -171,7 +171,7 @@ window_create(JoyScreen *self)
 }
 
 static cairo_surface_type_t
-cairo_surface_type(JoyScreen *self)
+cairo_surface_type(G_GNUC_UNUSED JoyScreen *self)
 {
 	return CAIRO_SURFACE_TYPE_XLIB;
 }
@@ -228,7 +228,7 @@ submit(JoyScreen *self)
 	struct Private *priv = GET_PRIVATE(self);
 	Display *display = joy_x11_screen_get_display(self);
 	joy_timer_start(priv->timer);
-	for (gint i = 0; i < priv->windows->len; ++i) {
+	for (gint i = 0; i < (int)priv->windows->len; ++i) {
 		JoyBubble *window = priv->windows->pdata[i];
 		joy_x11_window_submit(window, display);
 	}
@@ -236,7 +236,9 @@ submit(JoyScreen *self)
 }
 
 static gboolean
-enable_mirroring(JoyScreen *self, JoyScreen *mirror, GError **error)
+enable_mirroring(G_GNUC_UNUSED JoyScreen *self,
+		 G_GNUC_UNUSED JoyScreen *mirror,
+		 GError **error)
 {
 	JOY_UNIMPLEMENTED;
 	g_set_error_literal(error, JOY_ERROR, JOY_ERROR_UNIMPLEMENTED,
@@ -245,7 +247,9 @@ enable_mirroring(JoyScreen *self, JoyScreen *mirror, GError **error)
 }
 
 static gboolean
-disable_mirroring(JoyScreen *self, JoyScreen *mirror, GError **error)
+disable_mirroring(G_GNUC_UNUSED JoyScreen *self,
+		  G_GNUC_UNUSED JoyScreen *mirror,
+		  GError **error)
 {
 	JOY_UNIMPLEMENTED;
 	g_set_error_literal(error, JOY_ERROR, JOY_ERROR_UNIMPLEMENTED,

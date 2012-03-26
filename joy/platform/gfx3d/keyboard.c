@@ -14,12 +14,12 @@
 G_DEFINE_TYPE(JoyGfx3dKeyboard, joy_gfx3d_keyboard, JOY_TYPE_DEVICE_KEYBOARD)
 
 static void
-joy_gfx3d_keyboard_init(JoyGfx3dKeyboard *self)
+joy_gfx3d_keyboard_init(G_GNUC_UNUSED JoyGfx3dKeyboard *self)
 {
 }
 
 static void
-joy_gfx3d_keyboard_class_init(JoyGfx3dKeyboardClass *klass)
+joy_gfx3d_keyboard_class_init(G_GNUC_UNUSED JoyGfx3dKeyboardClass *klass)
 {
 }
 

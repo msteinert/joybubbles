@@ -14,7 +14,7 @@
 G_DEFINE_TYPE(JoyGfx3dMouse, joy_gfx3d_mouse, JOY_TYPE_DEVICE_MOUSE)
 
 static void
-joy_gfx3d_mouse_init(JoyGfx3dMouse *self)
+joy_gfx3d_mouse_init(G_GNUC_UNUSED JoyGfx3dMouse *self)
 {
 }
 

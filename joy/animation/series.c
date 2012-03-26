@@ -47,7 +47,7 @@ dispose(GObject *base)
 }
 
 static void
-start(JoyAnimation *self, JoyBubble *widget)
+start(JoyAnimation *self, G_GNUC_UNUSED JoyBubble *widget)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	priv->current = g_queue_peek_head_link(priv->children);
@@ -55,14 +55,14 @@ start(JoyAnimation *self, JoyBubble *widget)
 }
 
 static void
-stop(JoyAnimation *self, JoyBubble *widget)
+stop(JoyAnimation *self, G_GNUC_UNUSED JoyBubble *widget)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	joy_animation_stop(priv->current->data);
 }
 
 static void
-pause(JoyAnimation *self, JoyBubble *widget)
+pause(JoyAnimation *self, G_GNUC_UNUSED JoyBubble *widget)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	joy_animation_pause(priv->current->data);
@@ -89,7 +89,9 @@ joy_animation_series_new(void)
 }
 
 static void
-on_stop(JoyAnimation *child, JoyBubble *widget, JoyAnimation *self)
+on_stop(G_GNUC_UNUSED JoyAnimation *child,
+	G_GNUC_UNUSED JoyBubble *widget,
+	JoyAnimation *self)
 {
 	struct Private *priv = GET_PRIVATE(self);
 	priv->current = priv->current->next;

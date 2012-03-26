@@ -21,7 +21,7 @@
 #define NAME "Joybubbles Example"
 
 static gboolean
-on_draw(JoyBubble *image, cairo_t *cr, gpointer data)
+on_draw(JoyBubble *image, cairo_t *cr, G_GNUC_UNUSED gpointer data)
 {
 	gint width = joy_bubble_get_width(image) - 2;
 	gint height = joy_bubble_get_height(image) - 2;
@@ -52,8 +52,13 @@ on_draw(JoyBubble *image, cairo_t *cr, gpointer data)
 }
 
 static void
-on_key_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyKeySym sym, gpointer data)
+on_key_down(JoyBubble *window,
+	    G_GNUC_UNUSED JoyDevice *device,
+	    G_GNUC_UNUSED gulong timestamp,
+	    G_GNUC_UNUSED gint x,
+	    G_GNUC_UNUSED gint y,
+	    JoyKeySym sym,
+	    G_GNUC_UNUSED gpointer data)
 {
 	gint dx = 0;
 	gint dy = 0;
@@ -91,8 +96,13 @@ on_key_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
 }
 
 static void
-on_key_up(JoyBubble *window, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyKeySym sym, gpointer data)
+on_key_up(JoyBubble *window,
+	  G_GNUC_UNUSED JoyDevice *device,
+	  G_GNUC_UNUSED gulong timestamp,
+	  G_GNUC_UNUSED gint x,
+	  G_GNUC_UNUSED gint y,
+	  JoyKeySym sym,
+	  G_GNUC_UNUSED gpointer data)
 {
 	switch (sym) {
 	case JOY_KEY_q:
@@ -118,9 +128,13 @@ struct ButtonDown {
 };
 
 static void
-on_button_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyMouseButton button,
-		struct ButtonDown *down)
+on_button_down(G_GNUC_UNUSED JoyBubble *window,
+	       G_GNUC_UNUSED JoyDevice *device,
+	       G_GNUC_UNUSED gulong timestamp,
+	       gint x,
+	       gint y,
+	       JoyMouseButton button,
+	       struct ButtonDown *down)
 {
 	if (JOY_MOUSE_BUTTON_RIGHT == button) {
 		joy_animation_pause(down->move);
@@ -131,7 +145,7 @@ on_button_down(JoyBubble *window, JoyDevice *device, gulong timestamp,
 }
 
 static void
-on_clicked(JoyBubble *button, struct ButtonDown *down)
+on_clicked(G_GNUC_UNUSED JoyBubble *button, struct ButtonDown *down)
 {
 	joy_animation_pause(down->fade);
 	gdouble alpha;
@@ -153,8 +167,13 @@ on_clicked(JoyBubble *button, struct ButtonDown *down)
 }
 
 static void
-on_button_up(JoyBubble *image, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyMouseButton button, gpointer data)
+on_button_up(JoyBubble *image,
+	     G_GNUC_UNUSED JoyDevice *device,
+	     G_GNUC_UNUSED gulong timestamp,
+	     G_GNUC_UNUSED gint x,
+	     G_GNUC_UNUSED gint y,
+	     JoyMouseButton button,
+	     G_GNUC_UNUSED gpointer data)
 {
 	if (JOY_MOUSE_BUTTON_LEFT == button) {
 		JoyApplication *app = joy_bubble_get_application(image);
@@ -173,8 +192,12 @@ struct Crossing {
 };
 
 static void
-on_enter(JoyBubble *window, JoyDevice *device, gulong timestamp,
-		gint x, gint y, struct Crossing *crossing)
+on_enter(G_GNUC_UNUSED JoyBubble *window,
+	 G_GNUC_UNUSED JoyDevice *device,
+	 G_GNUC_UNUSED gulong timestamp,
+	 G_GNUC_UNUSED gint x,
+	 G_GNUC_UNUSED gint y,
+	 struct Crossing *crossing)
 {
 	joy_animation_pause(crossing->resize);
 	JoyBubble *widget = joy_animation_get_widget(crossing->resize);
@@ -195,8 +218,12 @@ on_enter(JoyBubble *window, JoyDevice *device, gulong timestamp,
 }
 
 static void
-on_leave(JoyBubble *window, JoyDevice *device, gulong timestamp,
-		gint x, gint y, struct Crossing *crossing)
+on_leave(G_GNUC_UNUSED JoyBubble *window,
+	 G_GNUC_UNUSED JoyDevice *device,
+	 G_GNUC_UNUSED gulong timestamp,
+	 G_GNUC_UNUSED gint x,
+	 G_GNUC_UNUSED gint y,
+	 struct Crossing *crossing)
 {
 	joy_animation_pause(crossing->resize);
 	JoyBubble *widget = joy_animation_get_widget(crossing->resize);
@@ -217,9 +244,13 @@ on_leave(JoyBubble *window, JoyDevice *device, gulong timestamp,
 }
 
 static void
-on_scroll(JoyBubble *window, JoyDevice *device, gulong timestamp,
-		gint x, gint y, JoyMouseScroll direction,
-		struct Crossing *crossing)
+on_scroll(G_GNUC_UNUSED JoyBubble *window,
+	  G_GNUC_UNUSED JoyDevice *device,
+	  G_GNUC_UNUSED gulong timestamp,
+	  G_GNUC_UNUSED gint x,
+	  G_GNUC_UNUSED gint y,
+	  JoyMouseScroll direction,
+	  struct Crossing *crossing)
 {
 	gint width, height;
 	JoyBubble *widget = joy_animation_get_widget(crossing->resize);
@@ -258,7 +289,7 @@ main(int argc, char *argv[])
 	GError *error = NULL;
 	GOptionContext *context = NULL;
 	struct ButtonDown down = { NULL, NULL, TRUE };
-	struct Crossing crossing = { NULL, { 5. }, 200, 100 };
+	struct Crossing crossing = { NULL, { 5. }, 200, 100, 0, 0, 0, 0 };
 	JoyApplication *app = joy_application_new();
 #ifdef JOY_HAVE_DBUS
 	JoyDBus *dbus = NULL;
@@ -272,7 +303,7 @@ main(int argc, char *argv[])
 		goto error;
 	}
 	GOptionEntry entries[] = {
-		{ NULL }
+		{ NULL, '\0', 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
 	};
 	g_option_context_add_main_entries(context, entries, GETTEXT_PACKAGE);
 	joy_application_add_options(app, context);

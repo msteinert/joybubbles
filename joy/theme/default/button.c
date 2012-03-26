@@ -15,19 +15,19 @@
 G_DEFINE_TYPE(JoyStyleDefaultButton, joy_style_default_button, JOY_TYPE_STYLE)
 
 static void
-joy_style_default_button_init(JoyStyleDefaultButton *self)
+joy_style_default_button_init(G_GNUC_UNUSED JoyStyleDefaultButton *self)
 {
 }
 
 static gboolean
-set_font_source(JoyStyle *self, cairo_t *cr)
+set_font_source(G_GNUC_UNUSED JoyStyle *self, cairo_t *cr)
 {
 	cairo_set_source_rgb(cr, 0., 0., 0.);
 	return TRUE;
 }
 
 static void
-draw_background(JoyStyle *self, JoyBubble *widget, cairo_t *cr)
+draw_background(G_GNUC_UNUSED JoyStyle *self, JoyBubble *widget, cairo_t *cr)
 {
 	const gdouble width = (gdouble)joy_bubble_get_width(widget);
 	const gdouble height = (gdouble)joy_bubble_get_height(widget);
@@ -87,7 +87,7 @@ joy_style_default_button_class_init(JoyStyleDefaultButtonClass *klass)
 }
 
 JoyStyle *
-joy_style_default_button_new(JoyBubble *button)
+joy_style_default_button_new(G_GNUC_UNUSED JoyBubble *button)
 {
 	return g_object_new(JOY_TYPE_STYLE_DEFAULT_BUTTON,
 			NULL);

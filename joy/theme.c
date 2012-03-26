@@ -71,7 +71,7 @@ dispose(GObject *base)
 }
 
 static void
-on_context_changed(JoyStyle *theme, PangoLayout *layout)
+on_context_changed(G_GNUC_UNUSED JoyStyle *theme, PangoLayout *layout)
 {
 	pango_layout_context_changed(layout);
 }

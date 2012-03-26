@@ -20,7 +20,7 @@
 #include "joy/easing/polynomial.h"
 
 gdouble
-joy_easing_in_quad(gpointer self, gdouble time)
+joy_easing_in_quad(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return time * time;
@@ -30,7 +30,7 @@ joy_easing_in_quad(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_quad(gpointer self, gdouble time)
+joy_easing_out_quad(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return -time * (time - 2);
@@ -40,7 +40,7 @@ joy_easing_out_quad(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_out_quad(gpointer self, gdouble time)
+joy_easing_in_out_quad(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	time *= 2.;
@@ -56,7 +56,7 @@ joy_easing_in_out_quad(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_in_quad(gpointer self, gdouble time)
+joy_easing_out_in_quad(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (.5 >  time) {
@@ -70,7 +70,7 @@ joy_easing_out_in_quad(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_cubic(gpointer self, gdouble time)
+joy_easing_in_cubic(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return time * time * time;
@@ -80,7 +80,7 @@ joy_easing_in_cubic(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_cubic(gpointer self, gdouble time)
+joy_easing_out_cubic(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	time -= 1.;
@@ -91,7 +91,7 @@ joy_easing_out_cubic(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_out_cubic(gpointer self, gdouble time)
+joy_easing_in_out_cubic(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	time *= 2.0;
@@ -107,7 +107,7 @@ joy_easing_in_out_cubic(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_in_cubic(gpointer self, gdouble time)
+joy_easing_out_in_cubic(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (.5 > time) {
@@ -121,7 +121,7 @@ joy_easing_out_in_cubic(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_quart(gpointer self, gdouble time)
+joy_easing_in_quart(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return time * time * time * time;
@@ -131,7 +131,7 @@ joy_easing_in_quart(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_quart(gpointer self, gdouble time)
+joy_easing_out_quart(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	time -= 1.;
@@ -142,7 +142,7 @@ joy_easing_out_quart(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_out_quart(gpointer self, gdouble time)
+joy_easing_in_out_quart(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	time *= 2.;
@@ -158,7 +158,7 @@ joy_easing_in_out_quart(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_in_quart(gpointer self, gdouble time)
+joy_easing_out_in_quart(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (.5 > time) {
@@ -172,7 +172,7 @@ joy_easing_out_in_quart(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_quint(gpointer self, gdouble time)
+joy_easing_in_quint(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	return time * time * time * time * time;
@@ -182,7 +182,7 @@ joy_easing_in_quint(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_quint(gpointer self, gdouble time)
+joy_easing_out_quint(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	time -= 1.;
@@ -193,7 +193,7 @@ joy_easing_out_quint(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_in_out_quint(gpointer self, gdouble time)
+joy_easing_in_out_quint(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	time *= 2.;
@@ -210,7 +210,7 @@ joy_easing_in_out_quint(gpointer self, gdouble time)
 }
 
 gdouble
-joy_easing_out_in_quint(gpointer self, gdouble time)
+joy_easing_out_in_quint(G_GNUC_UNUSED gpointer self, gdouble time)
 {
 #ifdef JOY_ENABLE_EASING
 	if (.5 > time) {

@@ -288,8 +288,10 @@ get_key(const IM_INPUT *event, JoyDevice *keyboard)
  * \param timestamp [in] The timestamp for \e event.
  */
 static inline void
-non_motion_event(JoySource *self, JoyScreen *screen, const IM_INPUT *event,
-		gulong timestamp)
+non_motion_event(G_GNUC_UNUSED JoySource *self,
+		 JoyScreen *screen,
+		 const IM_INPUT *event,
+		 gulong timestamp)
 {
 	gint x, y;
 	joy_gfx3d_screen_get_cursor_position(screen, &x, &y);
@@ -397,7 +399,9 @@ non_motion_event(JoySource *self, JoyScreen *screen, const IM_INPUT *event,
  * \param timestamp [in] The timestamp for the event.
  */
 static inline void
-motion_event(JoySource *self, JoyScreen *screen, gulong timestamp)
+motion_event(G_GNUC_UNUSED JoySource *self,
+	     JoyScreen *screen,
+	     gulong timestamp)
 {
 	gint x, y;
 	joy_gfx3d_screen_get_cursor_position(screen, &x, &y);

@@ -73,7 +73,8 @@ finalize(GObject *base)
 }
 
 static void
-add_options(JoyApplication *self, GOptionContext *context)
+add_options(G_GNUC_UNUSED JoyApplication *self,
+	    G_GNUC_UNUSED GOptionContext *context)
 {
 	// Do nothing
 }
@@ -170,12 +171,14 @@ joy_application_get_theme(JoyApplication *self)
 }
 
 static const GOptionEntry const joy_arguments[] = {
-	{ NULL }
+        { NULL, '\0', 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
 };
 
 static gboolean
-pre_hook(GOptionContext *context, GOptionGroup *group, gpointer data,
-		GError **error)
+pre_hook(G_GNUC_UNUSED GOptionContext *context,
+	 G_GNUC_UNUSED GOptionGroup *group,
+	 gpointer data,
+	 G_GNUC_UNUSED GError **error)
 {
 	JoyApplication *self = JOY_APPLICATION(data);
 	struct Private *priv = GET_PRIVATE(self);
@@ -186,8 +189,10 @@ pre_hook(GOptionContext *context, GOptionGroup *group, gpointer data,
 }
 
 static gboolean
-post_hook(GOptionContext *context, GOptionGroup *group, gpointer data,
-		GError **error)
+post_hook(G_GNUC_UNUSED GOptionContext *context,
+	  G_GNUC_UNUSED GOptionGroup *group,
+	  gpointer data,
+	  G_GNUC_UNUSED GError **error)
 {
 	JoyApplication *self = JOY_APPLICATION(data);
 	struct Private *priv = GET_PRIVATE(self);

@@ -84,13 +84,13 @@ get_window(JoyBubble *self)
 }
 
 static void
-set_buffered(JoyBubble *self, gboolean buffered)
+set_buffered(G_GNUC_UNUSED JoyBubble *self, G_GNUC_UNUSED gboolean buffered)
 {
 	// windows are always double-buffered
 }
 
 static gboolean
-get_buffered(JoyBubble *self)
+get_buffered(G_GNUC_UNUSED JoyBubble *self)
 {
 	return TRUE;
 }

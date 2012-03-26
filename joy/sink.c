@@ -123,7 +123,7 @@ joy_sink_remove(JoySink *self, JoySource *source)
 	g_return_if_fail(JOY_IS_SINK(self));
 	g_return_if_fail(JOY_IS_SOURCE(source));
 	struct Private *priv = GET_PRIVATE(self);
-	for (gint i = 0; i < priv->sources->len; ++i) {
+	for (gint i = 0; i < (gint)priv->sources->len; ++i) {
 		if (priv->sources->pdata[i] == source) {
 			g_ptr_array_remove_index(priv->sources, i);
 			return;
@@ -143,7 +143,7 @@ joy_sink_poll(JoySink *self, const struct timespec *timeout)
 	g_return_val_if_fail(JOY_IS_SINK(self), 0.);
 	struct Private *priv = GET_PRIVATE(self);
 	gboolean prepared = FALSE;
-	for (gint i = 0; i < priv->sources->len; ++i) {
+	for (gint i = 0; i < (gint)priv->sources->len; ++i) {
 		if (joy_source_prepare(priv->sources->pdata[i])) {
 			joy_source_dispatch(priv->sources->pdata[i], G_IO_IN);
 			prepared = TRUE;

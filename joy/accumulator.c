@@ -11,8 +11,9 @@
 #include "joy/accumulator.h"
 
 gboolean
-joy_boolean_accumulator(GSignalInvocationHint *hint, GValue *accu,
-		const GValue *value, gpointer data)
+joy_boolean_accumulator(G_GNUC_UNUSED GSignalInvocationHint *hint,
+			GValue *accu, const GValue *value,
+			G_GNUC_UNUSED gpointer data)
 {
 	gboolean ready = g_value_get_boolean(value);
 	g_value_set_boolean(accu, ready);
