@@ -56,7 +56,7 @@ static const gchar *const items[] = {
 static const gint n = sizeof(items) / sizeof(gchar *);
 
 static void
-test_001(gpointer *fixture, gconstpointer data)
+test_001(G_GNUC_UNUSED gpointer *fixture, G_GNUC_UNUSED gconstpointer data)
 {
 	gint i;
 	GQueue *queue = g_queue_new();
@@ -82,7 +82,7 @@ test_001(gpointer *fixture, gconstpointer data)
 }
 
 static void
-test_002(gpointer *fixture, gconstpointer data)
+test_002(G_GNUC_UNUSED gpointer *fixture, G_GNUC_UNUSED gconstpointer data)
 {
 	GHashTable *hash = g_hash_table_new(g_str_hash, g_str_equal);
 	g_assert(hash);
@@ -102,7 +102,7 @@ test_002(gpointer *fixture, gconstpointer data)
 }
 
 static void
-test_003(gpointer *fixture, gconstpointer data)
+test_003(G_GNUC_UNUSED gpointer *fixture, G_GNUC_UNUSED gconstpointer data)
 {
 	GPtrArray *array = g_ptr_array_sized_new(n);
 	g_assert(array);
@@ -127,7 +127,7 @@ test_003(gpointer *fixture, gconstpointer data)
 }
 
 static void
-test_004(gpointer *fixture, gconstpointer data)
+test_004(G_GNUC_UNUSED gpointer *fixture, G_GNUC_UNUSED gconstpointer data)
 {
 	gint i = 0;
 	for (JoyIterator *iter = joy_iterator_ptr_new(items[0]); iter;

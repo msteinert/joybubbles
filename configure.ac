@@ -11,8 +11,8 @@ AC_PREREQ([2.59])
 #	interface_age = 0
 m4_define([major_version], [0])
 m4_define([minor_version], [2])
-m4_define([micro_version], [2])
-m4_define([interface_age], [1])
+m4_define([micro_version], [3])
+m4_define([interface_age], [2])
 # Initialize autoconf & automake
 AC_INIT([Joybubbles], [major_version.minor_version.micro_version],
     [https://github.com/msteinert/joybubbles/issues], [joybubbles])
